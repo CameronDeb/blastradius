@@ -28,7 +28,7 @@ def main():
         an = S.Analysis(mp, by_file)
         for cid in sorted(ans):
             try:
-                p = S.plan_commit(cid, open(os.path.join(data, "commits", cid + ".patch"), encoding="utf-8").read(), mp, an, by_file, set(secs), secs)
+                p = S.plan_commit(cid, open(os.path.join(data, "commits", cid + ".patch"), encoding="utf-8").read(), mp, an, by_file, set(secs), {n: mp.cpu.get(n, secs[n]) for n in secs})
             except Exception as e:
                 print("plan error", cid, e)
                 continue

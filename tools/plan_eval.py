@@ -16,7 +16,7 @@ mp = S.Map(S.MAP); an = S.Analysis(mp, by_file)
 tot_run = tot_est = 0
 for cid in sorted(ans):
     try:
-        p = S.plan_commit(cid, open(os.path.join(data, "commits", cid + ".patch"), encoding="utf-8").read(), mp, an, by_file, set(secs), secs)
+        p = S.plan_commit(cid, open(os.path.join(data, "commits", cid + ".patch"), encoding="utf-8").read(), mp, an, by_file, set(secs), {n: mp.cpu.get(n, secs[n]) for n in secs})
     except Exception as e:
         print(cid, "PLAN ERROR", repr(e)); continue
     fail = set(ans[cid]["failing"])

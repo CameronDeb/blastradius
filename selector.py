@@ -26,7 +26,7 @@ MAX_WORKERS = 8
 TIER_B = float(os.environ.get("BR_TIER_B", "0.3"))
 TIER_C = float(os.environ.get("BR_TIER_C", "3.0"))
 # CPU seconds a test costs us relative to its recorded seconds
-CPU_FACTOR = float(os.environ.get("BR_CPU_FACTOR", "1.2"))
+CPU_FACTOR = float(os.environ.get("BR_CPU_FACTOR", "1.1"))
 
 
 def tier(sec):
@@ -153,6 +153,7 @@ class Map:
         self.static_modules = m["static_modules"]
         self.modfiles = m["modfiles"]
         self.rdeps = m.get("rdeps", {})
+        self.cpu = {int(k): v for k, v in m.get("cpu", {}).items()}
         self.tmod_lines = m.get("tmod_lines", {})
         self.import_set = {f: set(v) for f, v in self.import_lines.items()}
 
@@ -880,13 +881,13 @@ def child_run(job, out_fd):
             return False
         base = fails | set(fixed) | set(heavy)
         stop = pack(base | set(rem), tms)[1]
-        cont = CPU_FACTOR * 1000 * sum(t[4] for t in tests[i + 1 :]) + pack(base, tms)[1]
+        cont = CPU_FACTOR * 1000 * sum(t[6] for t in tests[i + 1 :]) + pack(base, tms)[1]
         return stop <= cont
 
     i = -1
     while i + 1 < len(tests):
         i += 1
-        num, modn, clsn, meth, secs, tr = tests[i]
+        num, modn, clsn, meth, secs, tr, _c = tests[i]
         ok = False
         try:
             if modn not in mods:
@@ -961,6 +962,7 @@ def main():
         meta[t["number"]] = (modname_of(path), cls, meth)
     all_nums = set(ms)
     mp = Map(MAP)
+    cost = {n: mp.cpu.get(n, secs[n]) for n in secs}
     by_file = {}
     for t in tests:
         by_file.setdefault(t["file"], set()).add(t["number"])
@@ -971,13 +973,13 @@ def main():
     plans = {}
     for cid in cids:
         try:
-            plans[cid] = plan_commit(cid, open(os.path.join(commit_dir, cid + ".patch"), encoding="utf-8", errors="replace").read(), mp, an, by_file, all_nums, secs)
+            plans[cid] = plan_commit(cid, open(os.path.join(commit_dir, cid + ".patch"), encoding="utf-8", errors="replace").read(), mp, an, by_file, all_nums, cost)
         except Exception as e:
             log("plan failed", cid, repr(e))
             plans[cid] = {"out": set(all_nums), "run": set(), "heavy": set(), "changed": {}}
     log(f"planned {len(cids)} in {time.time() - t_start:.2f}s")
 
-    results = run_all(plans, meta, secs)
+    results = run_all(plans, meta, secs, cost)
 
     for cid in cids:
         p = plans[cid]
@@ -1087,7 +1089,7 @@ def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
     purge = None
     if not fast:
         purge = sorted(mp.dependents({modname_of(r) for r in changed if r.endswith(".py")}))
-    run = {n for n in cand if tier(secs[n]) < 2}
+    run = {n for n in cand if tier(secs[n]) < 2}  # secs here: our CPU cost per test
     heavy = {n for n in cand if tier(secs[n]) == 2}
     if heavy and (not run or data_heavy):
         out |= heavy
@@ -1097,7 +1099,7 @@ def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
     return {"out": out, "run": run, "heavy": heavy, "purge": purge, "reimport": sorted(an.reimport), "changed": changed, "fast": fast, "reset": reset, "why": " ".join(why)}
 
 
-def run_all(plans, meta, secs):
+def run_all(plans, meta, secs, cost):
     jobs = [(cid, p) for cid, p in plans.items() if p["run"]]
     if not jobs:
         return {}
@@ -1115,7 +1117,7 @@ def run_all(plans, meta, secs):
     base_tmp = tempfile.mkdtemp(prefix="br")
     par = int(os.environ.get("BR_PAR", "2"))
     running = {}
-    queue = sorted(jobs, key=lambda j: -sum(secs[n] for n in j[1]["run"]))
+    queue = sorted(jobs, key=lambda j: -sum(cost[n] for n in j[1]["run"]))
     import select
     import subprocess
 
@@ -1127,14 +1129,14 @@ def run_all(plans, meta, secs):
             "changed": p["changed"],
             "fast": p["fast"] and use_fork,
             "tmpdir": tdir,
-            "tests": [[n, *meta[n], secs[n], tier(secs[n])] for n in sorted(tl, key=lambda n: (tier(secs[n]), secs[n], n))],
+            "tests": [[n, *meta[n], secs[n], tier(cost[n]), cost[n]] for n in sorted(tl, key=lambda n: (tier(cost[n]), cost[n], n))],
             "fixed": [[n, round(secs[n] * 1000)] for n in sorted(p["out"])],
             "heavy": [[n, round(secs[n] * 1000)] for n in sorted(p["heavy"])],
             "reset_classes": sorted(p["reset"]),
             "purge": p.get("purge") if use_fork else None,
             "reimport": p.get("reimport", []),
         }
-        budget = 30 + sum(secs[n] * 4 + 2 for n in tl)
+        budget = 30 + sum(max(secs[n], cost[n]) * 4 + 2 for n in tl)
         if use_fork:
             r, wfd = os.pipe()
             pid = os.fork()
