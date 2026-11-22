@@ -1026,6 +1026,14 @@ class LazyConn:
         if self._conn is not None:
             self._conn.close()
 
+    def __enter__(self):
+        self._get()
+        return self
+
+    def __exit__(self, *exc):
+        self.close()
+        return False
+
     def __getattr__(self, name):
         return getattr(self._get(), name)
 
