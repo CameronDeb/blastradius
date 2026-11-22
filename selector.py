@@ -253,6 +253,19 @@ def chain_at(tree, line):
 
 
 BLOCK_FIELDS = ("body", "orelse", "finalbody", "handlers", "cases")
+_OLD_TREES = {}
+_STR_SPANS = {}
+
+
+def in_multiline_string(rel, tree, lines):
+    spans = _STR_SPANS.get(rel)
+    if spans is None:
+        spans = _STR_SPANS[rel] = [
+            (n.lineno, n.end_lineno)
+            for n in ast.walk(tree)
+            if isinstance(n, (ast.Constant, ast.JoinedStr)) and getattr(n, "end_lineno", n.lineno) > n.lineno
+        ]
+    return any(a < ln <= b or a <= ln < b for a, b in spans for ln in lines)
 
 
 def _span(n):
@@ -406,19 +419,35 @@ class Analysis:
         cache[mod] = frozenset(out)
         return out
 
-    def py_change(self, rel, old, new, touched, inserts):
+    def py_change(self, rel, old, new, touched, inserts, removed_txt=(), added_txt=()):
         """Return (candidate tests, class contexts that must re-run setup, flags)."""
         mp = self.mp
         flags = set()
-        try:
-            new_tree = ast.parse(new)
-        except SyntaxError:
-            return None, set(), {"broken"}
         if old is None:
+            try:
+                ast.parse(new)
+            except SyntaxError:
+                return None, set(), {"broken"}
             return set(), set(), flags  # new module: nothing imports it at the pinned commit
-        old_tree = ast.parse(old)
-        if same_region(old_tree.body, new_tree.body, set(touched) | set(inserts) | {p - 1 for p in inserts}):
-            return set(), set(), {"same"}
+        old_tree = _OLD_TREES.get(rel)
+        if old_tree is None:
+            old_tree = _OLD_TREES[rel] = ast.parse(old)
+        region = set(touched) | set(inserts) | {p - 1 for p in inserts}
+        texts = list(removed_txt) + list(added_txt)
+        quick = texts and all(not t.strip() or t.lstrip().startswith("#") for t in texts) and not any(
+            re.search(r"coding[:=]", t) for t in texts
+        )
+        if not (quick and not in_multiline_string(rel, old_tree, region)):
+            # The child compiles the new source anyway; only parse here when
+            # the edit could be a no-op we can prove cheaply.
+            quick = False
+        if quick:
+            try:
+                new_tree = ast.parse(new)
+            except SyntaxError:
+                return None, set(), {"broken"}
+            if same_region(old_tree.body, new_tree.body, region):
+                return set(), set(), {"same"}
         mod = modname_of(rel)
         cand = set()
         lines = set(touched)
@@ -430,6 +459,7 @@ class Analysis:
         lines = {min(max(1, ln), nlines) for ln in lines}
         rerun_classes = set()
         spans = set()
+        imp_spans = set()
         for ln in sorted(lines):
             chain = chain_at(old_tree, ln)
             fn_idx = None
@@ -455,6 +485,8 @@ class Analysis:
                 t = mp.line_tests(rel, span)
                 cand |= t
                 spans |= span
+                # a lambda's first line is also where the lambda object is created
+                imp_spans |= span - {fn.lineno} if isinstance(fn, ast.Lambda) else span
                 rerun_classes |= mp.line_classes(rel, span)
                 continue
             # Not inside a function body: import-time code.
@@ -508,7 +540,7 @@ class Analysis:
             for tm in tmods:
                 cand |= self.tests_of_module(tm)
         # function bodies executed while sqlglot itself is imported
-        if "static" not in flags and mp.at_import(rel, spans):
+        if "static" not in flags and mp.at_import(rel, imp_spans):
             flags.add("importtime")
             cand |= self.module_users_by_name(mod)
             for d in mp.dependents({mod}):
@@ -721,7 +753,13 @@ def child_run(job, out_fd):
             absp = os.path.join(SRC, rel)
             with _open(absp, encoding="utf-8") as f:
                 old = f.read()
-            ok, swaps = code_diff(compile(old, absp, "exec"), compile(txt, absp, "exec"))
+            try:
+                new_code = compile(txt, absp, "exec")
+            except SyntaxError:
+                w.write(f"! broken {modname_of(rel)} SyntaxError\n")
+                w.close()
+                os._exit(0)
+            ok, swaps = code_diff(compile(old, absp, "exec"), new_code)
             if not ok:
                 fast = False
                 job["purge"] = sorted({modname_of(r) for r in py_changed} | set(job.get("reimport") or ()))
@@ -1016,7 +1054,9 @@ def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
                 out |= module_importers(mod, mp, by_file, all_nums)
                 why.append("deleted")
                 continue
-            c, rc, flags = an.py_change(rel, old_text, new_text, touched, inserts)
+            removed_txt = [b[1:] for _, body in hunks for b in body if b[:1] == "-"]
+            added_txt = [b[1:] for _, body in hunks for b in body if b[:1] == "+"]
+            c, rc, flags = an.py_change(rel, old_text, new_text, touched, inserts, removed_txt, added_txt)
             if "broken" in flags:
                 mod = modname_of(rel)
                 if rel.startswith("tests/"):
