@@ -37,7 +37,13 @@ for t in tests:
 def ctx_tests(ctx):
     if ctx.startswith("C:"):
         return by_class[ctx[:-5] if ctx.endswith(":down") else ctx]
-    return [int(ctx)]
+    return [int(ctx.split("|", 1)[0])]
+
+
+item_ids = {}
+items = []
+ilines = defaultdict(lambda: defaultdict(set))
+nlines = defaultdict(lambda: defaultdict(set))  # non-item test contexts
 
 
 lines = defaultdict(lambda: defaultdict(set))
@@ -52,6 +58,14 @@ for f in sorted(glob.glob(os.path.join(shard_dir, "shard*.json"))):
             s = lines[file][int(ln)]
             for c in ctxs:
                 s.update(ctx_tests(c))
+                if "|" in c:
+                    if c not in item_ids:
+                        num, key = c.split("|", 1)
+                        item_ids[c] = len(items)
+                        items.append([int(num), key])
+                    ilines[file][int(ln)].add(item_ids[c])
+                elif not c.startswith("C:"):
+                    nlines[file][int(ln)].add(int(c))
                 if c.startswith("C:"):
                     clines[file][int(ln)].add(c[2:-5] if c.endswith(":down") else c[2:])
     for ctx, fs in d["opens"].items():
@@ -318,9 +332,13 @@ for mm, rel in known_mods.items():
     except SyntaxError:
         pass
 
+item_tests = {num for num, _ in items}
 out_map = {
     "lines": {f: {str(ln): sid(ts) for ln, ts in by.items() if ts} for f, by in lines.items()},
     "clines": {f: {str(ln): sorted(cs) for ln, cs in by.items()} for f, by in clines.items()},
+    "items": items,
+    "ilines": {f: {str(ln): sid(v) for ln, v in by.items()} for f, by in ilines.items()},
+    "nlines": {f: {str(ln): sid(v & item_tests) for ln, v in by.items() if v & item_tests} for f, by in nlines.items()},
     "static_classes": {n: sorted(v) for n, v in static_classes.items()},
     "static_modules": {n: sorted(v) for n, v in static_modules.items()},
     "opens": {f: sid(ts) for f, ts in opens.items()},

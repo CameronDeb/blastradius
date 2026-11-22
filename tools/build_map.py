@@ -89,6 +89,9 @@ class InlineExecutor:
     def submit(self, fn, *args, **kwargs):
         import concurrent.futures as cf
 
+        key = submit_key()
+        if key:
+            push_ctx(key)
         f = cf.Future()
         try:
             args, kwargs = pickle.loads(pickle.dumps((args, kwargs)))
@@ -96,7 +99,98 @@ class InlineExecutor:
             f.set_result(pickle.loads(pickle.dumps(r)))
         except BaseException as e:
             f.set_exception(e)
+        finally:
+            if key:
+                pop_ctx()
         return f
+
+
+# Items: pieces of a test that can be run on their own (fixture cases of
+# check_file, TPC queries of the executor tests, dialects of generator_memory).
+# Their lines go to contexts "<num>|<item key>".
+import contextlib  # noqa: E402
+import re  # noqa: E402
+
+item = {"num": None, "meth": None, "fx_file": None, "fx_titles": {}, "k": 0}
+ctx_stack = []
+EXEC_SUBMIT = ("test_execute_tpch", "test_execute_tpcds")
+
+
+def push_ctx(key):
+    c = f"{item['num']}|{key}"
+    ctx_stack.append(c)
+    cov.switch_context(c)
+
+
+def pop_ctx():
+    ctx_stack.pop()
+    cov.switch_context(ctx_stack[-1] if ctx_stack else str(item["num"]))
+
+
+def submit_key():
+    if item["num"] is None:
+        return None
+    if item["fx_file"] is not None:
+        k = item["k"]
+        item["k"] += 1
+        return f"F|{item['fx_file']}|{k}"
+    if item["meth"] in EXEC_SUBMIT:
+        k = item["k"]
+        item["k"] += 1
+        return f"X|{k}"
+    return None
+
+
+def subtest_key(msg, params):
+    if item["num"] is None:
+        return None
+    if isinstance(msg, str):
+        t = msg[len("(execute) ") :] if msg.startswith("(execute) ") else msg
+        if item["fx_titles"] and t in item["fx_titles"]:
+            return f"F|{item['fx_file']}|{item['fx_titles'][t]}"
+        m = re.match(r"tpc-(?:h|ds) (\d+)$", msg)
+        if m:
+            return f"X|{int(m.group(1)) - 1}"
+        if item["meth"] == "test_optimized_tpch":
+            m = re.match(r"(\d+), ", msg)
+            if m:
+                return f"X|{int(m.group(1)) - 1}"
+    if item["meth"] == "test_generator_memory" and "dialect" in params:
+        d = params["dialect"]
+        return f"D|{getattr(d, 'value', d)}"
+    return None
+
+
+_orig_subtest = unittest.TestCase.subTest
+
+
+@contextlib.contextmanager
+def _subtest(self, msg=None, **params):
+    key = subtest_key(msg, params)
+    with _orig_subtest(self, msg, **params) if msg is not None else _orig_subtest(self, **params) as x:
+        if key:
+            push_ctx(key)
+        try:
+            yield x
+        finally:
+            if key:
+                pop_ctx()
+
+
+unittest.TestCase.subTest = _subtest
+
+if "tests.test_optimizer" in mods:
+    _orig_pairs = mods["tests.test_optimizer"].load_sql_fixture_pairs
+
+    def _pairs(filename):
+        pairs = list(_orig_pairs(filename))
+        titles = {}
+        for i, (meta, sql, _) in enumerate(pairs, start=1):
+            titles.setdefault(meta.get("title") or f"{i}, {sql}", i - 1)
+        item.update(fx_file=filename, fx_titles=titles, k=0)
+        return pairs
+
+    mods["tests.test_optimizer"].load_sql_fixture_pairs = _pairs
 
 
 for _m in ("tests.test_executor", "tests.test_optimizer"):
@@ -180,7 +274,10 @@ for mod, clsname in mine:
         print("setUpClass failed", cctx, e, file=sys.stderr)
     for num, meth in groups[(mod, clsname)]:
         result = unittest.TestResult()
+        item.update(num=num, meth=meth, fx_file=None, fx_titles={}, k=0)
+        ctx_stack.clear()
         measured(str(num), lambda: cls(meth).run(result))
+        item.update(num=None, meth=None, fx_file=None, fx_titles={}, k=0)
         ok = not (result.failures or result.errors)
         outcomes[num] = ok
         if not ok:
