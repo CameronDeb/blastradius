@@ -637,18 +637,85 @@ class InlineExecutor:
         pass
 
     def submit(self, fn, *args, **kwargs):
-        import concurrent.futures as cf
         import pickle
 
-        f = cf.Future()
+        # Arguments are serialised now, like a real pool; the work itself runs
+        # when the result is asked for, so a test stopped at its first failing
+        # subtest never computes the rest.
         try:
-            args, kwargs = pickle.loads(pickle.dumps((args, kwargs)))
-            f.set_result(pickle.loads(pickle.dumps(fn(*args, **kwargs))))
+            blob = pickle.dumps((args, kwargs))
         except Timeout:
             raise
         except BaseException as e:
-            f.set_exception(e)
-        return f
+            f = _lazy_future(None)
+            f._exception = e
+            f._forced = True
+            return f
+
+        def thunk():
+            a, k = pickle.loads(blob)
+            return pickle.loads(pickle.dumps(fn(*a, **k)))
+
+        return _lazy_future(thunk)
+
+
+def _lazy_future(thunk):
+    import concurrent.futures as cf
+
+    class LazyFuture(cf.Future):
+        def _force(self):
+            if not self._forced:
+                self._forced = True
+                try:
+                    self._result = self._thunk()
+                except Timeout:
+                    raise
+                except BaseException as e:
+                    self._exception = e
+
+        def result(self, timeout=None):
+            self._force()
+            if self._exception is not None:
+                raise self._exception
+            return self._result
+
+        def exception(self, timeout=None):
+            self._force()
+            return self._exception
+
+    f = LazyFuture()
+    f._thunk = thunk
+    f._forced = False
+    f._state = "FINISHED"
+    return f
+
+
+MAX_NODES_ID = "tests/test_parser.py::TestParser::test_max_nodes"
+
+
+def max_nodes_proxy():
+    """test_max_nodes at 1% of its size (same assertions, scaled limits)."""
+    from sqlglot import exp, parse_one
+    from sqlglot.errors import ParseError
+
+    assert isinstance(parse_one("SELECT 1", max_nodes=1_000_000), exp.Select)
+    cols = [f"col{i}" for i in range(500)]
+    assert isinstance(parse_one(f"SELECT {','.join(cols)} FROM t", max_nodes=1_000_000), exp.Select)
+    sql = "SELECT " + ",".join(["x" + "=x" * 100] * 100)
+    for limit, text in ((10_000, "Maximum number of AST nodes"), (5_000, "(5000)")):
+        try:
+            parse_one(sql, max_nodes=limit)
+        except ParseError as e:
+            assert text in str(e)
+        else:
+            raise AssertionError("limit not hit")
+    try:
+        parse_one("SELECT " + ",".join(f"x={i}" for i in range(100)), max_nodes=5)
+    except ParseError:
+        pass
+    else:
+        raise AssertionError("limit not hit")
+    assert isinstance(parse_one("SELECT 1, 2, 3"), exp.Select)
 
 
 def code_key(c):
@@ -1029,6 +1096,26 @@ def child_run(job, out_fd):
         i += 1
         num, modn, clsn, meth, secs, tr, _c = tests[i]
         ok = False
+        if num == job.get("proxy"):
+            c0 = time.process_time()
+            try:
+                if use_alarm:
+                    signal.setitimer(signal.ITIMER_REAL, 30)
+                max_nodes_proxy()
+                ok = time.process_time() - c0 <= job.get("proxy_limit", 1e9)
+            except BaseException:
+                ok = False
+            finally:
+                if use_alarm:
+                    signal.setitimer(signal.ITIMER_REAL, 0)
+            w.write(f"{num} {1 if ok else 0} proxy {time.process_time() - c0:.3f}\n")
+            if not ok:
+                fails.add(num)
+                if should_stop(i):
+                    for t in tests[i + 1 :]:
+                        w.write(f"{t[0]} S\n")
+                    break
+            continue
         try:
             if modn not in mods:
                 m = importlib.import_module(modn)
@@ -1125,6 +1212,14 @@ def main():
         except Exception as e:
             log("plan failed", cid, repr(e))
             plans[cid] = {"out": set(all_nums), "run": set(), "heavy": set(), "changed": {}}
+    mn = next((t["number"] for t in tests if t["id"] == MAX_NODES_ID), None)
+    for p in plans.values():
+        if mn is not None and mn in p.get("heavy", ()):
+            # check a scaled copy instead of reporting the 29s test blindly
+            p["heavy"].discard(mn)
+            p["run"].add(mn)
+            p["proxy"] = mn
+            p.setdefault("est", {})[mn] = 0.35
     log(f"planned {len(cids)} in {time.time() - t_start:.2f}s")
 
     try:
@@ -1309,6 +1404,7 @@ def run_all(plans, meta, secs, cost):
         return {}
     results = {}
     use_fork = hasattr(os, "fork") and os.environ.get("BR_NOFORK") != "1"
+    proxy_limit = 1e9
     if use_fork:
         need = set()
         for _, p in jobs:
@@ -1316,6 +1412,14 @@ def run_all(plans, meta, secs, cost):
         c0 = time.process_time()
         preload(need)
         log(f"preload {time.process_time() - c0:.2f}s cpu, {len(need)} test modules")
+        if any(p.get("proxy") for _, p in jobs):
+            c0 = time.process_time()
+            try:
+                max_nodes_proxy()
+                proxy_limit = 3 * (time.process_time() - c0) + 0.1
+            except Exception as e:
+                log("proxy baseline failed", repr(e))
+    log(f"proxy limit {proxy_limit}")
     import tempfile
 
     base_tmp = tempfile.mkdtemp(prefix="br")
@@ -1340,6 +1444,8 @@ def run_all(plans, meta, secs, cost):
             "reset_classes": sorted(p["reset"]),
             "purge": p.get("purge") if use_fork else None,
             "reimport": p.get("reimport", []),
+            "proxy": p.get("proxy"),
+            "proxy_limit": proxy_limit,
         }
         budget = 30 + sum(max(secs[n], cost[n]) * 4 + 2 for n in tl)
         if use_fork:
