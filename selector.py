@@ -1638,7 +1638,7 @@ def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
                 reset |= {TEST_CLASS[n] for n in mp.sets[o] if n in TEST_CLASS}
                 why.append(f"data:{len(mp.sets[o])}")
                 if rel.startswith("tests/fixtures/") and rel.endswith(".sql") and old_text is not None and new_text is not None:
-                    fixtures[rel] = fixture_changes(old_text, new_text)
+                    fixtures[rel] = None
             else:
                 why.append("unused-file")
     cand -= out
