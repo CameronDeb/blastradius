@@ -154,8 +154,34 @@ class Map:
         self.modfiles = m["modfiles"]
         self.rdeps = m.get("rdeps", {})
         self.cpu = {int(k): v for k, v in m.get("cpu", {}).items()}
+        self.items = m.get("items", [])
+        self.ilines = m.get("ilines", {})
+        self.nlines = m.get("nlines", {})
+        self.items_of = {}
+        for iid, (num, key) in enumerate(self.items):
+            self.items_of.setdefault(num, []).append(iid)
         self.tmod_lines = m.get("tmod_lines", {})
         self.import_set = {f: set(v) for f, v in self.import_lines.items()}
+
+    def item_hits(self, f, lns):
+        by = self.ilines.get(f)
+        out = set()
+        if by:
+            for ln in lns:
+                s = by.get(str(ln))
+                if s is not None:
+                    out.update(self.sets[s])
+        return out
+
+    def nonitem_tests(self, f, lns):
+        by = self.nlines.get(f)
+        out = set()
+        if by:
+            for ln in lns:
+                s = by.get(str(ln))
+                if s is not None:
+                    out.update(self.sets[s])
+        return out
 
     def tmods_at(self, f, lns):
         by = self.tmod_lines.get(f)
@@ -366,6 +392,7 @@ class Analysis:
         self.mp = mp
         self.by_file = by_file or {}
         self.reimport = set()
+        self.spans = {}
 
     def tests_of_module(self, tm):
         out = set(self.by_file.get(tm.replace(".", "/") + ".py", ()))
@@ -546,6 +573,7 @@ class Analysis:
             cand |= self.module_users_by_name(mod)
             for d in mp.dependents({mod}):
                 cand |= self.module_users_by_name(d)
+        self.spans[rel] = (spans, "static" in flags or "importtime" in flags or "tmod" in flags)
         return cand, rerun_classes, flags
 
 
@@ -683,6 +711,110 @@ def code_diff(old_code, new_code):
 def _is_class_body(c):
     # class bodies load __name__ into __module__ first
     return "__module__" in c.co_names and "__qualname__" in c.co_names and c.co_argcount == 0 and not (c.co_flags & 0x02 and c.co_varnames)
+
+
+ITEM_SEL = {"F": None}
+
+
+def prepare_test_module(m):
+    if hasattr(m, "ProcessPoolExecutor"):
+        m.ProcessPoolExecutor = InlineExecutor
+    if m.__name__ == "tests.test_optimizer" and not getattr(m, "_br_pairs", None):
+        orig = m.load_sql_fixture_pairs
+
+        def pairs(filename, _orig=orig):
+            sel = ITEM_SEL["F"]
+            got = list(_orig(filename))
+            if sel is None:
+                return got
+            keep = sel.get(filename)
+            if keep is None:
+                return got
+            return [x for i, x in enumerate(got) if i in keep]
+
+        m.load_sql_fixture_pairs = pairs
+        m._br_pairs = True
+    if m.__name__ == "tests.test_executor" and not getattr(m, "_br_duck", None):
+        m.duckdb = LazyDuck(m.duckdb)
+        m._br_duck = True
+
+
+def apply_items(m, cls, meth, keys):
+    """Restrict a test to some of its items; returns an undo function."""
+    if not keys:
+        return lambda: None
+    fx, xs, ds = {}, set(), set()
+    for k in keys:
+        kind, _, rest = k.partition("|")
+        if kind == "F":
+            f, _, i = rest.rpartition("|")
+            fx.setdefault(f, set()).add(int(i))
+        elif kind == "X":
+            xs.add(int(rest))
+        elif kind == "D":
+            ds.add(rest)
+    undo = []
+    if fx:
+        ITEM_SEL["F"] = fx
+        undo.append(lambda: ITEM_SEL.__setitem__("F", None))
+    if xs:
+        attr = "tpcds_sqls" if meth == "test_execute_tpcds" else "tpch_sqls"
+        orig = getattr(cls, attr, None)
+        if orig is not None:
+            setattr(cls, attr, [x for i, x in enumerate(orig) if i in xs])
+            undo.append(lambda: setattr(cls, attr, orig))
+    if ds and hasattr(m, "Dialects"):
+        orig_d = m.Dialects
+        m.Dialects = [d for d in orig_d if getattr(d, "value", d) in ds]
+        undo.append(lambda: setattr(m, "Dialects", orig_d))
+
+    def restore():
+        for u in undo:
+            u()
+
+    return restore
+
+
+class LazyDuck:
+    """duckdb module stand-in whose connections open on first real use, so
+    class setup can run before fork without live connections crossing it."""
+
+    def __init__(self, real):
+        self._real = real
+
+    def __getattr__(self, name):
+        return getattr(self._real, name)
+
+    def connect(self, *a, **k):
+        return LazyConn(self._real, a, k)
+
+
+class LazyConn:
+    def __init__(self, real, a, k):
+        self._real, self._a, self._k = real, a, k
+        self._conn = None
+        self._pending = []
+
+    def _get(self):
+        if self._conn is None:
+            self._conn = self._real.connect(*self._a, **self._k)
+            for sql in self._pending:
+                self._conn.execute(sql)
+            self._pending = []
+        return self._conn
+
+    def execute(self, sql, *a, **k):
+        if self._conn is None and not a and not k and isinstance(sql, str) and sql.lstrip().upper().startswith("CREATE VIEW"):
+            self._pending.append(sql)
+            return self
+        return self._get().execute(sql, *a, **k)
+
+    def close(self):
+        if self._conn is not None:
+            self._conn.close()
+
+    def __getattr__(self, name):
+        return getattr(self._get(), name)
 
 
 def holders(purge):
@@ -892,8 +1024,7 @@ def child_run(job, out_fd):
         try:
             if modn not in mods:
                 m = importlib.import_module(modn)
-                if hasattr(m, "ProcessPoolExecutor"):
-                    m.ProcessPoolExecutor = InlineExecutor
+                prepare_test_module(m)
                 mods[modn] = m
             m = mods[modn]
         except BaseException as e:
@@ -921,6 +1052,7 @@ def child_run(job, out_fd):
             if getattr(cls, "_br_setup_failed", False):
                 w.write(f"{num} 0 setup\n")
             else:
+                restore = apply_items(m, cls, meth, job.get("items", {}).get(str(num)))
                 result = unittest.TestResult()
                 result.failfast = True  # stop at the first failing subtest
                 t0 = time.perf_counter()
@@ -933,6 +1065,7 @@ def child_run(job, out_fd):
                 finally:
                     if use_alarm:
                         signal.setitimer(signal.ITIMER_REAL, 0)
+                restore()
                 ok = not (result.failures or result.errors or getattr(result, "unexpectedSuccesses", None))
                 w.write(f"{num} {1 if ok else 0} {time.perf_counter() - t0:.3f}\n")
                 if not ok and os.environ.get("BR_DEBUG"):
@@ -960,6 +1093,7 @@ def main():
     for t in tests:
         path, cls, meth = t["id"].split("::")
         meta[t["number"]] = (modname_of(path), cls, meth)
+        TEST_CLASS[t["number"]] = f"{modname_of(path)}::{cls}"
     all_nums = set(ms)
     mp = Map(MAP)
     cost = {n: mp.cpu.get(n, secs[n]) for n in secs}
@@ -1022,9 +1156,37 @@ def module_importers(mod, mp, by_file, all_nums):
 _AN = {}
 
 
+TEST_CLASS = {}
+
+
+def meta_cls(n):
+    return TEST_CLASS.get(n)
+
+
+def select_items(n, iids, spans, changed, mp, cls_key):
+    """Items of test n that execute a changed line, or None to run it whole."""
+    if any(not rel.endswith(".py") for rel in changed):
+        return None
+    sel = set()
+    for rel, (sp, static) in spans.items():
+        if not sp:
+            continue
+        if static or n in mp.nonitem_tests(rel, sp):
+            return None
+        if cls_key and cls_key in mp.line_classes(rel, sp):
+            return None
+        sel |= mp.item_hits(rel, sp)
+    for rel in changed:
+        if rel.endswith(".py") and rel not in spans:
+            return None
+    sel &= set(iids)
+    return sel or None
+
+
 def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
     files = parse_patch(text)
     an.reimport = set()
+    an.spans = {}
     data_heavy = False
     changed = {}
     cand = set()
@@ -1089,14 +1251,26 @@ def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
     purge = None
     if not fast:
         purge = sorted(mp.dependents({modname_of(r) for r in changed if r.endswith(".py")}))
-    run = {n for n in cand if tier(secs[n]) < 2}  # secs here: our CPU cost per test
-    heavy = {n for n in cand if tier(secs[n]) == 2}
+    items = {}
+    est = {}
+    for n in cand:
+        iids = mp.items_of.get(n)
+        if not iids:
+            continue
+        sel = select_items(n, iids, an.spans, changed, mp, meta_cls(n))
+        if sel is None:
+            continue
+        items[n] = sorted(mp.items[i][1] for i in sel)
+        est[n] = secs[n] * (len(sel) + 1) / (len(iids) + 1)
+    c_of = lambda n: est.get(n, secs[n])  # noqa: E731
+    run = {n for n in cand if tier(c_of(n)) < 2}  # secs here: our CPU cost per test
+    heavy = {n for n in cand if tier(c_of(n)) == 2}
     if heavy and (not run or data_heavy):
         out |= heavy
         heavy = set()
     if purge is not None:
         purge = sorted(set(purge) | an.reimport)
-    return {"out": out, "run": run, "heavy": heavy, "purge": purge, "reimport": sorted(an.reimport), "changed": changed, "fast": fast, "reset": reset, "why": " ".join(why)}
+    return {"out": out, "run": run, "heavy": heavy, "purge": purge, "reimport": sorted(an.reimport), "items": items, "est": est, "changed": changed, "fast": fast, "reset": reset, "why": " ".join(why)}
 
 
 def run_all(plans, meta, secs, cost):
@@ -1129,7 +1303,8 @@ def run_all(plans, meta, secs, cost):
             "changed": p["changed"],
             "fast": p["fast"] and use_fork,
             "tmpdir": tdir,
-            "tests": [[n, *meta[n], secs[n], tier(cost[n]), cost[n]] for n in sorted(tl, key=lambda n: (tier(cost[n]), cost[n], n))],
+            "tests": [[n, *meta[n], secs[n], tier(p["est"].get(n, cost[n])), p["est"].get(n, cost[n])] for n in sorted(tl, key=lambda n: (tier(p["est"].get(n, cost[n])), p["est"].get(n, cost[n]), n))],
+            "items": {str(n): v for n, v in p.get("items", {}).items() if n in p["run"]},
             "fixed": [[n, round(secs[n] * 1000)] for n in sorted(p["out"])],
             "heavy": [[n, round(secs[n] * 1000)] for n in sorted(p["heavy"])],
             "reset_classes": sorted(p["reset"]),
@@ -1245,8 +1420,7 @@ def preload(test_mods):
     for modn in sorted(test_mods):
         try:
             m = importlib.import_module(modn)
-            if hasattr(m, "ProcessPoolExecutor"):
-                m.ProcessPoolExecutor = InlineExecutor
+            prepare_test_module(m)
         except Exception as e:
             log("preload import failed", modn, repr(e))
     ex = sys.modules.get("tests.test_executor")
