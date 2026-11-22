@@ -574,6 +574,12 @@ class Analysis:
             for d in mp.dependents({mod}):
                 cand |= self.module_users_by_name(d)
         self.spans[rel] = (spans, "static" in flags or "importtime" in flags or "tmod" in flags)
+        if not cand and not quick:
+            # nothing would run the new source, so make sure it still compiles
+            try:
+                ast.parse(new)
+            except SyntaxError:
+                return None, set(), {"broken"}
         return cand, rerun_classes, flags
 
 

@@ -27,15 +27,16 @@ jobs:
             python3 kit/score.py kit/sample kit/sample/answers.json res/clean$i.jsonl > res/score$i.txt 2>&1 || true
             cat res/score$i.txt res/cpu$i.txt
           done
-      - name: run synthetic set
+      - name: run synthetic sets
         run: |
           if [ -f mut/CURRENT ]; then
-            set=$(cat mut/CURRENT)
-            /usr/bin/time -f "%e s wall" docker run --rm --platform linux/amd64 --network none --cpus 2               --memory 4096m --memory-swap 4096m --pids-limit 256 --read-only               --tmpfs /tmp:rw,size=64m,mode=1777 --cap-drop ALL --security-opt no-new-privileges               --user 65534:65534 --env HOME=/tmp               -v "$PWD/mut/$set/commits:/data/commits:ro" -v "$PWD/mut/$set/tests.json:/data/tests.json:ro"               --entrypoint sh br -c 'python /app/selector.py; echo "cgroup:"; cat /sys/fs/cgroup/cpu.stat'               > res/mut.jsonl 2> res/mut_err.log || echo "exit $?" >> res/mut_err.log
-            grep -v '^{' res/mut.jsonl > res/mut_cpu.txt || true
-            grep '^{' res/mut.jsonl > res/mut_clean.jsonl || true
-            python3 kit/score.py mut/$set mut/$set/answers.json res/mut_clean.jsonl > res/mut_score.txt 2>&1 || true
-            cat res/mut_score.txt res/mut_cpu.txt
+            for set in $(cat mut/CURRENT); do
+              docker run --rm --platform linux/amd64 --network none --cpus 2                 --memory 4096m --memory-swap 4096m --pids-limit 256 --read-only                 --tmpfs /tmp:rw,size=64m,mode=1777 --cap-drop ALL --security-opt no-new-privileges                 --user 65534:65534 --env HOME=/tmp                 -v "$PWD/mut/$set/commits:/data/commits:ro" -v "$PWD/mut/$set/tests.json:/data/tests.json:ro"                 --entrypoint sh br -c 'python /app/selector.py; echo "cgroup:"; cat /sys/fs/cgroup/cpu.stat'                 > res/$set.jsonl 2> res/${set}_err.log || echo "exit $?" >> res/${set}_err.log
+              grep -v '^{' res/$set.jsonl > res/${set}_cpu.txt || true
+              grep '^{' res/$set.jsonl > res/${set}_clean.jsonl || true
+              python3 kit/score.py mut/$set mut/$set/answers.json res/${set}_clean.jsonl > res/${set}_score.txt 2>&1 || true
+              echo "== $set"; cat res/${set}_score.txt res/${set}_cpu.txt
+            done
           fi
       - name: measure per-test cpu
         run: |
