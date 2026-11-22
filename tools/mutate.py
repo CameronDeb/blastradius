@@ -111,11 +111,113 @@ def fixture_mutant():
     return None
 
 
+test_files = [p for p in glob.glob(os.path.join(src, "tests", "**", "test_*.py"), recursive=True)]
+other_files = [os.path.join(src, f) for f in ("README.md", "setup.cfg", "pyproject.toml", "Makefile", "CHANGELOG.md") if os.path.exists(os.path.join(src, f))]
+
+
+def delete_mutant():
+    path = rng.choices(py_files, weights)[0]
+    lines = open(path, encoding="utf-8").read().split("\n")
+    for _ in range(200):
+        i = rng.randrange(len(lines))
+        s = lines[i].strip()
+        if not s or s.startswith("#") or s.endswith(":") or s.endswith(",") or s.endswith("(") or s.endswith("[") or s.endswith("{") or s.startswith(("def ", "class ", "@", ")", "]", "}")):
+            continue
+        ind = re.match(r"\s*", lines[i]).group(0)
+        # keep blocks non-empty
+        prev_ind = re.match(r"\s*", lines[i - 1]).group(0) if i else ""
+        nxt = lines[i + 1] if i + 1 < len(lines) else ""
+        nxt_ind = re.match(r"\s*", nxt).group(0)
+        if lines[i - 1].rstrip().endswith(":") and len(nxt_ind) < len(ind):
+            continue
+        b = lines[:i] + lines[i + 1 :]
+        return path, "delete", "\n".join(lines), "\n".join(b)
+    return None
+
+
+def string_mutant():
+    path = rng.choices(py_files, weights)[0]
+    lines = open(path, encoding="utf-8").read().split("\n")
+    for _ in range(200):
+        i = rng.randrange(len(lines))
+        ms = list(re.finditer(r'"([A-Z_]{2,})"', lines[i]))
+        if not ms or lines[i].strip().startswith("#"):
+            continue
+        m = rng.choice(ms)
+        new = lines[i][: m.start(1)] + m.group(1) + "X" + lines[i][m.end(1) :]
+        b = lines[:i] + [new] + lines[i + 1 :]
+        return path, "string", "\n".join(lines), "\n".join(b)
+    return None
+
+
+def test_mutant():
+    path = rng.choice(test_files)
+    lines = open(path, encoding="utf-8").read().split("\n")
+    for _ in range(200):
+        i = rng.randrange(len(lines))
+        ln = lines[i]
+        ms = list(re.finditer(r'"([^"\\]{3,})"', ln))
+        if not ms or ln.strip().startswith("#"):
+            continue
+        m = rng.choice(ms)
+        txt = m.group(1)
+        j = rng.randrange(len(txt))
+        new = ln[: m.start(1)] + txt[:j] + txt[j + 1 :] + ln[m.end(1) :]
+        b = lines[:i] + [new] + lines[i + 1 :]
+        return path, "testcode", "\n".join(lines), "\n".join(b)
+    return None
+
+
+def decorator_mutant():
+    path = rng.choices(py_files, weights)[0]
+    lines = open(path, encoding="utf-8").read().split("\n")
+    idx = [i for i, ln in enumerate(lines) if ln.strip() in ("@property", "@classmethod", "@staticmethod", "@cached_property")]
+    if not idx:
+        return None
+    i = rng.choice(idx)
+    b = lines[:i] + lines[i + 1 :]
+    return path, "decorator", "\n".join(lines), "\n".join(b)
+
+
+def default_mutant():
+    path = rng.choices(py_files, weights)[0]
+    lines = open(path, encoding="utf-8").read().split("\n")
+    for _ in range(300):
+        i = rng.randrange(len(lines))
+        m = re.search(r"(\w+: [\w\[\]|. ]+ = )(True|False|None|\d+)(,|\))", lines[i]) or re.search(r"(\w+=)(True|False|None|\d+)(,|\))", lines[i])
+        if not m or "def " not in "\n".join(lines[max(0, i - 8) : i + 1]):
+            continue
+        v = m.group(2)
+        nv = {"True": "False", "False": "True", "None": "0"}.get(v, str(int(v) + 1) if v.isdigit() else v)
+        new = lines[i][: m.start(2)] + nv + lines[i][m.end(2) :]
+        b = lines[:i] + [new] + lines[i + 1 :]
+        return path, "default", "\n".join(lines), "\n".join(b)
+    return None
+
+
+def other_mutant():
+    if not other_files:
+        return None
+    path = rng.choice(other_files)
+    lines = open(path, encoding="utf-8").read().split("\n")
+    i = rng.randrange(len(lines))
+    b = lines[:i] + ["# note"] + lines[i:]
+    return path, "otherfile", "\n".join(lines), "\n".join(b)
+
+
+EXTRA = os.environ.get("MUT_EXTRA") == "1"
 made = 0
 kinds = {}
 while made < count:
     r = rng.random()
-    if r < 0.12:
+    if EXTRA:
+        gen = rng.choice([delete_mutant, string_mutant, test_mutant, decorator_mutant, default_mutant, other_mutant, code_mutant, fixture_mutant])
+        m = gen()
+        if not m:
+            continue
+        path, kind, a, b = m
+        text = diff(os.path.relpath(path, src).replace(os.sep, "/"), a, b)
+    elif r < 0.12:
         parts = [x for x in (code_mutant(), comment_mutant(), fixture_mutant()) if x]
         seen = set()
         text = ""
