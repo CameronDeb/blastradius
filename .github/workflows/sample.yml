@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: build
         run: docker build --platform linux/amd64 -t br .
       - name: run sample 3x
@@ -27,6 +29,22 @@ jobs:
             python3 kit/score.py kit/sample kit/sample/answers.json res/clean$i.jsonl > res/score$i.txt 2>&1 || true
             cat res/score$i.txt res/cpu$i.txt
           done
+      - name: paired comparison against tools/BASE
+        run: |
+          if [ -f tools/BASE ]; then
+            base=$(cat tools/BASE)
+            git worktree add -q /tmp/base "$base"
+            docker build -q --platform linux/amd64 -t brbase /tmp/base > /dev/null
+            for r in 1 2 3; do
+              for img in brbase br; do
+                docker run --rm --platform linux/amd64 --network none --cpus 2                   --memory 4096m --memory-swap 4096m --pids-limit 256 --read-only                   --tmpfs /tmp:rw,size=64m,mode=1777 --cap-drop ALL --security-opt no-new-privileges                   --user 65534:65534 --env HOME=/tmp                   -v "$PWD/kit/sample/commits:/data/commits:ro" -v "$PWD/kit/sample/tests.json:/data/tests.json:ro"                   --entrypoint sh $img -c 'python /app/selector.py; echo "cgroup:"; cat /sys/fs/cgroup/cpu.stat'                   > res/pair_$img.jsonl 2>/dev/null || true
+                cpu=$(grep usage_usec res/pair_$img.jsonl | awk '{print $2/1e6}')
+                grep '^{' res/pair_$img.jsonl > res/pair_${img}_clean.jsonl
+                sim=$(python3 kit/score.py kit/sample kit/sample/answers.json res/pair_${img}_clean.jsonl 2>&1 | grep Simulated | awk '{print $2}')
+                echo "$img run$r sim=$sim cpu=$cpu" | tee -a res/pair.txt
+              done
+            done
+          fi
       - name: run synthetic sets
         run: |
           if [ -f mut/CURRENT ]; then
