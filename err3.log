@@ -1,0 +1,65 @@
+planned 30 in 0.44s
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+preload 1.64s cpu, 31 test modules
+proxy limit 1000000000.0
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+2haz: out=0 run=84 fail=0 cost=0.000 cpu=7.17 fast py:86
+2jrq: out=0 run=27 fail=18 cost=25.454 cpu=0.64 fast py:29
+2qn5: out=0 run=6 fail=0 cost=0.000 cpu=0.43 fast py:6
+2vdj: out=0 run=1 fail=1 cost=2.083 cpu=0.09 fast data:1
+3utz: out=0 run=35 fail=37 cost=25.454 cpu=0.48 fast py:37
+4d63: out=0 run=275 fail=275 cost=9.084 cpu=0.04 slow static py:275
+535z: out=0 run=10 fail=1 cost=2.596 cpu=1.19 fast py:10
+5y72: out=0 run=3 fail=0 cost=0.000 cpu=0.17 fast py:3
+66ks: out=0 run=50 fail=0 cost=0.000 cpu=1.37 fast py:51
+6vvp: out=0 run=1 fail=1 cost=2.037 cpu=0.10 fast data:1
+6ze8: out=0 run=1 fail=1 cost=2.001 cpu=0.05 fast py:1
+8y7j: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast py:0
+986c: out=0 run=1 fail=1 cost=2.329 cpu=0.10 fast same-ast same-ast data:1
+9u5k: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+ary6: out=0 run=10 fail=10 cost=4.382 cpu=0.12 fast py:10
+bap8: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+bj7g: out=0 run=2 fail=1 cost=2.011 cpu=0.23 fast py:2
+bvw2: out=0 run=1 fail=1 cost=2.061 cpu=0.09 fast same-ast data:1
+egys: out=0 run=1 fail=1 cost=2.596 cpu=0.09 fast data:1
+f4bn: out=0 run=1 fail=1 cost=2.007 cpu=0.09 fast data:1
+f4xa: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+fryt: out=0 run=3 fail=0 cost=0.000 cpu=0.11 fast py:3
+gbav: out=0 run=32 fail=0 cost=0.000 cpu=0.22 slow static py:32
+gbhk: out=0 run=1 fail=1 cost=2.061 cpu=0.09 fast data:1
+j6uz: out=0 run=2 fail=2 cost=4.399 cpu=0.17 fast py:2
+ktz3: out=0 run=3 fail=0 cost=0.000 cpu=0.27 slow static py:3
+mthh: out=0 run=1 fail=1 cost=3.016 cpu=0.10 fast data:1
+nwnx: out=0 run=1 fail=1 cost=2.092 cpu=0.10 fast data:1
+rszg: out=0 run=3 fail=3 cost=5.764 cpu=1.87 fast same-ast py:2 data:1
+st8f: out=0 run=1 fail=1 cost=2.008 cpu=0.09 fast data:1
+total wall 9.97s, parent cpu 2.37s, children cpu 15.47s
+nanobind: leaked 27 instances!
+nanobind: leaked 15 types!
+ - leaked type "_duckdb._sqltypes.DuckDBPyType"
+ - leaked type "token_type"
+ - leaked type "RenderMode"
+ - leaked type "CSVLineTerminator"
+ - leaked type "_duckdb.SourceHandle"
+ - leaked type "_duckdb.DuckDBPyConnection"
+ - leaked type "FunctionNullHandling"
+ - leaked type "StatementType"
+ - leaked type "ExpectedResultType"
+ - leaked type "PythonUDFType"
+ - ... skipped remainder
+nanobind: leaked 111 functions!
+ - leaked function ""
+ - leaked function "__getitem__"
+ - leaked function "arrow_table"
+ - leaked function "begin"
+ - leaked function "list_type"
+ - leaked function "arrow_capsule"
+ - leaked function ""
+ - leaked function "append_rows"
+ - leaked function "unregister"
+ - leaked function "df"
+ - ... skipped remainder
+nanobind: this is likely caused by a reference counting issue in the binding code.
+See https://nanobind.readthedocs.io/en/latest/refleaks.html10.27 s wall

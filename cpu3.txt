@@ -1,0 +1,11 @@
+cgroup:
+usage_usec 17957227
+user_usec 16090283
+system_usec 1866944
+nice_usec 0
+core_sched.force_idle_usec 0
+nr_periods 102
+nr_throttled 44
+throttled_usec 35918
+nr_bursts 0
+burst_usec 0
