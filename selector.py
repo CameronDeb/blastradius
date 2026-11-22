@@ -1459,8 +1459,7 @@ def main():
                         if n not in p["heavy"]
                     )
                     for n in p["heavy"]:
-                        if meta[n][0] == "tests.test_executor" and not ex_bad:
-                            continue
+                        pass
                         if res.get("stopped") or n not in p.get("heavy_run", ()) or res["ok"].get(n) is not True:
                             fails.add(n)
         workers, cost = pack(fails, ms)
