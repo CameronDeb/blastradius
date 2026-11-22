@@ -1213,6 +1213,17 @@ def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
     reset = set()
     fast = True
     why = []
+    # binary edits cannot be applied: report every test that reads the file
+    for m in re.finditer(r"^Binary files (?:a/)?(\S+) and (?:b/)?(\S+) differ$|^diff --git a/(\S+) b/(\S+)\n(?:.*\n){0,4}?GIT binary patch", text, re.M):
+        for p in {g for g in m.groups() if g and g != "/dev/null"}:
+            o = mp.opens.get(p)
+            if o is not None:
+                out |= set(mp.sets[o])
+            elif p.endswith(".py"):
+                out |= module_importers(modname_of(p), mp, by_file, all_nums)
+            why.append("binary")
+    if any(old is None and new and new.endswith(".py") for old, new, _ in files):
+        fast = False  # a new module has to be importable from the overlay
     for old, new, hunks in files:
         rel = new or old
         src_path = os.path.join(SRC, old) if old else None
