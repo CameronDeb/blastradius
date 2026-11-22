@@ -151,6 +151,20 @@ class Map:
         self.static_modules = m["static_modules"]
         self.modfiles = m["modfiles"]
         self.rdeps = m.get("rdeps", {})
+        self.tmod_lines = m.get("tmod_lines", {})
+        self.import_set = {f: set(v) for f, v in self.import_lines.items()}
+
+    def tmods_at(self, f, lns):
+        by = self.tmod_lines.get(f)
+        out = set()
+        if by:
+            for ln in lns:
+                out.update(by.get(str(ln), ()))
+        return out
+
+    def at_import(self, f, lns):
+        s = self.import_set.get(f)
+        return bool(s) and any(ln in s for ln in lns)
 
     def dependents(self, mods):
         seen = set(mods)
@@ -236,6 +250,60 @@ def chain_at(tree, line):
         node = nxt
 
 
+BLOCK_FIELDS = ("body", "orelse", "finalbody", "handlers", "cases")
+
+
+def _span(n):
+    a = n.lineno
+    if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and n.decorator_list:
+        a = min(a, min(d.lineno for d in n.decorator_list))
+    return a, getattr(n, "end_lineno", a)
+
+
+def same_region(xs, ys, lines):
+    """AST equality of two statement lists, comparing only statements that
+    overlap the changed (old) lines; text elsewhere is identical."""
+    if len(xs) != len(ys):
+        return False
+    for x, y in zip(xs, ys):
+        if type(x) is not type(y):
+            return False
+        a, b = _span(x)
+        if not any(a <= ln <= b for ln in lines):
+            continue
+        blocks = [f for f in BLOCK_FIELDS if isinstance(getattr(x, f, None), list)]
+        if blocks:
+            for f in blocks:
+                if len(getattr(x, f)) != len(getattr(y, f)):
+                    return False
+            hx = {k: v for k, v in ast.iter_fields(x) if k not in BLOCK_FIELDS}
+            hy = {k: v for k, v in ast.iter_fields(y) if k not in BLOCK_FIELDS}
+            if hx.keys() != hy.keys() or any(_dump(hx[k]) != _dump(hy[k]) for k in hx):
+                return False
+            for f in blocks:
+                if f == "handlers" or f == "cases":
+                    for hx_, hy_ in zip(getattr(x, f), getattr(y, f)):
+                        fx = {k: v for k, v in ast.iter_fields(hx_) if k != "body"}
+                        fy = {k: v for k, v in ast.iter_fields(hy_) if k != "body"}
+                        if any(_dump(fx[k]) != _dump(fy.get(k)) for k in fx):
+                            return False
+                        if not same_region(hx_.body, hy_.body, lines):
+                            return False
+                elif not same_region(getattr(x, f), getattr(y, f), lines):
+                    return False
+        elif ast.dump(x) != ast.dump(y):
+            return False
+    return True
+
+
+def _dump(v):
+    if isinstance(v, ast.AST):
+        return ast.dump(v)
+    if isinstance(v, list):
+        return [_dump(i) for i in v]
+    return repr(v)
+
+
 FUNC = (ast.FunctionDef, ast.AsyncFunctionDef)
 COMPOUND = (ast.If, ast.For, ast.AsyncFor, ast.While, ast.With, ast.AsyncWith, ast.Try, ast.Match)
 if hasattr(ast, "TryStar"):
@@ -278,8 +346,16 @@ def assigned_names(stmt):
 
 
 class Analysis:
-    def __init__(self, mp):
+    def __init__(self, mp, by_file=None):
         self.mp = mp
+        self.by_file = by_file or {}
+        self.reimport = set()
+
+    def tests_of_module(self, tm):
+        out = set(self.by_file.get(tm.replace(".", "/") + ".py", ()))
+        for tf in self.mp.modfiles.get(tm, ()):
+            out |= self.by_file.get(tf, set())
+        return out
 
     def class_users(self, qual, tree_cls=None, rel=None):
         out = self.mp.users_of(qual)
@@ -312,12 +388,20 @@ class Analysis:
         return out
 
     def module_users_by_name(self, mod):
+        cache = self.__dict__.setdefault("_mu_cache", {})
+        if mod in cache:
+            return set(cache[mod])
+        if not hasattr(self, "_by_prefix"):
+            bp = {}
+            for q, s in self.mp.users.items():
+                parts = q.split(".")
+                for i in range(1, len(parts)):
+                    bp.setdefault(".".join(parts[:i]), set()).update(self.mp.sets[s])
+            self._by_prefix = bp
         rel = mod.replace(".", "/") + ".py"
         out = self.mp.file_tests(rel) | self.mp.file_tests(mod.replace(".", "/") + "/__init__.py")
-        pre = mod + "."
-        for q, s in self.mp.users.items():
-            if q.startswith(pre):
-                out |= set(self.mp.sets[s])
+        out |= self._by_prefix.get(mod, set())
+        cache[mod] = frozenset(out)
         return out
 
     def py_change(self, rel, old, new, touched, inserts):
@@ -331,7 +415,7 @@ class Analysis:
         if old is None:
             return set(), set(), flags  # new module: nothing imports it at the pinned commit
         old_tree = ast.parse(old)
-        if ast.dump(old_tree) == ast.dump(new_tree):
+        if same_region(old_tree.body, new_tree.body, set(touched) | set(inserts) | {p - 1 for p in inserts}):
             return set(), set(), {"same"}
         mod = modname_of(rel)
         cand = set()
@@ -343,6 +427,7 @@ class Analysis:
         nlines = old.count("\n") + 1
         lines = {min(max(1, ln), nlines) for ln in lines}
         rerun_classes = set()
+        spans = set()
         for ln in sorted(lines):
             chain = chain_at(old_tree, ln)
             fn_idx = None
@@ -367,6 +452,7 @@ class Analysis:
                     pass
                 t = mp.line_tests(rel, span)
                 cand |= t
+                spans |= span
                 rerun_classes |= mp.line_classes(rel, span)
                 continue
             # Not inside a function body: import-time code.
@@ -374,6 +460,7 @@ class Analysis:
             s = stmts[-1] if stmts else None
             if s is None:
                 continue
+            spans |= set(range(s.lineno, s.end_lineno + 1))
             classes = [c for c in chain[1:] if isinstance(c, ast.ClassDef)]
             if isinstance(s, FUNC):
                 # decorator / signature / defaults of a def
@@ -410,6 +497,20 @@ class Analysis:
             cand |= self.name_users(names, mod)
             if not names:
                 cand |= self.module_users_by_name(mod)
+        # code that runs while a test module is imported: a failure there
+        # breaks every test file importing that module
+        tmods = mp.tmods_at(rel, spans)
+        if tmods:
+            flags.add("tmod")
+            self.reimport |= tmods
+            for tm in tmods:
+                cand |= self.tests_of_module(tm)
+        # function bodies executed while sqlglot itself is imported
+        if "static" not in flags and mp.at_import(rel, spans):
+            flags.add("importtime")
+            cand |= self.module_users_by_name(mod)
+            for d in mp.dependents({mod}):
+                cand |= self.module_users_by_name(d)
         return cand, rerun_classes, flags
 
 
@@ -606,15 +707,21 @@ def child_run(job, out_fd):
 
     py_changed = {rel: txt for rel, txt in changed.items() if rel.endswith(".py")}
     if fast:
-        # swap code objects of changed functions in place
         want = {}
         for rel, txt in py_changed.items():
             absp = os.path.join(SRC, rel)
             with _open(absp, encoding="utf-8") as f:
                 old = f.read()
             ok, swaps = code_diff(compile(old, absp, "exec"), compile(txt, absp, "exec"))
+            if not ok:
+                fast = False
+                job["purge"] = sorted({modname_of(r) for r in py_changed} | set(job.get("reimport") or ()))
+                w.write("# fallback to re-import\n")
+                break
             for k, v in swaps.items():
                 want[(os.path.normcase(absp), k)] = v
+    if fast:
+        # swap code objects of changed functions in place
         n = 0
         for o in FUNCS or gc.get_objects():
             if isinstance(o, types.FunctionType):
@@ -625,6 +732,9 @@ def child_run(job, out_fd):
                     o.__code__ = nc
                     n += 1
         w.write(f"# swapped {n}\n")
+        if job.get("reimport"):
+            for name in holders(set(job["reimport"])):
+                sys.modules.pop(name, None)
     else:
         # re-import the changed modules and everything that imports them
         purge = job.get("purge")
@@ -673,12 +783,17 @@ def child_run(job, out_fd):
                     w.write(f"! broken {name} {type(e).__name__}\n")
                     w.close()
                     os._exit(0)
+        broken_any = False
         for name in sorted(purge):
             if name.startswith("sqlglot") and not name.endswith("__main__"):
                 try:
                     importlib.import_module(name)
-                except Exception:
-                    pass
+                except BaseException as e:
+                    w.write(f"! broken {name} {type(e).__name__}\n")
+                    broken_any = True
+        if broken_any:
+            w.close()
+            os._exit(0)
         # a re-imported package loses attributes for submodules that stayed loaded
         for name, m in list(sys.modules.items()):
             if m is not None and "." in name and name.split(".")[0] in ("sqlglot", "tests"):
@@ -785,10 +900,10 @@ def main():
         meta[t["number"]] = (modname_of(path), cls, meth)
     all_nums = set(ms)
     mp = Map(MAP)
-    an = Analysis(mp)
     by_file = {}
     for t in tests:
         by_file.setdefault(t["file"], set()).add(t["number"])
+    an = Analysis(mp, by_file)
 
     commit_dir = os.path.join(DATA, "commits")
     cids = sorted(f[:-6] for f in os.listdir(commit_dir) if f.endswith(".patch"))
@@ -810,9 +925,9 @@ def main():
         if p["run"]:
             if res is None or res.get("broken") is not None:
                 fails |= p["heavy"]
-                fails |= set(p.get("broken_out", all_nums)) if res and res.get("broken") else set(p["run"])
-                if res and res.get("broken"):
-                    fails |= module_importers(res["broken"], mp, by_file, all_nums)
+                fails |= set(p["run"])
+                for bm in (res or {}).get("broken") or ():
+                    fails |= module_importers(bm, mp, by_file, all_nums)
             else:
                 any_fail = False
                 for n in p["run"]:
@@ -834,12 +949,20 @@ def module_importers(mod, mp, by_file, all_nums):
     out = set()
     for tf in mp.modfiles.get(mod, ()):
         out |= by_file.get(tf, set())
-    out |= Analysis(mp).module_users_by_name(mod)
+    an = _AN.get(id(mp))
+    if an is None:
+        an = _AN[id(mp)] = Analysis(mp)
+    out |= an.module_users_by_name(mod)
     return out
+
+
+_AN = {}
 
 
 def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
     files = parse_patch(text)
+    an.reimport = set()
+    data_heavy = False
     changed = {}
     cand = set()
     out = set()
@@ -884,13 +1007,8 @@ def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
             if "same" in flags:
                 why.append("same-ast")
                 continue
-            if old_text is not None:
-                ok, swaps = code_diff(compile(old_text, src_path, "exec"), compile(new_text, src_path, "exec"))
-                if not ok:
-                    fast = False
-                elif not swaps:
-                    why.append("same-code")
-                    continue
+            if "importtime" in flags or "static" in flags or old_text is None:
+                fast = False
             cand |= c
             reset |= rc
             why.append(("static " if "static" in flags else "") + f"py:{len(c)}")
@@ -898,6 +1016,7 @@ def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
             o = mp.opens.get(rel)
             if o is not None:
                 cand |= set(mp.sets[o])
+                data_heavy = True
                 why.append(f"data:{len(mp.sets[o])}")
             else:
                 why.append("unused-file")
@@ -907,10 +1026,12 @@ def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
         purge = sorted(mp.dependents({modname_of(r) for r in changed if r.endswith(".py")}))
     run = {n for n in cand if tier(secs[n]) < 2}
     heavy = {n for n in cand if tier(secs[n]) == 2}
-    if heavy and not run:
+    if heavy and (not run or data_heavy):
         out |= heavy
         heavy = set()
-    return {"out": out, "run": run, "heavy": heavy, "purge": purge, "changed": changed, "fast": fast, "reset": reset, "why": " ".join(why)}
+    if purge is not None:
+        purge = sorted(set(purge) | an.reimport)
+    return {"out": out, "run": run, "heavy": heavy, "purge": purge, "reimport": sorted(an.reimport), "changed": changed, "fast": fast, "reset": reset, "why": " ".join(why)}
 
 
 def run_all(plans, meta, secs):
@@ -946,6 +1067,7 @@ def run_all(plans, meta, secs):
             "tests": [[n, *meta[n], secs[n], tier(secs[n])] for n in sorted(tl, key=lambda n: (tier(secs[n]), n))],
             "reset_classes": sorted(p["reset"]),
             "purge": p.get("purge") if use_fork else None,
+            "reimport": p.get("reimport", []),
         }
         budget = 30 + sum(secs[n] * 4 + 2 for n in tl)
         if use_fork:
@@ -976,14 +1098,14 @@ def run_all(plans, meta, secs):
         else:
             data = h["buf"]
         ok = {}
-        broken = None
+        broken = []
         for line in data.decode(errors="replace").splitlines():
             if line.startswith("! broken"):
-                broken = line.split()[2]
+                broken.append(line.split()[2])
             elif line and line[0].isdigit():
                 parts = line.split()
                 ok[int(parts[0])] = {"1": True, "0": False, "S": None}[parts[1]]
-        results[cid] = {"ok": ok, "broken": broken, "cpu": h.get("cpu", 0.0)}
+        results[cid] = {"ok": ok, "broken": broken or None, "cpu": h.get("cpu", 0.0)}
 
     if not use_fork:
         # Windows/local: simple sequential pool of subprocesses

@@ -12,10 +12,13 @@ names = {t["number"]: t["id"].split("::", 1)[1] for t in tests}
 by_file = {}
 for t in tests:
     by_file.setdefault(t["file"], set()).add(t["number"])
-mp = S.Map(S.MAP); an = S.Analysis(mp)
+mp = S.Map(S.MAP); an = S.Analysis(mp, by_file)
 tot_run = tot_est = 0
 for cid in sorted(ans):
-    p = S.plan_commit(cid, open(os.path.join(data, "commits", cid + ".patch")).read(), mp, an, by_file, set(secs), secs)
+    try:
+        p = S.plan_commit(cid, open(os.path.join(data, "commits", cid + ".patch"), encoding="utf-8").read(), mp, an, by_file, set(secs), secs)
+    except Exception as e:
+        print(cid, "PLAN ERROR", repr(e)); continue
     fail = set(ans[cid]["failing"])
     miss = fail - p["out"] - p["run"] - p["heavy"]
     hv_miss = fail & p["heavy"] and not (fail & p["run"])

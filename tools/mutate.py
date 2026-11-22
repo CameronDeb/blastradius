@@ -115,14 +115,24 @@ made = 0
 kinds = {}
 while made < count:
     r = rng.random()
-    m = code_mutant() if r < 0.6 else (fixture_mutant() if r < 0.85 else comment_mutant())
-    if not m:
-        continue
-    path, kind, a, b = m
-    rel = os.path.relpath(path, src).replace(os.sep, "/")
+    if r < 0.12:
+        parts = [x for x in (code_mutant(), comment_mutant(), fixture_mutant()) if x]
+        seen = set()
+        text = ""
+        for path, _, a, b in parts:
+            if path not in seen:
+                seen.add(path)
+                text += diff(os.path.relpath(path, src).replace(os.sep, "/"), a, b)
+        kind = "multi"
+    else:
+        m = code_mutant() if r < 0.62 else (fixture_mutant() if r < 0.85 else comment_mutant())
+        if not m:
+            continue
+        path, kind, a, b = m
+        text = diff(os.path.relpath(path, src).replace(os.sep, "/"), a, b)
     cid = f"m{made:03d}"
     with open(os.path.join(out, "commits", cid + ".patch"), "w", encoding="utf-8", newline="\n") as f:
-        f.write(diff(rel, a, b))
+        f.write(text)
     kinds[cid] = kind
     made += 1
 import json

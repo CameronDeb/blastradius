@@ -63,11 +63,37 @@ for f in sorted(glob.glob(os.path.join(shard_dir, "shard*.json"))):
     failed += [k for k, ok in d["outcomes"].items() if not ok]
 print("failing at base:", failed, file=sys.stderr)
 
-# Import-time coverage: which lines run just by importing everything.
+# Which test files import which modules (transitively, at import time):
+# do it per test file in a fresh interpreter to be exact.
+import subprocess  # noqa: E402
+
+test_files = sorted({t["file"] for t in tests})
+code = (
+    "import sys,importlib,json;b=set(sys.modules);importlib.import_module(sys.argv[1]);"
+    "print(json.dumps(sorted(m for m in set(sys.modules)-b if m.startswith(('sqlglot','tests')))))"
+)
+modfiles = defaultdict(list)
+file_imports = {}
+for tf in test_files:
+    mod = tf[:-3].replace("/", ".")
+    r = subprocess.run([sys.executable, "-c", code, mod], capture_output=True, text=True, env={**os.environ, "PYTHONPATH": ROOT})
+    try:
+        ms = json.loads(r.stdout.strip().splitlines()[-1])
+        file_imports[mod] = set(ms)
+        for m in ms:
+            modfiles[m].append(tf)
+    except Exception:
+        file_imports[mod] = set()
+        print("import graph failed", tf, r.stderr[-300:], file=sys.stderr)
+
+# Import-time coverage. Context "S": importing all of sqlglot. Context
+# "I:<module>": importing one test module (dependencies imported first, so
+# each module's own import-time code lands in its own context).
 import coverage  # noqa: E402
 
 cov = coverage.Coverage(data_file=None, source=[os.path.join(ROOT, "sqlglot"), os.path.join(ROOT, "tests")])
 cov.start()
+cov.switch_context("S")
 import sqlglot  # noqa: E402
 
 for m in pkgutil.walk_packages(sqlglot.__path__, "sqlglot."):
@@ -82,39 +108,50 @@ for dname in Dialects:
         Dialect.get_or_raise(dname.value)
     except Exception:
         pass
-test_files = sorted({t["file"] for t in tests})
-before = set(sys.modules)
-test_imports = {}
-for tf in test_files:
-    mod = tf[:-3].replace("/", ".")
+test_mods = set()
+for mm in file_imports.values():
+    test_mods |= {x for x in mm if x.startswith("tests")}
+test_mods |= set(file_imports)
+done = set()
+
+
+def imp(mod):
+    if mod in done:
+        return
+    done.add(mod)
+    for dep in sorted(file_imports.get(mod, ())):
+        if dep.startswith("tests") and dep != mod and dep.count(".") <= mod.count(".") + 1:
+            pass
+    # import shallower test dependencies first
+    for dep in sorted(x for x in file_imports.get(mod, ()) if x.startswith("tests.") and x != mod):
+        if dep not in done and dep in test_mods and mod not in file_imports.get(dep, ()):
+            imp(dep)
+    cov.switch_context("I:" + mod)
     try:
         importlib.import_module(mod)
     except Exception as e:
         print("cannot import", mod, e, file=sys.stderr)
+
+
+for mod in sorted(test_mods):
+    imp(mod)
 cov.stop()
 data = cov.get_data()
 import_lines = {}
+tmod_lines = {}
 for f in data.measured_files():
     rel = os.path.relpath(f, ROOT).replace(os.sep, "/")
-    import_lines[rel] = sorted(data.lines(f) or [])
-
-# Which test files import which sqlglot modules (transitively, at import time):
-# do it per test file in a fresh interpreter to be exact.
-import subprocess  # noqa: E402
-
-code = (
-    "import sys,importlib,json;b=set(sys.modules);importlib.import_module(sys.argv[1]);"
-    "print(json.dumps(sorted(m for m in set(sys.modules)-b if m.startswith(('sqlglot','tests')))))"
-)
-modfiles = defaultdict(list)
-for tf in test_files:
-    mod = tf[:-3].replace("/", ".")
-    r = subprocess.run([sys.executable, "-c", code, mod], capture_output=True, text=True, env={**os.environ, "PYTHONPATH": ROOT})
-    try:
-        for m in json.loads(r.stdout.strip().splitlines()[-1]):
-            modfiles[m].append(tf)
-    except Exception:
-        print("import graph failed", tf, r.stderr[-300:], file=sys.stderr)
+    by = data.contexts_by_lineno(f)
+    s_lines = sorted(ln for ln, cs in by.items() if "S" in cs)
+    if s_lines:
+        import_lines[rel] = s_lines
+    t = {}
+    for ln, cs in by.items():
+        ims = sorted(c[2:] for c in cs if c.startswith("I:"))
+        if ims:
+            t[str(ln)] = ims
+    if t:
+        tmod_lines[rel] = t
 
 # Users: tests that instantiated a class whose MRO includes the qualname.
 classes_by_name = {}
@@ -292,6 +329,7 @@ out_map = {
     "name_funcs": {n: sorted(v) for n, v in name_funcs.items()},
     "import_names": sorted(import_names),
     "import_lines": import_lines,
+    "tmod_lines": tmod_lines,
     "modfiles": modfiles,
     "rdeps": {k: sorted(v) for k, v in rdeps.items()},
     "sets": sets,
