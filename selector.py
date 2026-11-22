@@ -873,7 +873,11 @@ def code_sig(c):
         c.co_kwonlyargcount,
         c.co_posonlyargcount,
         c.co_exceptiontable if hasattr(c, "co_exceptiontable") else b"",
-        tuple(const_sig(x) for x in c.co_consts),
+        # class bodies keep their own first line number (__firstlineno__)
+        tuple(
+            ("<line>",) if type(x) is int and x == c.co_firstlineno and "__firstlineno__" in c.co_names else const_sig(x)
+            for x in c.co_consts
+        ),
     )
 
 
@@ -1392,6 +1396,7 @@ def main():
         path, cls, meth = t["id"].split("::")
         meta[t["number"]] = (modname_of(path), cls, meth)
         TEST_CLASS[t["number"]] = f"{modname_of(path)}::{cls}"
+        TEST_CLASS[("meth", t["number"])] = meth
     all_nums = set(ms)
     mp = Map(MAP)
     cost = {n: mp.cpu.get(n, secs[n]) for n in secs}
@@ -1481,17 +1486,63 @@ _AN = {}
 
 
 TEST_CLASS = {}
+TPC_FILES = {
+    "test_execute_tpch": "optimizer/tpc-h/tpc-h.sql",
+    "test_optimized_tpch": "optimizer/tpc-h/tpc-h.sql",
+    "test_execute_tpcds": "optimizer/tpc-ds/tpc-ds.sql",
+}
+
+
+def fixture_pairs(text):
+    statements = "\n".join(ln for ln in text.splitlines() if ln and not ln.startswith("--")).split(";")
+    out = []
+    for i in range(0, len(statements), 2):
+        if i + 1 < len(statements):
+            sql = statements[i].strip()
+            lines = sql.split("\n")
+            j = 0
+            meta = []
+            while lines[j].startswith("#"):
+                key, val = lines[j].split(":", maxsplit=1)
+                meta.append((key.lstrip("#").strip(), val.strip()))
+                j += 1
+            out.append((tuple(meta), "\n".join(lines[j:]), statements[i + 1].strip()))
+    return out
+
+
+def fixture_changes(old, new):
+    """Indices of fixture cases that differ, or None when cases were added or removed."""
+    try:
+        a, b = fixture_pairs(old), fixture_pairs(new)
+    except Exception:
+        return None
+    if len(a) != len(b):
+        return None
+    return {i for i, (x, y) in enumerate(zip(a, b)) if x != y}
 
 
 def meta_cls(n):
     return TEST_CLASS.get(n)
 
 
-def select_items(n, iids, spans, changed, mp, cls_key):
+def select_items(n, iids, spans, changed, mp, cls_key, fixtures=None, same=()):
     """Items of test n that execute a changed line, or None to run it whole."""
-    if any(not rel.endswith(".py") for rel in changed):
-        return None
     sel = set()
+    non_py = [rel for rel in changed if not rel.endswith(".py")]
+    if non_py:
+        # fixture case files whose cases still match one to one
+        if not fixtures or any(fixtures.get(rel) is None for rel in non_py):
+            return None
+        meth = TEST_CLASS.get(("meth", n)) or ""
+        for iid in iids:
+            kind, _, rest = mp.items[iid][1].partition("|")
+            if kind == "F":
+                f, _, i = rest.rpartition("|")
+                if int(i) in fixtures.get("tests/fixtures/" + f, ()):
+                    sel.add(iid)
+            elif kind == "X" and meth in TPC_FILES:
+                if int(rest) in fixtures.get("tests/fixtures/" + TPC_FILES[meth], ()):
+                    sel.add(iid)
     for rel, (sp, static) in spans.items():
         if not sp:
             continue
@@ -1501,7 +1552,7 @@ def select_items(n, iids, spans, changed, mp, cls_key):
             return None
         sel |= mp.item_hits(rel, sp)
     for rel in changed:
-        if rel.endswith(".py") and rel not in spans:
+        if rel.endswith(".py") and rel not in spans and rel not in same:
             return None
     sel &= set(iids)
     return sel or None
@@ -1512,6 +1563,8 @@ def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
     an.reimport = set()
     an.spans = {}
     an.patches = []
+    fixtures = {}
+    same_files = set()
     data_heavy = False
     changed = {}
     cand = set()
@@ -1568,6 +1621,7 @@ def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
                 why.append("syntax")
                 continue
             if "same" in flags:
+                same_files.add(rel)
                 why.append("same-ast")
                 continue
             if "importtime" in flags or "static" in flags or old_text is None:
@@ -1581,6 +1635,8 @@ def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
                 cand |= set(mp.sets[o])
                 data_heavy = True
                 why.append(f"data:{len(mp.sets[o])}")
+                if rel.startswith("tests/fixtures/") and rel.endswith(".sql") and old_text is not None and new_text is not None:
+                    fixtures[rel] = fixture_changes(old_text, new_text)
             else:
                 why.append("unused-file")
     cand -= out
@@ -1593,7 +1649,7 @@ def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
         iids = mp.items_of.get(n)
         if not iids:
             continue
-        sel = select_items(n, iids, an.spans, changed, mp, meta_cls(n))
+        sel = select_items(n, iids, an.spans, changed, mp, meta_cls(n), fixtures, same_files)
         if sel is None:
             continue
         items[n] = sorted(mp.items[i][1] for i in sel)
@@ -1602,8 +1658,11 @@ def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
     run = {n for n in cand if tier(c_of(n)) < 2}  # secs here: our CPU cost per test
     heavy = {n for n in cand if tier(c_of(n)) == 2}
     if heavy and (not run or data_heavy):
-        out |= heavy
-        heavy = set()
+        out |= {n for n in heavy if n not in items}
+        heavy = {n for n in heavy if n in items}
+        if data_heavy:
+            run |= heavy
+            heavy = set()
     if purge is not None:
         purge = sorted(set(purge) | an.reimport)
     return {"out": out, "run": run, "heavy": heavy, "purge": purge, "reimport": sorted(an.reimport), "items": items, "est": est, "patches": list(an.patches), "changed": changed, "fast": fast, "reset": reset, "why": " ".join(why)}
