@@ -1,0 +1,11 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -381,6 +381,7 @@
+   - :arrow_lower_right: *fixes issue [#8807](https://github.com/tobymao/sqlglot/issues/8807) opened by [@THEtheChad](https://github.com/THEtheChad)*
+ - [`41287a2`](https://github.com/tobymao/sqlglot/commit/41287a2d7ff6ede9fab62fc645922957788e443b) - **snowflake**: accept unquoted keyword identifiers *(PR [#8816](https://github.com/tobymao/sqlglot/pull/8816) by [@georgesittas](https://github.com/georgesittas))*
+   - :arrow_lower_right: *fixes issue [#8805](https://github.com/tobymao/sqlglot/issues/8805) opened by [@THEtheChad](https://github.com/THEtheChad)*
++# note
+ - [`3cca3ea`](https://github.com/tobymao/sqlglot/commit/3cca3ea47592c84b23636aff196ca0bbaf4f1905) - preserve timestamp arithmetic semantics *(PR [#8815](https://github.com/tobymao/sqlglot/pull/8815) by [@georgesittas](https://github.com/georgesittas))*
+ - [`e88e67e`](https://github.com/tobymao/sqlglot/commit/e88e67e6c8f5fe8992419f6920dac66cca8f12a8) - **snowflake**: preserve date truncation types in DuckDB *(PR [#8817](https://github.com/tobymao/sqlglot/pull/8817) by [@georgesittas](https://github.com/georgesittas))*
+   - :arrow_lower_right: *fixes issue [#8806](https://github.com/tobymao/sqlglot/issues/8806) opened by [@THEtheChad](https://github.com/THEtheChad)*

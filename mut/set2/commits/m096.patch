@@ -1,0 +1,11 @@
+diff --git a/README.md b/README.md
+--- a/README.md
++++ b/README.md
+@@ -662,6 +662,7 @@
+ The dialect will be automatically discovered and can be used like any built-in dialect:
+ 
+ ```python
++# note
+ from sqlglot import transpile
+ transpile("SELECT * FROM t", read="mydb", write="postgres")
+ ```

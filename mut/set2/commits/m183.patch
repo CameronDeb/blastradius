@@ -1,0 +1,12 @@
+diff --git a/tests/dialects/test_postgres.py b/tests/dialects/test_postgres.py
+--- a/tests/dialects/test_postgres.py
++++ b/tests/dialects/test_postgres.py
+@@ -2570,7 +2570,7 @@
+         revoke_cmds = [
+             "REVOKE SELECT ON TABLE users FROM role1",
+             "REVOKE INSERT, DELETE ON TABLE orders FROM user1",
+-            "REVOKE USAGE ON SCHEMA finance FROM user2",
++            "REVOKEUSAGE ON SCHEMA finance FROM user2",
+             "REVOKE ALL PRIVILEGES ON DATABASE mydb FROM PUBLIC",
+             "REVOKE CREATE ON SCHEMA public FROM developer",
+             "REVOKE CONNECT ON DATABASE testdb FROM readonly_user",

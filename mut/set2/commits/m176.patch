@@ -1,0 +1,12 @@
+diff --git a/sqlglot/expressions/builders.py b/sqlglot/expressions/builders.py
+--- a/sqlglot/expressions/builders.py
++++ b/sqlglot/expressions/builders.py
+@@ -1066,7 +1066,7 @@
+         case().when("a = 1", "foo").else_("bar")
+ 
+     Args:
+-        expression: Optionally, the input expression (not all dialects support this)
++        expression: Optionally, the input expression (all dialects support this)
+         copy: whether to copy the argument expressions.
+         **opts: Extra keyword arguments for parsing `expression`
+     """

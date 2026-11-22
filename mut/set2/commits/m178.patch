@@ -1,0 +1,11 @@
+diff --git a/sqlglot/generators/duckdb.py b/sqlglot/generators/duckdb.py
+--- a/sqlglot/generators/duckdb.py
++++ b/sqlglot/generators/duckdb.py
+@@ -2674,7 +2674,6 @@
+             )
+         else:
+             # Use RANDOM() for non-deterministic output
+-            random_expr = exp.Rand()
+ 
+         replacements = {"s": s, "n": n, "random_expr": random_expr}
+         return f"({self.sql(exp.replace_placeholders(self.ZIPF_TEMPLATE, **replacements))})"

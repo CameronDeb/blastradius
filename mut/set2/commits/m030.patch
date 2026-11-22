@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -3770,7 +3770,7 @@
+         if (
+             isinstance(expression.this, exp.Variance)
+             and expression.this.args.get("single_value_returns_zero")
+-            and expression.text("over") != "KEEP"
++            and expression.text("over") != "KEEPX"
+             and not self.VARIANCE_RETURNS_ZERO_ON_SINGLE_VALUE
+         ):
+             return self.variance_sql(expression.this, window=expression)

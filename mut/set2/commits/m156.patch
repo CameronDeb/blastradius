@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -690,7 +690,7 @@
+         exp.DType.TINYBLOB: "BLOB",
+         exp.DType.INET: "INET",
+         exp.DType.ROWVERSION: "VARBINARY",
+-        exp.DType.SMALLDATETIME: "TIMESTAMP",
++        exp.DType.SMALLDATETIME: "TIMESTAMPX",
+     }
+ 
+     UNSUPPORTED_TYPES: t.ClassVar[set[exp.DType]] = set()

@@ -1,0 +1,12 @@
+diff --git a/sqlglot/optimizer/qualify_columns.py b/sqlglot/optimizer/qualify_columns.py
+--- a/sqlglot/optimizer/qualify_columns.py
++++ b/sqlglot/optimizer/qualify_columns.py
+@@ -34,7 +34,7 @@
+     schema: dict[str, object] | Schema,
+     expand_alias_refs: bool = True,
+     expand_stars: bool = True,
+-    allow_partial_qualification: bool = False,
++    allow_partial_qualification: bool = True,
+     dialect: DialectType = None,
+ ) -> E:
+     """

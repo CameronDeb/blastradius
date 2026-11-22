@@ -1,0 +1,12 @@
+diff --git a/tests/test_time.py b/tests/test_time.py
+--- a/tests/test_time.py
++++ b/tests/test_time.py
+@@ -61,7 +61,7 @@
+         self.assertEqual(6, subsecond_precision("2023-01-01 12:13:14.000001+00:00"))
+         self.assertEqual(3, subsecond_precision("2023-01-01 12:13:14.123+00:00"))
+         self.assertEqual(0, subsecond_precision("2023-01-01 12:13:14+00:00"))
+-        self.assertEqual(0, subsecond_precision("2023-01-01 12:13:14"))
++        self.assertEqual(0, subsecond_precision("2023-01-01 1:13:14"))
+         self.assertEqual(0, subsecond_precision("garbage"))
+ 
+     @unittest.skipUnless(

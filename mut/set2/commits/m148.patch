@@ -1,0 +1,11 @@
+diff --git a/Makefile b/Makefile
+--- a/Makefile
++++ b/Makefile
+@@ -132,6 +132,7 @@
+ 		MYPYPATH=$(abspath .) $(MAKE) -C sqlglot-integration-tests style && \
+ 		$(MAKE) -C sqlglot-integration-tests check-submodule; \
+ 	fi
++# note
+ 
+ check: style test testc
+ 

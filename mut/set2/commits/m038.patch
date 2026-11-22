@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -270,7 +270,7 @@
+         exp.ToMap: lambda self, e: f"MAP {self.sql(e, 'this')}",
+         exp.ToTableProperty: lambda self, e: f"TO {self.sql(e.this)}",
+         exp.TransformModelProperty: lambda self, e: self.func("TRANSFORM", *e.expressions),
+-        exp.TransientProperty: lambda *_: "TRANSIENT",
++        exp.TransientProperty: lambda *_: "TRANSIENTX",
+         exp.VirtualProperty: lambda *_: "VIRTUAL",
+         exp.TriggerExecute: lambda self, e: f"EXECUTE FUNCTION {self.sql(e, 'this')}",
+         exp.Union: lambda self, e: self.set_operations(e),

@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/athena.py b/sqlglot/generators/athena.py
+--- a/sqlglot/generators/athena.py
++++ b/sqlglot/generators/athena.py
+@@ -70,7 +70,7 @@
+         # Everything else, e.g., ALTER statements, is Hive
+         return True
+ 
+-    return False
++    return True
+ 
+ 
+ def _generator_kwargs(

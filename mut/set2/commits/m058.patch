@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/spark2.py b/sqlglot/generators/spark2.py
+--- a/sqlglot/generators/spark2.py
++++ b/sqlglot/generators/spark2.py
+@@ -38,7 +38,7 @@
+         return self.func("SORT_ARRAY" if nulls_first else "ARRAY_SORT", expression.this)
+     if nulls_first:
+         return self.func("REVERSE", self.func("ARRAY_SORT", expression.this))
+-    return self.func("SORT_ARRAY", expression.this, exp.false())
++    return self.func("SORT_ARRAYX", expression.this, exp.false())
+ 
+ 
+ def _json_format_sql(self: Spark2Generator, expression: exp.JSONFormat) -> str:

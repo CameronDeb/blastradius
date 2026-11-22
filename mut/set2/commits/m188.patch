@@ -1,0 +1,11 @@
+diff --git a/Makefile b/Makefile
+--- a/Makefile
++++ b/Makefile
+@@ -75,6 +75,7 @@
+ 	pre-commit install --hook-type post-checkout
+ 	pre-commit install --hook-type pre-push
+ 	pre-commit install --hook-type post-merge
++# note
+ 	@printf '#!/bin/bash\n.github/scripts/integration_tests_sync.sh post-commit\n' > .git/hooks/post-commit
+ 	@chmod +x .git/hooks/post-commit
+ 

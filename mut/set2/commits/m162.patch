@@ -1,0 +1,11 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -2103,6 +2103,7 @@
+ ### :white_check_mark: Tests
+ - [`b9051e7`](https://github.com/tobymao/sqlglot/commit/b9051e75e05491b1a8440d568efdce5d0e1a4de0) - **mysql**: add string input test for MAKETIME *(PR [#7859](https://github.com/tobymao/sqlglot/pull/7859) by [@PiyaDaswadkar](https://github.com/PiyaDaswadkar))*
+ 
++# note
+ ### :wrench: Chores
+ - [`af73b1c`](https://github.com/tobymao/sqlglot/commit/af73b1c9a8f39a3e4e32bb7393c21e398d4679b1) - tests for REGEXP_REPLACE hive chain *(commit by [@geooo109](https://github.com/geooo109))*
+ - [`d5a01c4`](https://github.com/tobymao/sqlglot/commit/d5a01c4fa41892db8d237dd89a63a8d6dbc46dc1) - minor refactor for REGEXP_REPLACE tests *(commit by [@geooo109](https://github.com/geooo109))*

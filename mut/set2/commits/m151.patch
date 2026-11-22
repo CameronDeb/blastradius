@@ -1,0 +1,12 @@
+diff --git a/tests/dialects/test_teradata.py b/tests/dialects/test_teradata.py
+--- a/tests/dialects/test_teradata.py
++++ b/tests/dialects/test_teradata.py
+@@ -197,7 +197,7 @@
+             ),
+             (
+                 'EXECUTE "example db"."example macro"(1)',
+-                'EXECUTE "example db"."example macro"(1)',
++                'EXECUTE "example d"."example macro"(1)',
+             ),
+         ):
+             with self.subTest(sql=sql):

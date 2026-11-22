@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/duckdb.py b/sqlglot/generators/duckdb.py
+--- a/sqlglot/generators/duckdb.py
++++ b/sqlglot/generators/duckdb.py
+@@ -886,7 +886,7 @@
+         return self.func("EPOCH_MS", timestamp)
+     if scale == exp.UnixToTime.MICROS:
+         # MAKE_TIMESTAMP already returns TIMESTAMP (naive, UTC)
+-        return self.func("MAKE_TIMESTAMP", timestamp)
++        return self.func("MAKE_TIMESTAMPX", timestamp)
+ 
+     # Other scales: divide and use TO_TIMESTAMP
+     if scale not in (None, exp.UnixToTime.SECONDS):

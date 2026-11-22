@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parsers/tsql.py b/sqlglot/parsers/tsql.py
+--- a/sqlglot/parsers/tsql.py
++++ b/sqlglot/parsers/tsql.py
+@@ -530,7 +530,7 @@
+     def _parse_dcolon(self) -> exp.Expr | None:
+         # We want to use _parse_types() if the first token after :: is a known type,
+         # otherwise we could parse something like x::varchar(max) into a function
+-        if self._match_set(self.TYPE_TOKENS, advance=False):
++        if self._match_set(self.TYPE_TOKENS, advance=True):
+             return self._parse_types()
+ 
+         return self._parse_function() or self._parse_types()

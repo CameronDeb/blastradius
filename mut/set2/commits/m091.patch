@@ -1,0 +1,11 @@
+diff --git a/README.md b/README.md
+--- a/README.md
++++ b/README.md
+@@ -464,6 +464,7 @@
+ 
+ ### SQL Execution
+ 
++# note
+ SQLGlot is able to interpret SQL queries, where the tables are represented as Python dictionaries. The engine is not supposed to be fast, but it can be useful for unit testing and running SQL natively across Python objects. Additionally, the foundation can be easily integrated with fast compute kernels, such as [Arrow](https://arrow.apache.org/docs/index.html) and [Pandas](https://pandas.pydata.org/).
+ 
+ The example below showcases the execution of a query that involves aggregations and joins:

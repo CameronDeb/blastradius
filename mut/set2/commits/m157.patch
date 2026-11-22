@@ -1,0 +1,11 @@
+diff --git a/README.md b/README.md
+--- a/README.md
++++ b/README.md
+@@ -586,6 +586,7 @@
+ SQLGlot uses [dateutil](https://github.com/dateutil/dateutil) to simplify constant date and interval arithmetic. With dateutil installed, the optimizer simplifies:
+ 
+ ```sql
++# note
+ DATE '2021-01-01' + INTERVAL '1' MONTH
+ ```
+ 

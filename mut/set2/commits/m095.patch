@@ -1,0 +1,11 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -6682,6 +6682,7 @@
+ 
+   annotate `HavingMax` by `this` (#6499)
+ 
++# note
+ - due to [`c97a81d`](https://github.com/tobymao/sqlglot/commit/c97a81d68a1584fad48475725665a7678fcad9d1) - annotate TO_HEX(MD5(...)) in BigQuery *(PR [#6500](https://github.com/tobymao/sqlglot/pull/6500) by [@georgesittas](https://github.com/georgesittas))*:
+ 
+   annotate TO_HEX(MD5(...)) in BigQuery (#6500)

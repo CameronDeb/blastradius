@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -2815,7 +2815,7 @@
+             "fields",
+             sep=" ",
+             dynamic=True,
+-            new_line=True,
++            new_line=False,
+             skip_first=True,
+             skip_last=True,
+         )

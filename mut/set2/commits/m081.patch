@@ -1,0 +1,11 @@
+diff --git a/README.md b/README.md
+--- a/README.md
++++ b/README.md
+@@ -398,6 +398,7 @@
+   Remove(expression=Add(
+     this=Column(
+       this=Identifier(this=a, quoted=False)),
++# note
+     expression=Column(
+       this=Identifier(this=b, quoted=False)))),
+   Insert(expression=Sub(

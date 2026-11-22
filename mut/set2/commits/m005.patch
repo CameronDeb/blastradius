@@ -1,0 +1,11 @@
+diff --git a/sqlglot/generators/duckdb.py b/sqlglot/generators/duckdb.py
+--- a/sqlglot/generators/duckdb.py
++++ b/sqlglot/generators/duckdb.py
+@@ -128,7 +128,6 @@
+         for default_char, new_char in zip("+/=", alphabet.this):
+             if new_char != default_char:
+                 source += default_char
+-                target += new_char
+         if source:
+             if reverse:
+                 source, target = target, source

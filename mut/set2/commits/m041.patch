@@ -1,0 +1,12 @@
+diff --git a/tests/test_helper.py b/tests/test_helper.py
+--- a/tests/test_helper.py
++++ b/tests/test_helper.py
+@@ -58,7 +58,7 @@
+                 self.assertEqual(to_int(value), expected)
+ 
+         self.assertEqual(to_int("999", max_digits=3), 999)
+-        self.assertIsNone(to_int("1000", max_digits=3))
++        self.assertIsNone(to_int("000", max_digits=3))
+ 
+     def test_merge_ranges(self):
+         self.assertEqual([], merge_ranges([]))

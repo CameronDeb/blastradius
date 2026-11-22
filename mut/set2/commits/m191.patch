@@ -1,0 +1,12 @@
+diff --git a/tests/dialects/test_mysql.py b/tests/dialects/test_mysql.py
+--- a/tests/dialects/test_mysql.py
++++ b/tests/dialects/test_mysql.py
+@@ -1667,7 +1667,7 @@
+             "CAST(x AS TEXT)",
+             write={
+                 "mysql": "CAST(x AS CHAR)",
+-                "presto": "CAST(x AS VARCHAR)",
++                "presto": "CAST(x S VARCHAR)",
+                 "starrocks": "CAST(x AS STRING)",
+             },
+         )
