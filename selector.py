@@ -1094,6 +1094,12 @@ def child_run(job, out_fd):
 
 def main():
     t_start = time.time()
+    # Only answer lines may reach stdout: keep the real stdout aside and send
+    # everything else (imports, tests, children) to stderr.
+    sys.stdout.flush()
+    out = os.fdopen(os.dup(1), "w", encoding="utf-8", newline="\n")
+    os.dup2(2, 1)
+    sys.stdout = sys.stderr
     tests = json.load(open(os.path.join(DATA, "tests.json")))["tests"]
     ms = {t["number"]: round(t["seconds"] * 1000) for t in tests}
     secs = {t["number"]: t["seconds"] for t in tests}
@@ -1121,7 +1127,11 @@ def main():
             plans[cid] = {"out": set(all_nums), "run": set(), "heavy": set(), "changed": {}}
     log(f"planned {len(cids)} in {time.time() - t_start:.2f}s")
 
-    results = run_all(plans, meta, secs, cost)
+    try:
+        results = run_all(plans, meta, secs, cost)
+    except BaseException as e:  # never lose the batch: unrun tests get reported
+        log("runner failed", repr(e))
+        results = {}
 
     for cid in cids:
         p = plans[cid]
@@ -1144,7 +1154,8 @@ def main():
                 if any_fail:
                     fails |= p["heavy"]
         workers, cost = pack(fails, ms)
-        print(json.dumps({"commit": cid, "workers": workers}), flush=True)
+        out.write(json.dumps({"commit": cid, "workers": workers}) + "\n")
+        out.flush()
         ccpu = (res or {}).get("cpu", 0.0)
         log(f"{cid}: out={len(p['out'])} run={len(p['run'])} fail={len(fails)} cost={cost / 1000:.3f} cpu={ccpu:.2f} {'fast' if p.get('fast') else 'slow'} {p.get('why', '')}")
     log(f"total wall {time.time() - t_start:.2f}s, parent cpu {time.process_time():.2f}s, children cpu {sum(r.get('cpu', 0) for r in results.values()):.2f}s")
