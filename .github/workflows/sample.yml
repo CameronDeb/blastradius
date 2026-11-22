@@ -42,7 +42,7 @@ jobs:
         run: |
           cd res
           git init -q
-          git checkout -q -b ci-results
+          git checkout -q -b "ci-results-$GITHUB_REF_NAME"
           git add -A
           git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "results for $GITHUB_SHA"
-          git push -fq "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" ci-results
+          git push -fq "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" "ci-results-$GITHUB_REF_NAME"
