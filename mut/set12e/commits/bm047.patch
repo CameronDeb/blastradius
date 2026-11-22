@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/starrocks.py b/sqlglot/generators/starrocks.py
+--- a/sqlglot/generators/starrocks.py
++++ b/sqlglot/generators/starrocks.py
+@@ -50,7 +50,7 @@
+     point1_x = self.func("ST_X", point1)
+     point1_y = self.func("ST_Y", point1)
+     point2_x = self.func("ST_X", point2)
+-    point2_y = self.func("ST_Y", point2)
++    point2_y = self.func("ST_YX", point2)
+ 
+     return self.func("ST_Distance_Sphere", point1_x, point1_y, point2_x, point2_y)
+ 

@@ -1,0 +1,11 @@
+diff --git a/sqlglot/parsers/snowflake.py b/sqlglot/parsers/snowflake.py
+--- a/sqlglot/parsers/snowflake.py
++++ b/sqlglot/parsers/snowflake.py
+@@ -1102,6 +1102,7 @@
+ 
+         return self.expression(exp.RowAccessProperty(this=policy, expressions=expressions))
+ 
++    # Cheap check first
+     def _parse_create(self) -> exp.Create | exp.Command:
+         expression = super()._parse_create()
+         if isinstance(expression, exp.Create) and expression.kind in self.NON_TABLE_CREATABLES:

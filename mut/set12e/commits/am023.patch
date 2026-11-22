@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -3981,7 +3981,7 @@
+             else self.dialect.CONCAT_COALESCE
+         )
+ 
+-        if not concat_coalesce and expression.args.get("coalesce"):
++        if concat_coalesce and expression.args.get("coalesce"):
+ 
+             def _wrap_with_coalesce(e: exp.Expr) -> exp.Expr:
+                 if not e.type:

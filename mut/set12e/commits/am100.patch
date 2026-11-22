@@ -1,0 +1,12 @@
+diff --git a/sqlglot/expressions/query.py b/sqlglot/expressions/query.py
+--- a/sqlglot/expressions/query.py
++++ b/sqlglot/expressions/query.py
+@@ -1987,7 +1987,7 @@
+         "mode": False,
+         "partition": False,
+         "expression": False,
+-        "properties": False,
++        "properties": True,
+     }
+ 
+ 

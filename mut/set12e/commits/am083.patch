@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -153,7 +153,7 @@
+             f"{'DEFAULT ' if e.args.get('default') else ''}CHARACTER SET={self.sql(e, 'this')}"
+         ),
+         exp.ClusteredColumnConstraint: lambda self, e: (
+-            f"CLUSTERED ({self.expressions(e, 'this', indent=False)})"
++            f"CLUSTERED ({self.expressions(e, 'this', indent=True)})"
+         ),
+         exp.CollateColumnConstraint: lambda self, e: f"COLLATE {self.sql(e, 'this')}",
+         exp.CommentColumnConstraint: lambda self, e: f"COMMENT {self.sql(e, 'this')}",

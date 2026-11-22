@@ -1,0 +1,12 @@
+diff --git a/tests/fixtures/optimizer/tpc-ds/tpc-ds.sql b/tests/fixtures/optimizer/tpc-ds/tpc-ds.sql
+--- a/tests/fixtures/optimizer/tpc-ds/tpc-ds.sql
++++ b/tests/fixtures/optimizer/tpc-ds/tpc-ds.sql
+@@ -12263,7 +12263,7 @@
+   JOIN "household_demographics_2" AS "household_demographics"
+     ON "household_demographics"."hd_demo_sk" = "store_sales"."ss_hdemo_sk"
+   JOIN "store_2" AS "store"
+-    ON "store"."s_store_sk" = "store_sales"."ss_store_sk"
++    ON "store"."s_store_sk" =1 "store_sales"."ss_store_sk"
+   JOIN "time_dim" AS "time_dim"
+     ON "store_sales"."ss_sold_time_sk" = "time_dim"."t_time_sk"
+     AND "time_dim"."t_hour" = 8

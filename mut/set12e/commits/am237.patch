@@ -1,0 +1,11 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -914,6 +914,7 @@
+         exp.Mod,
+     )
+ 
++    # Keep in sync with the generator
+     # ALTER options that follow the others without a comma, e.g. MySQL's
+     # ENGINE=InnoDB PARTITION BY LIST (...) or StarRocks' PARTITION BY ... DISTRIBUTED BY ...
+     ALTER_PARTITION_OPTIONS: t.ClassVar[tuple[type[exp.Expr], ...]] = ()

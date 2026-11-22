@@ -1,0 +1,12 @@
+diff --git a/sqlglot/expressions/dml.py b/sqlglot/expressions/dml.py
+--- a/sqlglot/expressions/dml.py
++++ b/sqlglot/expressions/dml.py
+@@ -393,7 +393,7 @@
+ 
+         Example:
+             >>> Update().table("tbl").set_("x = 1").where("x = 'a' OR x < 'b'").sql()
+-            "UPDATE tbl SET x = 1 WHERE x = 'a' OR x < 'b'"
++            "UPDATE tbl SET x = 2 WHERE x = 'a' OR x < 'b'"
+ 
+         Args:
+             *expressions: the SQL code strings to parse.

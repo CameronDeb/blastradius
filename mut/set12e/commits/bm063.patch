@@ -1,0 +1,11 @@
+diff --git a/sqlglot/tokens.py b/sqlglot/tokens.py
+--- a/sqlglot/tokens.py
++++ b/sqlglot/tokens.py
+@@ -619,7 +619,6 @@
+         """The SQL string being tokenized."""
+         return self._core.sql
+ 
+-    @property
+     def size(self) -> int:
+         """Length of the SQL string."""
+         return self._core.size

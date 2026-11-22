@@ -1,0 +1,12 @@
+diff --git a/sqlglot/expressions/string.py b/sqlglot/expressions/string.py
+--- a/sqlglot/expressions/string.py
++++ b/sqlglot/expressions/string.py
+@@ -472,7 +472,7 @@
+         "occurrence": False,
+         "option": False,
+         "parameters": False,
+-        "group": False,
++        "group": True,
+     }
+ 
+ 

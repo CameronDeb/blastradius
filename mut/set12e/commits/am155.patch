@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -2351,7 +2351,7 @@
+                 if i < total - 1:
+                     chunks.append([])
+             else:
+-                chunks[-1].append(token)
++                chunks[-2].append(token)
+ 
+         self._chunks = chunks
+ 

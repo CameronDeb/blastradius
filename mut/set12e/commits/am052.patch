@@ -1,0 +1,12 @@
+diff --git a/tests/fixtures/optimizer/simplify.sql b/tests/fixtures/optimizer/simplify.sql
+--- a/tests/fixtures/optimizer/simplify.sql
++++ b/tests/fixtures/optimizer/simplify.sql
+@@ -310,7 +310,7 @@
+ B AND x IS NULL;
+ 
+ x IS NULL OR (NOT (x IS NULL) AND B);
+-B OR x IS NULL;
++B OR x IS
+ 
+ x NOT LIKE 'a%' OR (y IN (1, 2) AND x LIKE 'a%');
+ (x LIKE 'a%' AND y IN (1, 2)) OR x NOT LIKE 'a%';

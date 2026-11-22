@@ -1,0 +1,12 @@
+diff --git a/tests/dialects/test_dremio.py b/tests/dialects/test_dremio.py
+--- a/tests/dialects/test_dremio.py
++++ b/tests/dialects/test_dremio.py
+@@ -178,7 +178,7 @@
+         to_char = self.validate_identity("TO_CHAR(5555)").assert_is(exp.ToChar)
+         assert not to_char.args.get("is_numeric")
+ 
+-        to_char = self.validate_identity("TO_CHAR(3.14, columnname)").assert_is(exp.ToChar)
++        to_char = self.validate_identity("TO_CHAR(3.14, colmnname)").assert_is(exp.ToChar)
+         assert not to_char.args.get("is_numeric")
+ 
+         to_char = self.validate_identity("TO_CHAR(123, 'abcd')").assert_is(exp.ToChar)

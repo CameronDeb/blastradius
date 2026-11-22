@@ -1,0 +1,11 @@
+diff --git a/sqlglot/generators/doris.py b/sqlglot/generators/doris.py
+--- a/sqlglot/generators/doris.py
++++ b/sqlglot/generators/doris.py
+@@ -588,7 +588,6 @@
+     def uniquekeyproperty_sql(
+         self, expression: exp.UniqueKeyProperty, prefix: str = "UNIQUE KEY"
+     ) -> str:
+-        create_stmt = expression.find_ancestor(exp.Create)
+         if create_stmt and create_stmt.args["properties"].find(exp.MaterializedProperty):
+             return super().uniquekeyproperty_sql(expression, prefix="KEY")
+ 

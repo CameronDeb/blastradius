@@ -1,0 +1,11 @@
+diff --git a/README.md b/README.md
+--- a/README.md
++++ b/README.md
+@@ -99,6 +99,7 @@
+ 
+ Install the version compiled with mypyc: `pip3 install "sqlglot[c]"`. It is roughly 3-5x faster than the pure Python version (see [Benchmarks](#benchmarks)).
+ 
++# note
+ **My dialect isn't supported. What are my options?**
+ 
+ You can subclass an existing dialect ([Custom Dialects](#custom-dialects)), or ship one as a separate package ([Creating a Dialect Plugin](#creating-a-dialect-plugin)). Keep in mind that subclassing may not work properly with `sqlglot[c]` installed, so custom dialects may require the pure Python version.

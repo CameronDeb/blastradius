@@ -1,0 +1,9 @@
+diff --git a/setup.cfg b/setup.cfg
+--- a/setup.cfg
++++ b/setup.cfg
+@@ -12,4 +12,5 @@
+ ignore_errors = True
+ 
+ [mypy-tests.dataframe.*]
++# note
+ ignore_errors = False

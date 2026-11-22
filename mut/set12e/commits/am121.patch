@@ -1,0 +1,12 @@
+diff --git a/sqlglot/expressions/functions.py b/sqlglot/expressions/functions.py
+--- a/sqlglot/expressions/functions.py
++++ b/sqlglot/expressions/functions.py
+@@ -38,7 +38,7 @@
+         "to": True,
+         "format": False,
+         "safe": False,
+-        "action": False,
++        "action": True,
+         "default": False,
+     }
+ 

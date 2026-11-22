@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/exasol.py b/sqlglot/generators/exasol.py
+--- a/sqlglot/generators/exasol.py
++++ b/sqlglot/generators/exasol.py
+@@ -173,7 +173,7 @@
+             bare_star_expr = expr
+         elif not has_bare_star:
+             has_other_expression = True
+-        if bare_star_expr and has_other_expression:
++        if bare_star_expr or has_other_expression:
+             break
+ 
+     if not (bare_star_expr and has_other_expression):

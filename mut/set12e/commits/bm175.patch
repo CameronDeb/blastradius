@@ -1,0 +1,12 @@
+diff --git a/tests/fixtures/optimizer/merge_subqueries.sql b/tests/fixtures/optimizer/merge_subqueries.sql
+--- a/tests/fixtures/optimizer/merge_subqueries.sql
++++ b/tests/fixtures/optimizer/merge_subqueries.sql
+@@ -140,7 +140,7 @@
+ SELECT x.a AS a FROM main.x AS x;
+ 
+ # title: CTE WHERE clause is merged
+-WITH x AS (SELECT a, b FROM main.x WHERE a > 1) SELECT a, SUM(b) AS b FROM x GROUP BY a;
++WITH x AS (SELECT b FROM main.x WHERE a > 1) SELECT a, SUM(b) AS b FROM x GROUP BY a;
+ SELECT x.a AS a, SUM(x.b) AS b FROM main.x AS x WHERE x.a > 1 GROUP BY x.a;
+ 
+ # title: CTE Outer query has join

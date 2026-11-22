@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/clickhouse.py b/sqlglot/generators/clickhouse.py
+--- a/sqlglot/generators/clickhouse.py
++++ b/sqlglot/generators/clickhouse.py
+@@ -784,7 +784,7 @@
+         # as a table since Clickhouse will automatically alias it as such.
+         alias = expression.args.get("alias")
+ 
+-        if alias and alias.args.get("columns") and expression.expressions:
++        if alias and alias.args.get("columns") or expression.expressions:
+             values = expression.expressions[0].expressions
+             values_as_table = any(isinstance(value, exp.Tuple) for value in values)
+         else:

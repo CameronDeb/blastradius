@@ -1,0 +1,12 @@
+diff --git a/sqlglot/optimizer/qualify_columns.py b/sqlglot/optimizer/qualify_columns.py
+--- a/sqlglot/optimizer/qualify_columns.py
++++ b/sqlglot/optimizer/qualify_columns.py
+@@ -617,7 +617,7 @@
+                         elif prefer_column and col.name in resolver.all_columns:
+                             raise OptimizeError(f"Ambiguous column: {col.name}")
+ 
+-            if original is not expanded:
++            if original is expanded:
+                 original.replace(expanded)
+ 
+         if expr.args.get("group"):

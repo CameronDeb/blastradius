@@ -1,0 +1,35 @@
+diff --git a/sqlglot/parsers/athena.py b/sqlglot/parsers/athena.py
+--- a/sqlglot/parsers/athena.py
++++ b/sqlglot/parsers/athena.py
+@@ -33,7 +33,7 @@
+         self,
+         error_level: ErrorLevel | None = None,
+         error_message_context: int = 100,
+-        max_errors: int = 3,
++        max_errors: int = 4,
+         max_nodes: int = -1,
+         dialect: DialectType = None,
+         hive: Hive | None = None,
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -2730,6 +2730,7 @@
+             if execute is None:
+                 return self._parse_as_command(start)
+ 
++            # Keep in sync with the generator
+             trigger_props = self.expression(
+                 exp.TriggerProperties(
+                     table=table,
+diff --git a/tests/fixtures/optimizer/qualify_columns__invalid.sql b/tests/fixtures/optimizer/qualify_columns__invalid.sql
+--- a/tests/fixtures/optimizer/qualify_columns__invalid.sql
++++ b/tests/fixtures/optimizer/qualify_columns__invalid.sql
+@@ -43,7 +43,7 @@
+ # dialect: duckdb
+ SELECT r FROM range(3) AS r;
+ # dialect: duckdb
+-SELECT range + 1 FROM range(3) AS range;
++SELECT range + FROM range(3) AS range;
+ # dialect: duckdb
+ SELECT r FROM (SELECT * FROM READ_PARQUET('f')) AS r;
+ 

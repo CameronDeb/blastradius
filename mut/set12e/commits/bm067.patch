@@ -1,0 +1,12 @@
+diff --git a/tests/fixtures/optimizer/eliminate_joins.sql b/tests/fixtures/optimizer/eliminate_joins.sql
+--- a/tests/fixtures/optimizer/eliminate_joins.sql
++++ b/tests/fixtures/optimizer/eliminate_joins.sql
+@@ -465,7 +465,7 @@
+ FROM x
+ CROSS JOIN (
+   SELECT
+-    1 AS b
++    1 AS
+   OFFSET 1
+ ) AS y;
+ SELECT

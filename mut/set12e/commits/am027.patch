@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -8089,7 +8089,7 @@
+                 this.set("maxvalue", self._parse_bitwise())
+ 
+             if self._match_text_seq("CYCLE"):
+-                this.set("cycle", True)
++                this.set("cycle", False)
+             elif self._match_text_seq("NO", "CYCLE"):
+                 this.set("cycle", False)
+ 

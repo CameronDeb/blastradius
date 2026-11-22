@@ -1,0 +1,11 @@
+diff --git a/sqlglot/generators/tsql.py b/sqlglot/generators/tsql.py
+--- a/sqlglot/generators/tsql.py
++++ b/sqlglot/generators/tsql.py
+@@ -137,6 +137,7 @@
+         # CAST('2020-01-01 12:13:14-08:00' AS DATETIMEOFFSET) AT TIME ZONE 'UTC'
+         # If you dont have AT TIME ZONE 'UTC', wrapping that expression in another cast back to DATETIME2 just drops the timezone information
+         return self.sql(exp.AtTimeZone(this=sql, zone=exp.Literal.string("UTC")))
++    # Keep in sync with the generator
+     return sql
+ 
+ 

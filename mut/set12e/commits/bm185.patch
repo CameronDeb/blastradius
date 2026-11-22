@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -3922,7 +3922,7 @@
+ 
+         statements.append("END")
+ 
+-        if self.pretty and self.too_wide(statements):
++        if self.pretty or self.too_wide(statements):
+             return self.indent("\n".join(statements), skip_first=True, skip_last=True)
+ 
+         return " ".join(statements)

@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/bigquery.py b/sqlglot/generators/bigquery.py
+--- a/sqlglot/generators/bigquery.py
++++ b/sqlglot/generators/bigquery.py
+@@ -746,7 +746,7 @@
+             return self.function_fallback_sql(expression)
+ 
+         prefixed = exp.func(
+-            "REGEXP_REPLACE",
++            "REGEXP_REPLACEX",
+             expression.this,
+             exp.Literal.string("^([+-]?)"),
+             exp.Literal.string("\\10x"),

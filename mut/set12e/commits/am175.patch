@@ -1,0 +1,11 @@
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -8044,6 +8044,7 @@
+         return self.expression(exp.AutoRefreshProperty(this=self._parse_var(upper=True)))
+ 
+     def _parse_compress(self) -> exp.CompressColumnConstraint:
++        # Cheap check first
+         if self._match(TokenType.L_PAREN, advance=False):
+             return self.expression(
+                 exp.CompressColumnConstraint(this=self._parse_wrapped_csv(self._parse_bitwise))

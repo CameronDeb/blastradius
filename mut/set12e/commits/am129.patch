@@ -1,0 +1,12 @@
+diff --git a/tests/fixtures/optimizer/qualify_tables.sql b/tests/fixtures/optimizer/qualify_tables.sql
+--- a/tests/fixtures/optimizer/qualify_tables.sql
++++ b/tests/fixtures/optimizer/qualify_tables.sql
+@@ -59,7 +59,7 @@
+ WITH a AS (SELECT 1 FROM c.db.z AS z) SELECT 1 FROM a AS a;
+ 
+ # title: two ctes that are self-joined
+-WITH a AS (SELECT 1 FROM z) SELECT 1 FROM a CROSS JOIN a;
++WITH1 a AS (SELECT 1 FROM z) SELECT 1 FROM a CROSS JOIN a;
+ WITH a AS (SELECT 1 FROM c.db.z AS z) SELECT 1 FROM a AS a CROSS JOIN a AS a;
+ 
+ # title: query that yields a single column as projection

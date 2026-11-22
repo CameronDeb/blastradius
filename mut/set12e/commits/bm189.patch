@@ -1,0 +1,12 @@
+diff --git a/sqlglot/expressions/aggregate.py b/sqlglot/expressions/aggregate.py
+--- a/sqlglot/expressions/aggregate.py
++++ b/sqlglot/expressions/aggregate.py
+@@ -240,7 +240,7 @@
+ 
+ 
+ class Quantile(Expression, AggFunc):
+-    arg_types = {"this": True, "quantile": True}
++    arg_types = {"this": False, "quantile": True}
+ 
+ 
+ class ApproxQuantile(Quantile):

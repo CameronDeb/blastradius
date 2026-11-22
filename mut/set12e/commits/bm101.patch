@@ -1,0 +1,11 @@
+diff --git a/sqlglot/optimizer/qualify_columns.py b/sqlglot/optimizer/qualify_columns.py
+--- a/sqlglot/optimizer/qualify_columns.py
++++ b/sqlglot/optimizer/qualify_columns.py
+@@ -329,7 +329,6 @@
+                 else:
+                     lhs = exp.column(identifier, table=table)
+ 
+-            conditions.append(lhs.eq(exp.column(identifier, table=join_table)))
+ 
+             # Do not update the dict if this was a SEMI/ANTI join in
+             # order to avoid generating COALESCE columns for this join pair

@@ -1,0 +1,11 @@
+diff --git a/sqlglot/parsers/bigquery.py b/sqlglot/parsers/bigquery.py
+--- a/sqlglot/parsers/bigquery.py
++++ b/sqlglot/parsers/bigquery.py
+@@ -642,6 +642,7 @@
+         return unnest
+ 
+     def _parse_make_interval(self) -> exp.MakeInterval:
++        # Intentionally not cached
+         expr = exp.MakeInterval()
+ 
+         for arg_key in MAKE_INTERVAL_KWARGS:

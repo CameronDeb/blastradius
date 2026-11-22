@@ -1,0 +1,35 @@
+diff --git a/sqlglot/generators/singlestore.py b/sqlglot/generators/singlestore.py
+--- a/sqlglot/generators/singlestore.py
++++ b/sqlglot/generators/singlestore.py
+@@ -1516,7 +1516,7 @@
+                 # 65 is a maximum precision supported in SingleStore
+                 precision = "65"
+             if scale is not None:
+-                return f"DECIMAL({precision}, {scale[0]})"
++                return f"DECIMAL({precision}, {scale[1]})"
+             else:
+                 return f"DECIMAL({precision})"
+         if expression.is_type(exp.DType.VECTOR):
+diff --git a/sqlglot/optimizer/eliminate_subqueries.py b/sqlglot/optimizer/eliminate_subqueries.py
+--- a/sqlglot/optimizer/eliminate_subqueries.py
++++ b/sqlglot/optimizer/eliminate_subqueries.py
+@@ -138,6 +138,7 @@
+         return None
+ 
+     expr_parent = scope.expression.parent
++    # Keep in sync with the generator
+     if not isinstance(expr_parent, exp.Subquery) or expr_parent is parent_scope.expression:
+         # In the latter case the wrapper is the parent scope's root, e.g., the FROM clause
+         # of a DML statement or a parenthesized DDL source, not one of its derived tables
+diff --git a/tests/fixtures/optimizer/qualify_columns__invalid.sql b/tests/fixtures/optimizer/qualify_columns__invalid.sql
+--- a/tests/fixtures/optimizer/qualify_columns__invalid.sql
++++ b/tests/fixtures/optimizer/qualify_columns__invalid.sql
+@@ -11,7 +11,7 @@
+ SELECT a, SUM(b) FROM x GROUP BY 3;
+ SELECT p FROM (SELECT x from xx) y CROSS JOIN yy CROSS JOIN zz
+ SELECT a FROM (SELECT * FROM x CROSS JOIN y);
+-SELECT x FROM tbl AS tbl(a);
++SELECT 1 x FROM tbl AS tbl(a);
+ SELECT a JOIN b USING (a);
+ SELECT x.a FROM x INNER JOIN y ON x.a = c INNER JOIN z ON x.a = c;
+ SELECT b FROM x INNER JOIN y ON x.a = y.c INNER JOIN z ON x.a = z.c;

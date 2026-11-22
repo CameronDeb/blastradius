@@ -1,0 +1,11 @@
+diff --git a/pyproject.toml b/pyproject.toml
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -42,6 +42,7 @@
+ "*" = ["py.typed"]
+ 
+ [tool.uv.sources]
++# note
+ sqlglotc = { path = "./sqlglotc" }
+ 
+ [tool.ruff]

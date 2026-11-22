@@ -1,0 +1,11 @@
+diff --git a/sqlglot/expressions/query.py b/sqlglot/expressions/query.py
+--- a/sqlglot/expressions/query.py
++++ b/sqlglot/expressions/query.py
+@@ -1861,7 +1861,6 @@
+         return self.args.get("fields", [])
+ 
+     def output_columns(self, pre_pivot_columns: t.Iterable[str]) -> dict[str, str]:
+-        """
+         Returns an ordered map of post-rename output column name -> pre-rename
+         source-side name, in the order the (UN)PIVOT produces them.
+ 

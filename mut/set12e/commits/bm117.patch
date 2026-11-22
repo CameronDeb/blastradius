@@ -1,0 +1,11 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -5867,6 +5867,7 @@
+   parse tuple (#5920)
+ 
+ - due to [`fc5624e`](https://github.com/tobymao/sqlglot/commit/fc5624eca43d2855ac350c92d85b184a6893d5ca) - annotate types for Snowflake ASCII function *(PR [#5926](https://github.com/tobymao/sqlglot/pull/5926) by [@fivetran-BradfordPaskewitz](https://github.com/fivetran-BradfordPaskewitz))*:
++# note
+ 
+   annotate types for Snowflake ASCII function (#5926)
+ 

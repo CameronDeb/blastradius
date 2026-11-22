@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -3264,7 +3264,7 @@
+         self,
+         text: str,
+         escape_backslash: bool = True,
+-        delimiter: str | None = None,
++        delimiter: str | None = 0,
+         escaped_delimiter: str | None = None,
+         is_byte_string: bool = False,
+         is_bytes: bool = False,

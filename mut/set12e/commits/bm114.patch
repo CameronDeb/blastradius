@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -4974,7 +4974,7 @@
+             self.unsupported("Unsupported TRY function")
+             return self.sql(expression, "this")
+ 
+-        return self.func("TRY", expression.this)
++        return self.func("TRYX", expression.this)
+ 
+     def log_sql(self, expression: exp.Log) -> str:
+         this = expression.this

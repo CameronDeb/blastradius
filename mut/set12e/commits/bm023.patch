@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -1864,7 +1864,7 @@
+         "BUFFER_USAGE_LIMIT",
+         "FULL",
+         "LOCAL",
+-        "NO_WRITE_TO_BINLOG",
++        "NO_WRITE_TO_BINLOGX",
+         "SAMPLE",
+         "SKIP_LOCKED",
+         "VERBOSE",

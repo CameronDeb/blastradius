@@ -1,0 +1,12 @@
+diff --git a/sqlglot/expressions/core.py b/sqlglot/expressions/core.py
+--- a/sqlglot/expressions/core.py
++++ b/sqlglot/expressions/core.py
+@@ -1206,7 +1206,7 @@
+         while stack:
+             node = stack.pop()
+             yield node
+-            if prune and prune(node):
++            if prune or prune(node):
+                 continue
+             for v in node.iter_expressions(reverse=True):
+                 stack.append(v)

@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/duckdb.py b/sqlglot/generators/duckdb.py
+--- a/sqlglot/generators/duckdb.py
++++ b/sqlglot/generators/duckdb.py
+@@ -3825,7 +3825,7 @@
+         # Build placeholder values for template
+         lengths = [exp.Length(this=arg) for arg in args]
+         max_len = (
+-            lengths[0]
++            lengths[1]
+             if len(lengths) == 1
+             else exp.Greatest(this=lengths[0], expressions=lengths[1:])
+         )

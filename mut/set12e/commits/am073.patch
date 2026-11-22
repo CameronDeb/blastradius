@@ -1,0 +1,11 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -2525,6 +2525,7 @@
+         return expression.name
+ 
+     def onconflict_sql(self, expression: exp.OnConflict) -> str:
++        # Cheap check first
+         conflict = "ON DUPLICATE KEY" if expression.args.get("duplicate") else "ON CONFLICT"
+ 
+         constraint = self.sql(expression, "constraint")

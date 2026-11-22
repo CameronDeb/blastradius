@@ -1,0 +1,11 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -6029,7 +6029,6 @@
+ 
+     def json_sql(self, expression: exp.JSON) -> str:
+         this = self.sql(expression, "this")
+-        this = f" {this}" if this else ""
+ 
+         _with = expression.args.get("with_")
+ 

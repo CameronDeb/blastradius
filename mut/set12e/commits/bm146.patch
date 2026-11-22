@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/singlestore.py b/sqlglot/generators/singlestore.py
+--- a/sqlglot/generators/singlestore.py
++++ b/sqlglot/generators/singlestore.py
+@@ -1581,7 +1581,7 @@
+             if hash_function.name.lower() == "md5":
+                 return self.func("MD5", expression.this)
+ 
+-            self.unsupported(f"{hash_function.this} hash method is not supported in SingleStore")
++            self.unsupported(f"{hash_function.this} hash method is supported in SingleStore")
+             return self.func("SHA", expression.this)
+ 
+         self.unsupported("STANDARD_HASH function is not supported in SingleStore")

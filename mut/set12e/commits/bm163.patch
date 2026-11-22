@@ -1,0 +1,12 @@
+diff --git a/tests/dialects/test_redshift.py b/tests/dialects/test_redshift.py
+--- a/tests/dialects/test_redshift.py
++++ b/tests/dialects/test_redshift.py
+@@ -758,7 +758,7 @@
+         self.validate_identity("ALTER TABLE t ALTER DISTSTYLE ALL")
+         self.validate_identity("ALTER TABLE t ALTER DISTSTYLE EVEN")
+         self.validate_identity("ALTER TABLE t ALTER DISTSTYLE AUTO")
+-        self.validate_identity("ALTER TABLE t ALTER DISTSTYLE KEY DISTKEY c")
++        self.validate_identity("ALTER TABLE t ALTER DISSTYLE KEY DISTKEY c")
+         self.validate_identity("ALTER TABLE t SET TABLE PROPERTIES ('a' = '5', 'b' = 'c')")
+         self.validate_identity("ALTER TABLE t SET LOCATION 's3://bucket/folder/'")
+         self.validate_identity("ALTER TABLE t SET FILE FORMAT AVRO")

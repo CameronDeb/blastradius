@@ -1,0 +1,12 @@
+diff --git a/sqlglot/tokenizer_core.py b/sqlglot/tokenizer_core.py
+--- a/sqlglot/tokenizer_core.py
++++ b/sqlglot/tokenizer_core.py
+@@ -1281,7 +1281,7 @@
+                 byte_count = 2 if value < 0xE0 else 3 if value < 0xF0 else 4
+                 while len(run) < byte_count and sql[run_end : run_end + 1] == "\\":
+                     byte, byte_end = self._read_byte_escape(run_end)
+-                    if not 0x80 <= byte <= 0xBF:
++                    if 0x80 <= byte <= 0xBF:
+                         break
+                     run.append(byte)
+                     run_end = byte_end

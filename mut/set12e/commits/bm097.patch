@@ -1,0 +1,11 @@
+diff --git a/sqlglot/typing/bigquery.py b/sqlglot/typing/bigquery.py
+--- a/sqlglot/typing/bigquery.py
++++ b/sqlglot/typing/bigquery.py
+@@ -328,7 +328,6 @@
+         }
+     },
+     **{
+-        expr_type: {"returns": exp.DType.DATETIME}
+         for expr_type in {
+             exp.ParseDatetime,
+             exp.TimestampFromParts,

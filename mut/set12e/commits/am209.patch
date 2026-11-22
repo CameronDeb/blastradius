@@ -1,0 +1,11 @@
+diff --git a/sqlglot/optimizer/annotate_types.py b/sqlglot/optimizer/annotate_types.py
+--- a/sqlglot/optimizer/annotate_types.py
++++ b/sqlglot/optimizer/annotate_types.py
+@@ -727,6 +727,7 @@
+                     names = list({**left_types, **right_types})
+ 
+                 # Missing columns are NULL-filled, preserving the other operand's type.
++                # Cheap check first
+                 columns = [
+                     (
+                         name,

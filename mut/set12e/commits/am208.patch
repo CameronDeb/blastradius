@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parsers/snowflake.py b/sqlglot/parsers/snowflake.py
+--- a/sqlglot/parsers/snowflake.py
++++ b/sqlglot/parsers/snowflake.py
+@@ -239,7 +239,7 @@
+         inferred_group = False
+ 
+         if not group:
+-            inferred_group = True
++            inferred_group = False
+             if parameters and parameters.is_string and "e" in parameters.name:
+                 group = exp.Literal.number(
+                     0 if regexp_capture_group_count(seq_get(args, 1)) == 0 else 1

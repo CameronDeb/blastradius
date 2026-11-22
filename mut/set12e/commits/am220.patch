@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -5962,7 +5962,7 @@
+                 (not desc and self.dialect.NULL_ORDERING == "nulls_are_small")
+                 or (desc and self.dialect.NULL_ORDERING != "nulls_are_small")
+             )
+-            and self.dialect.NULL_ORDERING != "nulls_are_last"
++            or self.dialect.NULL_ORDERING != "nulls_are_last"
+         ):
+             nulls_first = True
+ 

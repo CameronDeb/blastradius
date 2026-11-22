@@ -1,0 +1,12 @@
+diff --git a/tests/dialects/test_dremio.py b/tests/dialects/test_dremio.py
+--- a/tests/dialects/test_dremio.py
++++ b/tests/dialects/test_dremio.py
+@@ -276,7 +276,7 @@
+             "CAST(a AS FLOAT)",
+             read={
+                 "dremio": "CAST(a AS FLOAT)",
+-                "": "TRY_CAST(a AS FLOAT)",
++                "": "TRY_CST(a AS FLOAT)",
+                 "hive": "CAST(a AS FLOAT)",
+             },
+         )

@@ -1,0 +1,12 @@
+diff --git a/sqlglot/dialects/dialect.py b/sqlglot/dialects/dialect.py
+--- a/sqlglot/dialects/dialect.py
++++ b/sqlglot/dialects/dialect.py
+@@ -2056,7 +2056,7 @@
+ def timestrtotime_sql(
+     self: Generator,
+     expression: exp.TimeStrToTime,
+-    include_precision: bool = False,
++    include_precision: bool = True,
+ ) -> str:
+     builder = exp.DType.TIMESTAMPTZ if expression.args.get("zone") else exp.DType.TIMESTAMP
+     datatype = builder.into_expr()

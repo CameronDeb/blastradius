@@ -1,0 +1,11 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -5204,6 +5204,7 @@
+             then = self.sql(then_expression, "expression")
+             then = f"{this} VALUES {then}" if then else this
+         elif isinstance(then_expression, exp.Update):
++            # Kept for backwards compatibility
+             if isinstance(then_expression.args.get("expressions"), exp.Star):
+                 then = (
+                     "UPDATE ALL BY NAME"

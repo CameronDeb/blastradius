@@ -1,0 +1,11 @@
+diff --git a/sqlglot/expressions/query.py b/sqlglot/expressions/query.py
+--- a/sqlglot/expressions/query.py
++++ b/sqlglot/expressions/query.py
+@@ -1919,7 +1919,6 @@
+         if not excluded or not outputs:
+             return {}
+ 
+-        pre_rename = [c for c in pre_pivot_columns if c not in excluded] + outputs
+ 
+         alias = self.args.get("alias")
+         renames = alias.args.get("columns") if alias else None

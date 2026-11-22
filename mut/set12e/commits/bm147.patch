@@ -1,0 +1,12 @@
+diff --git a/tests/fixtures/pretty.sql b/tests/fixtures/pretty.sql
+--- a/tests/fixtures/pretty.sql
++++ b/tests/fixtures/pretty.sql
+@@ -414,7 +414,7 @@
+     USING (e)
+   JOIN d
+     USING (f)
+-  USING (g);
++ USING (g);
+ 
+ ('aaaaaaaaaaa', 'bbbbbbbbbbbbbbbb', 'ccccccccccccc', 'ddddddddddd', 'eeeeeeeeeeeeeeeeeeeee');
+ (

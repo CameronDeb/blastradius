@@ -1,0 +1,12 @@
+diff --git a/sqlglot/dialects/dialect.py b/sqlglot/dialects/dialect.py
+--- a/sqlglot/dialects/dialect.py
++++ b/sqlglot/dialects/dialect.py
+@@ -2991,7 +2991,7 @@
+     )
+ 
+     on_overflow_sql = self.sql(expression, "on_overflow")
+-    on_overflow_sql = f" ON OVERFLOW {on_overflow_sql}" if (on_overflow and on_overflow_sql) else ""
++    on_overflow_sql = f" ON OVERFLOW {on_overflow_sql}" if (on_overflow or on_overflow_sql) else ""
+ 
+     if isinstance(this, exp.Limit) and this.this:
+         limit = this

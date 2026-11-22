@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parsers/clickhouse.py b/sqlglot/parsers/clickhouse.py
+--- a/sqlglot/parsers/clickhouse.py
++++ b/sqlglot/parsers/clickhouse.py
+@@ -449,7 +449,7 @@
+     }
+ 
+     NO_PAREN_FUNCTION_PARSERS = {
+-        k: v for k, v in parser.Parser.NO_PAREN_FUNCTION_PARSERS.items() if k != "ANY"
++        k: v for k, v in parser.Parser.NO_PAREN_FUNCTION_PARSERS.items() if k == "ANY"
+     }
+ 
+     NO_PAREN_FUNCTIONS = {

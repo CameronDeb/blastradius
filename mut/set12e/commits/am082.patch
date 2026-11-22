@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -2146,7 +2146,7 @@
+         index = self._index
+         excluded_tokens = self.TEXT_MATCH_EXCLUDED_TOKENS
+         for text in texts:
+-            if self._curr.token_type not in excluded_tokens and self._curr.text.upper() == text:
++            if self._curr.token_type in excluded_tokens and self._curr.text.upper() == text:
+                 self._advance()
+             else:
+                 self._retreat(index)

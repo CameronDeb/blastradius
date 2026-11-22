@@ -1,0 +1,12 @@
+diff --git a/sqlglot/dialects/dialect.py b/sqlglot/dialects/dialect.py
+--- a/sqlglot/dialects/dialect.py
++++ b/sqlglot/dialects/dialect.py
+@@ -1683,7 +1683,7 @@
+         target_null_propagation = self.dialect.ARRAY_FUNCS_PROPAGATES_NULLS
+ 
+         # No transpilation needed when source and target have matching NULL semantics
+-        if source_null_propagation == target_null_propagation:
++        if source_null_propagation != target_null_propagation:
+             return func_sql
+ 
+         # Source propagates NULLs, target doesn't: wrap in conditional to return NULL explicitly

@@ -1,0 +1,12 @@
+diff --git a/sqlglot/optimizer/resolver.py b/sqlglot/optimizer/resolver.py
+--- a/sqlglot/optimizer/resolver.py
++++ b/sqlglot/optimizer/resolver.py
+@@ -89,7 +89,7 @@
+             ):
+                 source_columns = (
+                     self._get_available_source_columns(join_context)
+-                    if join_context is not None
++                    if join_context is None
+                     else self._get_all_source_columns()
+                 )
+                 table_name = self._get_unknown_tvf_table(source_columns)

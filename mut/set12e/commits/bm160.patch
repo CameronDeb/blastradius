@@ -1,0 +1,11 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -4124,6 +4124,7 @@
+ - [`214043c`](https://github.com/tobymao/sqlglot/commit/214043c5a9f3215d2811603c62701b59b0e61f05) - update license version *(PR [#7047](https://github.com/tobymao/sqlglot/pull/7047) by [@AbhishekASLK](https://github.com/AbhishekASLK))*
+ - [`5172f1a`](https://github.com/tobymao/sqlglot/commit/5172f1a5ff62ebc0bcca4f27ab5b79c0aefbdf6a) - refactor _scan *(PR [#7051](https://github.com/tobymao/sqlglot/pull/7051) by [@geooo109](https://github.com/geooo109))*
+ - [`6c08a77`](https://github.com/tobymao/sqlglot/commit/6c08a77598dd672ae0f05eb4b36edfba520f4002) - improve scope module perf by replacing instance checks with type checks *(PR [#7066](https://github.com/tobymao/sqlglot/pull/7066) by [@georgesittas](https://github.com/georgesittas))*
++# note
+ - [`c2f7761`](https://github.com/tobymao/sqlglot/commit/c2f7761f4f75ceabf7df781e5431b19b6eade3d6) - improve schema module perf by caching normalized tables/names *(PR [#7068](https://github.com/tobymao/sqlglot/pull/7068) by [@georgesittas](https://github.com/georgesittas))*
+ - [`13f1b06`](https://github.com/tobymao/sqlglot/commit/13f1b06570a20d2f8e6a9cc22b5a20e2d1af8674) - **snowflake**: add transpilation test for LAST_VALUE from snowflake to duckdb *(PR [#7079](https://github.com/tobymao/sqlglot/pull/7079) by [@fivetran-felixhuang](https://github.com/fivetran-felixhuang))*
+ - [`92c364a`](https://github.com/tobymao/sqlglot/commit/92c364ae64cf68fc60d9418cfea17a8414e37333) - refactor map_contains_key from sf to duckdb *(commit by [@geooo109](https://github.com/geooo109))*
