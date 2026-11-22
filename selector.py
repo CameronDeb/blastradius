@@ -29,7 +29,7 @@ MAX_WORKERS = 8
 TIER_B = float(os.environ.get("BR_TIER_B", "0.3"))
 TIER_C = float(os.environ.get("BR_TIER_C", "3.0"))
 # CPU seconds a test costs us relative to its recorded seconds
-CPU_FACTOR = float(os.environ.get("BR_CPU_FACTOR", "1.5"))
+CPU_FACTOR = float(os.environ.get("BR_CPU_FACTOR", "2.2"))
 
 
 def tier(sec):
