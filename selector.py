@@ -284,7 +284,7 @@ _OLD_TREES = {}
 _STR_SPANS = {}
 
 
-def in_multiline_string(rel, tree, lines):
+def in_multiline_string(rel, tree, lines, inserts=()):
     spans = _STR_SPANS.get(rel)
     if spans is None:
         spans = _STR_SPANS[rel] = [
@@ -292,7 +292,9 @@ def in_multiline_string(rel, tree, lines):
             for n in ast.walk(tree)
             if isinstance(n, (ast.Constant, ast.JoinedStr)) and getattr(n, "end_lineno", n.lineno) > n.lineno
         ]
-    return any(a < ln <= b or a <= ln < b for a, b in spans for ln in lines)
+    # an inserted line lands before old line p: inside a string only if the
+    # string started earlier and runs through p
+    return any(a <= ln <= b for a, b in spans for ln in lines) or any(a < p <= b for a, b in spans for p in inserts)
 
 
 def _span(n):
@@ -465,7 +467,7 @@ class Analysis:
         quick = texts and all(not t.strip() or t.lstrip().startswith("#") for t in texts) and not any(
             re.search(r"coding[:=]", t) for t in texts
         )
-        if not (quick and not in_multiline_string(rel, old_tree, region)):
+        if not (quick and not in_multiline_string(rel, old_tree, set(touched), inserts)):
             # The child compiles the new source anyway; only parse here when
             # the edit could be a no-op we can prove cheaply.
             quick = False
