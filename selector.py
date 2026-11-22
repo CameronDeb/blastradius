@@ -1634,6 +1634,8 @@ def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
             if o is not None:
                 cand |= set(mp.sets[o])
                 data_heavy = True
+                # class setup may have read the old file before the fork
+                reset |= {TEST_CLASS[n] for n in mp.sets[o] if n in TEST_CLASS}
                 why.append(f"data:{len(mp.sets[o])}")
                 if rel.startswith("tests/fixtures/") and rel.endswith(".sql") and old_text is not None and new_text is not None:
                     fixtures[rel] = fixture_changes(old_text, new_text)
