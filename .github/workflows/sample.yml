@@ -37,6 +37,12 @@ jobs:
             python3 kit/score.py mut/$set mut/$set/answers.json res/mut_clean.jsonl > res/mut_score.txt 2>&1 || true
             cat res/mut_score.txt res/mut_cpu.txt
           fi
+      - name: measure per-test cpu
+        run: |
+          if [ -f tools/MEASURE ]; then
+            docker run --rm --platform linux/amd64 --network none --cpus 2 --memory 4096m --pids-limit 256               --read-only --tmpfs /tmp:rw,size=64m,mode=1777 --user 65534:65534 --env HOME=/tmp               -v "$PWD/kit/sample/commits:/data/commits:ro" -v "$PWD/kit/sample/tests.json:/data/tests.json:ro"               -v "$PWD/tools/measure_cpu.py:/app/measure_cpu.py:ro"               br python /app/measure_cpu.py > res/cpu_measure.json 2> res/cpu_measure.log || true
+            tail -5 res/cpu_measure.log
+          fi
       - name: publish results
         if: always()
         run: |

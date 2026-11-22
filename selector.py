@@ -25,6 +25,8 @@ MAX_WORKERS = 8
 # test failed or there was nothing smaller to run.
 TIER_B = float(os.environ.get("BR_TIER_B", "0.3"))
 TIER_C = float(os.environ.get("BR_TIER_C", "3.0"))
+# CPU seconds a test costs us relative to its recorded seconds
+CPU_FACTOR = float(os.environ.get("BR_CPU_FACTOR", "1.2"))
 
 
 def tier(sec):
@@ -614,27 +616,34 @@ def code_diff(old_code, new_code):
     swaps = {}
 
     def walk(a, b, top):
+        """Returns (ok, changed). A function whose nested code (lambda,
+        genexpr, inner def) changed is swapped too: nested code objects are
+        only reachable through the enclosing function's constants."""
         ca = [x for x in a.co_consts if isinstance(x, types.CodeType)]
         cb = [x for x in b.co_consts if isinstance(x, types.CodeType)]
         if len(ca) != len(cb):
-            return False
+            return False, True
         same_here = code_sig(a) == code_sig(b)
-        is_func = not top and not (a.co_flags & 0) and a.co_name != "<module>"
-        ok = True
+        child_changed = False
         for x, y in zip(ca, cb):
             if x.co_name != y.co_name:
-                return False
-            if not walk(x, y, False):
-                ok = False
+                return False, True
+            ok, ch = walk(x, y, False)
+            if not ok:
+                return False, True
+            child_changed = child_changed or ch
+        container = top or _is_class_body(a)
         if not same_here:
-            if top or _is_class_body(a):
-                return False
-            if a.co_freevars != b.co_freevars:
-                return False
+            if container or a.co_freevars != b.co_freevars:
+                return False, True
             swaps[code_key(a)] = b
-        return ok
+        elif child_changed and not container:
+            if a.co_freevars != b.co_freevars:
+                return False, True
+            swaps[code_key(a)] = b
+        return True, (not same_here) or child_changed
 
-    ok = walk(old_code, new_code, True)
+    ok, _ = walk(old_code, new_code, True)
     return ok, swaps
 
 
@@ -818,33 +827,44 @@ def child_run(job, out_fd):
         signal.signal(signal.SIGALRM, on_alarm)
 
     current_cls = None
-    a_failed = False
-    for num, modn, clsn, meth, secs, tr in tests:
-        if tr == 1 and a_failed:
-            w.write(f"{num} S\n")
-            continue
+    fixed = {int(n): int(v) for n, v in job.get("fixed", [])}
+    heavy = {int(n): int(v) for n, v in job.get("heavy", [])}
+    tms = dict(fixed)
+    tms.update(heavy)
+    for t in tests:
+        tms[t[0]] = round(t[4] * 1000)
+    fails = set()
+
+    def should_stop(i):
+        # after a failure: report what is left instead of running it, when cheaper
+        rem = [t[0] for t in tests[i + 1 :]]
+        if not rem:
+            return False
+        base = fails | set(fixed) | set(heavy)
+        stop = pack(base | set(rem), tms)[1]
+        cont = CPU_FACTOR * 1000 * sum(t[4] for t in tests[i + 1 :]) + pack(base, tms)[1]
+        return stop <= cont
+
+    i = -1
+    while i + 1 < len(tests):
+        i += 1
+        num, modn, clsn, meth, secs, tr = tests[i]
+        ok = False
         try:
             if modn not in mods:
                 m = importlib.import_module(modn)
-                for attr in ("ProcessPoolExecutor",):
-                    if hasattr(m, attr):
-                        setattr(m, attr, InlineExecutor)
+                if hasattr(m, "ProcessPoolExecutor"):
+                    m.ProcessPoolExecutor = InlineExecutor
                 mods[modn] = m
             m = mods[modn]
         except BaseException as e:
             w.write(f"{num} 0 import {type(e).__name__}\n")
-            a_failed = a_failed or tr == 0
-            continue
-        cls = getattr(m, clsn, None)
-        if cls is None:
+            m = None
+        cls = getattr(m, clsn, None) if m is not None else None
+        if m is not None and cls is None:
             w.write(f"{num} 0 nocls\n")
-            a_failed = a_failed or tr == 0
-            continue
-        key = f"{modn}::{clsn}"
-        if key != current_cls:
-            if current_cls is not None:
-                pass
-            current_cls = key
+        if cls is not None:
+            key = f"{modn}::{clsn}"
             if key not in classes_done:
                 classes_done.add(key)
                 need = (not fast) or key in reset or not getattr(cls, "_br_ready", False)
@@ -854,34 +874,37 @@ def child_run(job, out_fd):
                             signal.setitimer(signal.ITIMER_REAL, 60)
                         cls.setUpClass()
                         cls._br_setup_failed = False
-                    except BaseException as e:
+                    except BaseException:
                         cls._br_setup_failed = True
                     finally:
                         if use_alarm:
                             signal.setitimer(signal.ITIMER_REAL, 0)
-        if getattr(cls, "_br_setup_failed", False):
-            w.write(f"{num} 0 setup\n")
-            a_failed = a_failed or tr == 0
-            continue
-        result = unittest.TestResult()
-        result.failfast = True  # stop at the first failing subtest
-        t0 = time.perf_counter()
-        try:
-            if use_alarm:
-                signal.setitimer(signal.ITIMER_REAL, max(2.0, secs * 4 + 1.5))
-            cls(meth).run(result)
-        except Timeout:
-            result.errors.append((None, "timeout"))
-        finally:
-            if use_alarm:
-                signal.setitimer(signal.ITIMER_REAL, 0)
-        ok = not (result.failures or result.errors or getattr(result, "unexpectedSuccesses", None))
-        if not ok and tr == 0:
-            a_failed = True
-        w.write(f"{num} {1 if ok else 0} {time.perf_counter() - t0:.3f}\n")
-        if not ok and os.environ.get("BR_DEBUG"):
-            err = str((result.failures or result.errors or [(0, "?")])[0][1])[-700:]
-            w.write("#   " + err.replace("\n", "\n#   ") + "\n")
+            if getattr(cls, "_br_setup_failed", False):
+                w.write(f"{num} 0 setup\n")
+            else:
+                result = unittest.TestResult()
+                result.failfast = True  # stop at the first failing subtest
+                t0 = time.perf_counter()
+                try:
+                    if use_alarm:
+                        signal.setitimer(signal.ITIMER_REAL, max(2.0, secs * 4 + 1.5))
+                    cls(meth).run(result)
+                except Timeout:
+                    result.errors.append((None, "timeout"))
+                finally:
+                    if use_alarm:
+                        signal.setitimer(signal.ITIMER_REAL, 0)
+                ok = not (result.failures or result.errors or getattr(result, "unexpectedSuccesses", None))
+                w.write(f"{num} {1 if ok else 0} {time.perf_counter() - t0:.3f}\n")
+                if not ok and os.environ.get("BR_DEBUG"):
+                    err = str((result.failures or result.errors or [(0, "?")])[0][1])[-700:]
+                    w.write("#   " + err.replace("\n", "\n#   ") + "\n")
+        if not ok:
+            fails.add(num)
+            if should_stop(i):
+                for t in tests[i + 1 :]:
+                    w.write(f"{t[0]} S\n")
+                break
     w.close()
     os._exit(0)
 
@@ -1064,7 +1087,9 @@ def run_all(plans, meta, secs):
             "changed": p["changed"],
             "fast": p["fast"] and use_fork,
             "tmpdir": tdir,
-            "tests": [[n, *meta[n], secs[n], tier(secs[n])] for n in sorted(tl, key=lambda n: (tier(secs[n]), n))],
+            "tests": [[n, *meta[n], secs[n], tier(secs[n])] for n in sorted(tl, key=lambda n: (tier(secs[n]), secs[n], n))],
+            "fixed": [[n, round(secs[n] * 1000)] for n in sorted(p["out"])],
+            "heavy": [[n, round(secs[n] * 1000)] for n in sorted(p["heavy"])],
             "reset_classes": sorted(p["reset"]),
             "purge": p.get("purge") if use_fork else None,
             "reimport": p.get("reimport", []),
