@@ -1258,18 +1258,32 @@ def child_run(job, out_fd):
             hr.clear()
 
     def should_stop(i):
-        # after a failure: report what is left instead of running it, when cheaper
+        # report what is left instead of running it, when that is cheaper; with
+        # nothing failed yet, stopping also means reporting the heavy tests
         rem = [t[0] for t in tests[i + 1 :]]
         if not rem:
             return False
-        base = fails | set(fixed) | set(heavy)
-        stop = pack(base | set(rem), tms)[1]
-        cont = CPU_FACTOR * 1000 * sum(t[6] for t in tests[i + 1 :]) + pack(base, tms)[1]
+        hv = set(heavy) | {t[0] for t in hr}
+        stop = pack(fails | set(fixed) | hv | set(rem), tms)[1]
+        kept = fails | set(fixed) | (set(heavy) if fails else set())
+        cont = CPU_FACTOR * 1000 * sum(t[6] for t in tests[i + 1 :]) + pack(kept, tms)[1]
         return stop <= cont
 
+    def stop_now(i):
+        for t in tests[i + 1 :] + hr:
+            w.write(f"{t[0]} S\n")
+        if not fails:
+            w.write("! stopped\n")
+
     i = -1
+    if should_stop(-1):
+        stop_now(-1)
+        i = len(tests)
     while i + 1 < len(tests):
         i += 1
+        if i and i % 8 == 0 and not fails and should_stop(i - 1):
+            stop_now(i - 1)
+            break
         num, modn, clsn, meth, secs, tr, _c = tests[i]
         ok = False
         if num == job.get("proxy"):
@@ -1424,7 +1438,9 @@ def main():
                         fails.add(n)
                     if r is False:
                         any_fail = True
-                if any_fail:
+                if res.get("stopped"):
+                    fails |= p["heavy"]
+                elif any_fail:
                     for n in p["heavy"]:
                         if n not in p.get("heavy_run", ()) or res["ok"].get(n) is not True:
                             fails.add(n)
@@ -1663,13 +1679,16 @@ def run_all(plans, meta, secs, cost):
             data = h["buf"]
         ok = {}
         broken = []
+        stopped = False
         for line in data.decode(errors="replace").splitlines():
-            if line.startswith("! broken"):
+            if line.startswith("! stopped"):
+                stopped = True
+            elif line.startswith("! broken"):
                 broken.append(line.split()[2])
             elif line and line[0].isdigit():
                 parts = line.split()
                 ok[int(parts[0])] = {"1": True, "0": False, "S": None}[parts[1]]
-        results[cid] = {"ok": ok, "broken": broken or None, "cpu": h.get("cpu", 0.0)}
+        results[cid] = {"ok": ok, "broken": broken or None, "cpu": h.get("cpu", 0.0), "stopped": stopped}
 
     if not use_fork:
         # Windows/local: simple sequential pool of subprocesses
