@@ -14,5 +14,6 @@ t=tarfile.open(fileobj=io.BytesIO(urllib.request.urlopen(u).read())); t.extracta
 COPY selector.py map.json.gz /app/
 RUN python -m compileall -q /app && chmod -R a+rX /app
 
-ENV PYTHONDONTWRITEBYTECODE=1 SKIP_INTEGRATION=0
+ENV PYTHONDONTWRITEBYTECODE=1 SKIP_INTEGRATION=0 \
+    OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_MAX_THREADS=1 NUMEXPR_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1
 CMD ["python", "/app/selector.py"]

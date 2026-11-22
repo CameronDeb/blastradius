@@ -15,6 +15,9 @@ import sys
 import time
 import types
 
+for _v in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS", "NUMEXPR_NUM_THREADS", "NUMEXPR_MAX_THREADS"):
+    os.environ.setdefault(_v, "1")
+
 DATA = os.environ.get("BR_DATA", "/data")
 SRC = os.environ.get("BR_SRC", "/opt/sqlglot")
 MAP = os.environ.get("BR_MAP", os.path.join(os.path.dirname(os.path.abspath(__file__)), "map.json.gz"))
@@ -26,7 +29,7 @@ MAX_WORKERS = 8
 TIER_B = float(os.environ.get("BR_TIER_B", "0.3"))
 TIER_C = float(os.environ.get("BR_TIER_C", "3.0"))
 # CPU seconds a test costs us relative to its recorded seconds
-CPU_FACTOR = float(os.environ.get("BR_CPU_FACTOR", "1.1"))
+CPU_FACTOR = float(os.environ.get("BR_CPU_FACTOR", "1.5"))
 
 
 def tier(sec):
@@ -939,9 +942,9 @@ def prepare_test_module(m):
 
         m.load_sql_fixture_pairs = pairs
         m._br_pairs = True
-    if m.__name__ == "tests.test_executor" and not getattr(m, "_br_duck", None):
-        m.duckdb = LazyDuck(m.duckdb)
-        m._br_duck = True
+    real = getattr(m, "duckdb", None)
+    if real is not None and not isinstance(real, LazyDuck) and getattr(real, "__name__", "") == "duckdb":
+        m.duckdb = LazyDuck(real)
 
 
 def apply_items(m, cls, meth, keys):
@@ -991,6 +994,11 @@ class LazyDuck:
         return getattr(self._real, name)
 
     def connect(self, *a, **k):
+        # one thread: the host may expose many cores and the run has a
+        # process limit; results do not depend on it
+        cfg = dict(k.pop("config", None) or {})
+        cfg.setdefault("threads", 1)
+        k["config"] = cfg
         return LazyConn(self._real, a, k)
 
 
@@ -1017,6 +1025,14 @@ class LazyConn:
     def close(self):
         if self._conn is not None:
             self._conn.close()
+
+    def __enter__(self):
+        self._get()
+        return self
+
+    def __exit__(self, *exc):
+        self.close()
+        return False
 
     def __getattr__(self, name):
         return getattr(self._get(), name)
