@@ -150,6 +150,17 @@ class Map:
         self.static_classes = m["static_classes"]
         self.static_modules = m["static_modules"]
         self.modfiles = m["modfiles"]
+        self.rdeps = m.get("rdeps", {})
+
+    def dependents(self, mods):
+        seen = set(mods)
+        stack = list(mods)
+        while stack:
+            for d in self.rdeps.get(stack.pop(), ()):
+                if d not in seen:
+                    seen.add(d)
+                    stack.append(d)
+        return seen
 
     def line_tests(self, f, lns):
         by = self.lines.get(f)
@@ -575,7 +586,8 @@ def child_run(job, out_fd):
         want = {}
         for rel, txt in py_changed.items():
             absp = os.path.join(SRC, rel)
-            old = open(absp, encoding="utf-8").read()
+            with _open(absp, encoding="utf-8") as f:
+                old = f.read()
             ok, swaps = code_diff(compile(old, absp, "exec"), compile(txt, absp, "exec"))
             for k, v in swaps.items():
                 want[(os.path.normcase(absp), k)] = v
@@ -590,10 +602,12 @@ def child_run(job, out_fd):
                     n += 1
         w.write(f"# swapped {n}\n")
     else:
-        # fresh import of sqlglot + tests with the patched sources
-        for name in list(sys.modules):
-            if name == "sqlglot" or name.startswith("sqlglot.") or name == "tests" or name.startswith("tests."):
-                del sys.modules[name]
+        # re-import the changed modules and everything that imports them
+        purge = job.get("purge")
+        if purge is None:
+            purge = [n for n in sys.modules if n.split(".")[0] in ("sqlglot", "tests")]
+        for name in purge:
+            sys.modules.pop(name, None)
         overlay = {}
         for rel, txt in py_changed.items():
             overlay[modname_of(rel)] = (rel, txt)
@@ -633,6 +647,12 @@ def child_run(job, out_fd):
                     w.write(f"! broken {name} {type(e).__name__}\n")
                     w.close()
                     os._exit(0)
+        for name in sorted(purge):
+            if name.startswith("sqlglot") and not name.endswith("__main__"):
+                try:
+                    importlib.import_module(name)
+                except Exception:
+                    pass
 
     tests = job["tests"]  # list of [num, module, class, method, seconds]
     reset = set(job.get("reset_classes", ()))
@@ -766,8 +786,9 @@ def main():
                     fails |= p["heavy"]
         workers, cost = pack(fails, ms)
         print(json.dumps({"commit": cid, "workers": workers}), flush=True)
-        log(f"{cid}: out={len(p['out'])} run={len(p['run'])} fail={len(fails)} cost={cost / 1000:.3f} {p.get('why', '')}")
-    log(f"total wall {time.time() - t_start:.2f}s")
+        ccpu = (res or {}).get("cpu", 0.0)
+        log(f"{cid}: out={len(p['out'])} run={len(p['run'])} fail={len(fails)} cost={cost / 1000:.3f} cpu={ccpu:.2f} {'fast' if p.get('fast') else 'slow'} {p.get('why', '')}")
+    log(f"total wall {time.time() - t_start:.2f}s, parent cpu {time.process_time():.2f}s, children cpu {sum(r.get('cpu', 0) for r in results.values()):.2f}s")
 
 
 def module_importers(mod, mp, by_file, all_nums):
@@ -842,12 +863,15 @@ def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
             else:
                 why.append("unused-file")
     cand -= out
+    purge = None
+    if not fast:
+        purge = sorted(mp.dependents({modname_of(r) for r in changed if r.endswith(".py")}))
     run = {n for n in cand if tier(secs[n]) < 2}
     heavy = {n for n in cand if tier(secs[n]) == 2}
     if heavy and not run:
         out |= heavy
         heavy = set()
-    return {"out": out, "run": run, "heavy": heavy, "changed": changed, "fast": fast, "reset": reset, "why": " ".join(why)}
+    return {"out": out, "run": run, "heavy": heavy, "purge": purge, "changed": changed, "fast": fast, "reset": reset, "why": " ".join(why)}
 
 
 def run_all(plans, meta, secs):
@@ -857,7 +881,12 @@ def run_all(plans, meta, secs):
     results = {}
     use_fork = hasattr(os, "fork") and os.environ.get("BR_NOFORK") != "1"
     if use_fork:
-        preload(meta)
+        need = set()
+        for _, p in jobs:
+            need |= {meta[n][0] for n in p["run"]}
+        c0 = time.process_time()
+        preload(need)
+        log(f"preload {time.process_time() - c0:.2f}s cpu, {len(need)} test modules")
     import tempfile
 
     base_tmp = tempfile.mkdtemp(prefix="br")
@@ -877,6 +906,7 @@ def run_all(plans, meta, secs):
             "tmpdir": tdir,
             "tests": [[n, *meta[n], secs[n], tier(secs[n])] for n in sorted(tl, key=lambda n: (tier(secs[n]), n))],
             "reset_classes": sorted(p["reset"]),
+            "purge": p.get("purge") if use_fork else None,
         }
         budget = 30 + sum(secs[n] * 4 + 2 for n in tl)
         if use_fork:
@@ -914,7 +944,7 @@ def run_all(plans, meta, secs):
             elif line and line[0].isdigit():
                 parts = line.split()
                 ok[int(parts[0])] = {"1": True, "0": False, "S": None}[parts[1]]
-        results[cid] = {"ok": ok, "broken": broken}
+        results[cid] = {"ok": ok, "broken": broken, "cpu": h.get("cpu", 0.0)}
 
     if not use_fork:
         # Windows/local: simple sequential pool of subprocesses
@@ -941,7 +971,8 @@ def run_all(plans, meta, secs):
                 h["buf"] += chunk
                 continue
             os.close(fd)
-            os.waitpid(h["pid"], 0)
+            _, _, ru = os.wait4(h["pid"], 0)
+            h["cpu"] = ru.ru_utime + ru.ru_stime
             del running[fd]
             finish(h)
         for fd, h in list(running.items()):
@@ -957,7 +988,7 @@ def run_all(plans, meta, secs):
     return results
 
 
-def preload(meta):
+def preload(test_mods):
     """Import sqlglot and the test modules once; children fork from here."""
     import gc
     import importlib
@@ -983,7 +1014,7 @@ def preload(meta):
             Dialect.get_or_raise(d.value)
         except Exception:
             pass
-    for modn in sorted({v[0] for v in meta.values()}):
+    for modn in sorted(test_mods):
         try:
             m = importlib.import_module(modn)
             if hasattr(m, "ProcessPoolExecutor"):

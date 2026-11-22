@@ -236,6 +236,51 @@ for path in sorted(glob.glob("sqlglot/**/*.py", recursive=True) + glob.glob("tes
         for n in ns:
             name_funcs[n].add(fid)
 
+
+# Static import graph (module level, TYPE_CHECKING blocks skipped): who imports whom.
+def import_deps(rel, m, known):
+    tree = ast.parse(open(rel, encoding="utf-8").read())
+    out = set()
+    pkg = m if rel.endswith("__init__.py") else m.rsplit(".", 1)[0]
+
+    def visit(nodes):
+        for n in nodes:
+            if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
+                continue
+            if isinstance(n, ast.If) and "TYPE_CHECKING" in ast.dump(n.test):
+                visit(n.orelse)
+                continue
+            if isinstance(n, ast.Import):
+                for a in n.names:
+                    out.add(a.name)
+            elif isinstance(n, ast.ImportFrom):
+                base = n.module or ""
+                if n.level:
+                    parts = pkg.split(".")
+                    parts = parts[: len(parts) - n.level + 1]
+                    base = ".".join(parts + ([n.module] if n.module else []))
+                out.add(base)
+                for a in n.names:
+                    out.add(base + "." + a.name)
+            visit(list(ast.iter_child_nodes(n)))
+
+    visit(tree.body)
+    return {d for d in out if d in known and d != m}
+
+
+known_mods = {}
+for path in glob.glob("sqlglot/**/*.py", recursive=True) + glob.glob("tests/**/*.py", recursive=True):
+    rel = path.replace(os.sep, "/")
+    mm = rel[:-3].replace("/", ".")
+    known_mods[mm[:-9] if mm.endswith(".__init__") else mm] = rel
+rdeps = defaultdict(set)
+for mm, rel in known_mods.items():
+    try:
+        for d in import_deps(rel, mm, known_mods):
+            rdeps[d].add(mm)
+    except SyntaxError:
+        pass
+
 out_map = {
     "lines": {f: {str(ln): sid(ts) for ln, ts in by.items() if ts} for f, by in lines.items()},
     "clines": {f: {str(ln): sorted(cs) for ln, cs in by.items()} for f, by in clines.items()},
@@ -248,6 +293,7 @@ out_map = {
     "import_names": sorted(import_names),
     "import_lines": import_lines,
     "modfiles": modfiles,
+    "rdeps": {k: sorted(v) for k, v in rdeps.items()},
     "sets": sets,
 }
 with gzip.open(out, "wt", encoding="utf-8", compresslevel=9) as f:
