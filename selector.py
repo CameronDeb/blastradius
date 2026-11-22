@@ -1235,6 +1235,13 @@ def child_run(job, out_fd):
                     except Exception:
                         pass
 
+    if job.get("tpc_refresh"):
+        ex = sys.modules.get("tests.test_executor")
+        if ex is not None and getattr(ex.TestExecutor, "_br_ready", False):
+            # reload the TPC queries from the patched fixtures
+            ex.TestExecutor.tpch_sqls = list(ex.load_sql_fixture_pairs("optimizer/tpc-h/tpc-h.sql"))
+            ex.TestExecutor.tpcds_sqls = list(ex.load_sql_fixture_pairs("optimizer/tpc-ds/tpc-ds.sql"))
+
     tests = job["tests"]  # list of [num, module, class, method, seconds]
     reset = set(job.get("reset_classes", ()))
     mods = {}
@@ -1565,6 +1572,7 @@ def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
     an.patches = []
     fixtures = {}
     same_files = set()
+    tpc_refresh = False
     data_heavy = False
     changed = {}
     cand = set()
@@ -1632,10 +1640,24 @@ def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
         else:
             o = mp.opens.get(rel)
             if o is not None:
-                cand |= set(mp.sets[o])
+                users = set(mp.sets[o])
+                fx = rel[len("tests/fixtures/") :] if rel.startswith("tests/fixtures/") else None
+                tpc = fx in TPC_FILES.values()
+                if tpc:
+                    # the executor class loads TPC queries for its TPC tests only
+                    users = {
+                        n for n in users
+                        if not TEST_CLASS.get(n, "").startswith("tests.test_executor::")
+                        or TPC_FILES.get(TEST_CLASS.get(("meth", n))) == fx
+                    }
+                    tpc_refresh = True
+                cand |= users
                 data_heavy = True
                 # class setup may have read the old file before the fork
-                reset |= {TEST_CLASS[n] for n in mp.sets[o] if n in TEST_CLASS}
+                reset |= {
+                    TEST_CLASS[n] for n in users
+                    if n in TEST_CLASS and not (tpc and TEST_CLASS[n].startswith("tests.test_executor::"))
+                }
                 why.append(f"data:{len(mp.sets[o])}")
                 if rel.startswith("tests/fixtures/") and rel.endswith(".sql") and old_text is not None and new_text is not None:
                     fixtures[rel] = fixture_changes(old_text, new_text)
@@ -1667,7 +1689,7 @@ def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
             heavy = set()
     if purge is not None:
         purge = sorted(set(purge) | an.reimport)
-    return {"out": out, "run": run, "heavy": heavy, "purge": purge, "reimport": sorted(an.reimport), "items": items, "est": est, "patches": list(an.patches), "changed": changed, "fast": fast, "reset": reset, "why": " ".join(why)}
+    return {"out": out, "run": run, "heavy": heavy, "purge": purge, "reimport": sorted(an.reimport), "items": items, "est": est, "patches": list(an.patches), "tpc_refresh": tpc_refresh, "changed": changed, "fast": fast, "reset": reset, "why": " ".join(why)}
 
 
 def run_all(plans, meta, secs, cost):
@@ -1722,6 +1744,7 @@ def run_all(plans, meta, secs, cost):
             "purge": p.get("purge") if use_fork else None,
             "reimport": p.get("reimport", []),
             "proxy": p.get("proxy"),
+            "tpc_refresh": p.get("tpc_refresh", False),
             "patches": p.get("patches", []) if p["fast"] and use_fork else [],
             "proxy_limit": proxy_limit,
         }
