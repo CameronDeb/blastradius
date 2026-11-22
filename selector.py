@@ -1121,6 +1121,11 @@ def child_run(job, out_fd):
                 break
             for k, v in swaps.items():
                 want[(os.path.normcase(absp), k)] = v
+        if fast and not want and not job.get("patches") and not job.get("reimport") and len(py_changed) == len(changed):
+            # compiles to the same code: nothing can behave differently
+            w.write("! same\n")
+            w.close()
+            os._exit(0)
     if fast:
         # swap code objects of changed functions in place
         n = 0
@@ -1425,7 +1430,9 @@ def main():
         fails = set(p["out"])
         res = results.get(cid)
         if p["run"]:
-            if res is None or res.get("broken") is not None:
+            if res is not None and res.get("same"):
+                pass
+            elif res is None or res.get("broken") is not None:
                 fails |= p["heavy"]
                 fails |= set(p["run"])
                 for bm in (res or {}).get("broken") or ():
@@ -1681,15 +1688,18 @@ def run_all(plans, meta, secs, cost):
         ok = {}
         broken = []
         stopped = False
+        same = False
         for line in data.decode(errors="replace").splitlines():
-            if line.startswith("! stopped"):
+            if line.startswith("! same"):
+                same = True
+            elif line.startswith("! stopped"):
                 stopped = True
             elif line.startswith("! broken"):
                 broken.append(line.split()[2])
             elif line and line[0].isdigit():
                 parts = line.split()
                 ok[int(parts[0])] = {"1": True, "0": False, "S": None}[parts[1]]
-        results[cid] = {"ok": ok, "broken": broken or None, "cpu": h.get("cpu", 0.0), "stopped": stopped}
+        results[cid] = {"ok": ok, "broken": broken or None, "cpu": h.get("cpu", 0.0), "stopped": stopped, "same": same}
 
     if not use_fork:
         # Windows/local: simple sequential pool of subprocesses
