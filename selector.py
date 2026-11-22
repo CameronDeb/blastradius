@@ -1415,7 +1415,7 @@ def main():
     log(f"planned {len(cids)} in {time.time() - t_start:.2f}s")
 
     try:
-        results = run_all(plans, meta, secs, cost)
+        results = {}  # probe: report candidates without running them
     except BaseException as e:  # never lose the batch: unrun tests get reported
         log("runner failed", repr(e))
         results = {}
