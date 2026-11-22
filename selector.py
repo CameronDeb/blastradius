@@ -542,6 +542,30 @@ def _is_class_body(c):
     return "__module__" in c.co_names and "__qualname__" in c.co_names and c.co_argcount == 0 and not (c.co_flags & 0x02 and c.co_varnames)
 
 
+def holders(purge):
+    """Grow `purge` with every loaded sqlglot/tests module that holds an object
+    (class, function, module or instance) defined in a purged module."""
+    mods = [(n, m) for n, m in list(sys.modules.items()) if m is not None and n.split(".")[0] in ("sqlglot", "tests")]
+    changed = True
+    while changed:
+        changed = False
+        for name, mod in mods:
+            if name in purge:
+                continue
+            for v in list(vars(mod).values()):
+                if isinstance(v, types.ModuleType):
+                    owner = v.__name__
+                elif isinstance(v, (type, types.FunctionType)):
+                    owner = getattr(v, "__module__", None)
+                else:
+                    owner = type(v).__module__
+                if owner in purge:
+                    purge.add(name)
+                    changed = True
+                    break
+    return sorted(purge)
+
+
 def child_run(job, out_fd):
     """Runs in a fresh (forked or spawned) process. Writes 'num ok' lines."""
     import builtins
@@ -606,6 +630,8 @@ def child_run(job, out_fd):
         purge = job.get("purge")
         if purge is None:
             purge = [n for n in sys.modules if n.split(".")[0] in ("sqlglot", "tests")]
+        else:
+            purge = holders(set(purge))
         for name in purge:
             sys.modules.pop(name, None)
         overlay = {}
@@ -653,6 +679,16 @@ def child_run(job, out_fd):
                     importlib.import_module(name)
                 except Exception:
                     pass
+        # a re-imported package loses attributes for submodules that stayed loaded
+        for name, m in list(sys.modules.items()):
+            if m is not None and "." in name and name.split(".")[0] in ("sqlglot", "tests"):
+                parent, _, short = name.rpartition(".")
+                pm = sys.modules.get(parent)
+                if pm is not None and short not in pm.__dict__:
+                    try:
+                        setattr(pm, short, m)
+                    except Exception:
+                        pass
 
     tests = job["tests"]  # list of [num, module, class, method, seconds]
     reset = set(job.get("reset_classes", ()))
@@ -728,6 +764,9 @@ def child_run(job, out_fd):
         if not ok and tr == 0:
             a_failed = True
         w.write(f"{num} {1 if ok else 0} {time.perf_counter() - t0:.3f}\n")
+        if not ok and os.environ.get("BR_DEBUG"):
+            err = str((result.failures or result.errors or [(0, "?")])[0][1])[-700:]
+            w.write("#   " + err.replace("\n", "\n#   ") + "\n")
     w.close()
     os._exit(0)
 
