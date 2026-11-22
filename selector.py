@@ -281,6 +281,26 @@ def chain_at(tree, line):
 
 BLOCK_FIELDS = ("body", "orelse", "finalbody", "handlers", "cases")
 _OLD_TREES = {}
+_OLD_INDEX = {}
+
+
+def index_defs(tree):
+    """Module- and class-level defs and simple assignments by (kind, class path, name)."""
+    out = {}
+
+    def walk(body, path):
+        for n in body:
+            if isinstance(n, ast.ClassDef):
+                walk(n.body, path + (n.name,))
+            elif isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                out.setdefault(("def", path, n.name), []).append(n)
+            elif isinstance(n, ast.Assign) and len(n.targets) == 1 and isinstance(n.targets[0], ast.Name):
+                out.setdefault(("attr", path, n.targets[0].id), []).append(n)
+            elif isinstance(n, ast.AnnAssign) and isinstance(n.target, ast.Name) and n.value is not None:
+                out.setdefault(("attr", path, n.target.id), []).append(n)
+
+    walk(tree.body, ())
+    return out
 _STR_SPANS = {}
 
 
@@ -395,6 +415,84 @@ class Analysis:
         self.by_file = by_file or {}
         self.reimport = set()
         self.spans = {}
+        self.patches = []
+        self._new_idx_key = None
+        self._new_idx = None
+
+    def _new_index(self, rel, new):
+        key = (rel, id(new))
+        if self._new_idx_key != key:
+            try:
+                self._new_idx = index_defs(ast.parse(new))
+            except SyntaxError:
+                self._new_idx = None
+            self._new_idx_key = key
+        return self._new_idx
+
+    def defaults_patch(self, rel, old_tree, new, path, o):
+        """A def whose header changed only in literal default values."""
+        old_idx = _OLD_INDEX.get(rel)
+        if old_idx is None:
+            old_idx = _OLD_INDEX[rel] = index_defs(old_tree)
+        new_idx = self._new_index(rel, new)
+        key = ("def", path, o.name)
+        olds, news = old_idx.get(key, []), (new_idx or {}).get(key, [])
+        if new_idx is None or len(olds) != len(news) or not any(x is o for x in olds):
+            return None
+        n = news[[i for i, x in enumerate(olds) if x is o][0]]
+        if type(n) is not type(o) or len(n.args.defaults) != len(o.args.defaults):
+            return None
+        if [d is None for d in n.args.kw_defaults] != [d is None for d in o.args.kw_defaults]:
+            return None
+
+        def header(f):
+            a = f.args
+            return (
+                ast.dump(ast.arguments(posonlyargs=a.posonlyargs, args=a.args, vararg=a.vararg, kwonlyargs=a.kwonlyargs, kw_defaults=[], kwarg=a.kwarg, defaults=[])),
+                [ast.dump(d) for d in f.decorator_list],
+                ast.dump(f.returns) if f.returns else None,
+            )
+
+        if header(n) != header(o):
+            return None
+        try:
+            vals = tuple(ast.literal_eval(d) for d in n.args.defaults)
+            kw = {a.arg: ast.literal_eval(d) for a, d in zip(n.args.kwonlyargs, n.args.kw_defaults) if d is not None}
+        except Exception:
+            return None
+        try:
+            if vals == tuple(ast.literal_eval(d) for d in o.args.defaults) and kw == {
+                a.arg: ast.literal_eval(d) for a, d in zip(o.args.kwonlyargs, o.args.kw_defaults) if d is not None
+            } and [type(v) for v in vals] == [type(ast.literal_eval(d)) for d in o.args.defaults]:
+                return "same"
+        except Exception:
+            pass
+        lo = min([o.lineno] + [d.lineno for d in o.decorator_list])
+        return ("defaults", rel, ".".join(path + (o.name,)), (lo, o.lineno), vals, kw)
+
+    def attr_patch(self, rel, old_tree, new, path, o, mod):
+        """A class attribute holding a literal that nothing reads at import time."""
+        target = o.targets[0] if isinstance(o, ast.Assign) and len(o.targets) == 1 else getattr(o, "target", None)
+        if not isinstance(target, ast.Name) or o.value is None:
+            return None
+        name = target.id
+        if name in self.mp.import_names or self.mp.static_classes.get(name):
+            return None
+        old_idx = _OLD_INDEX.get(rel)
+        if old_idx is None:
+            old_idx = _OLD_INDEX[rel] = index_defs(old_tree)
+        new_idx = self._new_index(rel, new)
+        key = ("attr", path, name)
+        if new_idx is None or len(old_idx.get(key, ())) != 1 or len(new_idx.get(key, ())) != 1:
+            return None
+        try:
+            old_val = ast.literal_eval(o.value)
+            val = ast.literal_eval(new_idx[key][0].value)
+        except Exception:
+            return None
+        if repr(old_val) == repr(val) and type(old_val) is type(val):
+            return "same"
+        return ("attr", mod, ".".join(path), name, val)
 
     def tests_of_module(self, tm):
         out = set(self.by_file.get(tm.replace(".", "/") + ".py", ()))
@@ -482,6 +580,8 @@ class Analysis:
         cand = set()
         lines = set(touched)
         for p in inserts:
+            if p - 1 in touched:
+                continue  # replacement of a removed line: that line already counts
             lines.add(p)
             if p > 1:
                 lines.add(p - 1)
@@ -490,7 +590,11 @@ class Analysis:
         rerun_classes = set()
         spans = set()
         imp_spans = set()
+        old_lines = old.split("\n")
         for ln in sorted(lines):
+            txt = old_lines[ln - 1] if ln - 1 < len(old_lines) else ""
+            if (not txt.strip() or txt.lstrip().startswith("#")) and not in_multiline_string(rel, old_tree, {ln}):
+                continue
             chain = chain_at(old_tree, ln)
             fn_idx = None
             for i in range(len(chain) - 1, 0, -1):
@@ -520,12 +624,36 @@ class Analysis:
                 rerun_classes |= mp.line_classes(rel, span)
                 continue
             # Not inside a function body: import-time code.
-            flags.add("static")
             s = stmts[-1] if stmts else None
             if s is None:
+                flags.add("static")
                 continue
-            spans |= set(range(s.lineno, s.end_lineno + 1))
             classes = [c for c in chain[1:] if isinstance(c, ast.ClassDef)]
+            path = tuple(c.name for c in classes)
+            if isinstance(s, FUNC) and (s.body[0].lineno > ln):
+                patch = self.defaults_patch(rel, old_tree, new, path, s)
+                if patch == "same":
+                    continue
+                if patch is not None:
+                    body = set(range(s.body[0].lineno, s.end_lineno + 1))
+                    cand |= mp.line_tests(rel, body)
+                    rerun_classes |= mp.line_classes(rel, body)
+                    spans |= body
+                    if patch not in self.patches:
+                        self.patches.append(patch)
+                    continue
+            if classes and isinstance(s, (ast.Assign, ast.AnnAssign)):
+                patch = self.attr_patch(rel, old_tree, new, path, s, mod)
+                if patch == "same":
+                    continue
+                if patch is not None:
+                    qual = mod + "." + ".".join(path)
+                    cand |= mp.users_of(qual) & mp.name_tests(patch[3])
+                    if patch not in self.patches:
+                        self.patches.append(patch)
+                    continue
+            flags.add("static")
+            spans |= set(range(s.lineno, s.end_lineno + 1))
             if isinstance(s, FUNC):
                 # decorator / signature / defaults of a def
                 body = range(s.body[0].lineno, s.end_lineno + 1)
@@ -746,7 +874,7 @@ def code_sig(c):
     )
 
 
-def code_diff(old_code, new_code):
+def code_diff(old_code, new_code, allow_container=False):
     """Pair code objects; return (module_level_same, {old_key: new_code})
     or None if structure differs."""
     swaps = {}
@@ -770,6 +898,8 @@ def code_diff(old_code, new_code):
             child_changed = child_changed or ch
         container = top or _is_class_body(a)
         if not same_here:
+            if container and allow_container:
+                return True, True
             if container or a.co_freevars != b.co_freevars:
                 return False, True
             swaps[code_key(a)] = b
@@ -967,7 +1097,7 @@ def child_run(job, out_fd):
                 w.write(f"! broken {modname_of(rel)} SyntaxError\n")
                 w.close()
                 os._exit(0)
-            ok, swaps = code_diff(compile(old, absp, "exec"), new_code)
+            ok, swaps = code_diff(compile(old, absp, "exec"), new_code, allow_container=bool(job.get("patches")))
             if not ok:
                 fast = False
                 job["purge"] = sorted({modname_of(r) for r in py_changed} | set(job.get("reimport") or ()))
@@ -986,6 +1116,26 @@ def child_run(job, out_fd):
                 if nc is not None:
                     o.__code__ = nc
                     n += 1
+        for pt in job.get("patches") or ():
+            try:
+                if pt[0] == "defaults":
+                    _, rel, qn, (lo, hi), vals, kw = pt
+                    absp = os.path.normcase(os.path.join(SRC, rel))
+                    for o in FUNCS:
+                        c = o.__code__
+                        if getattr(c, "co_qualname", c.co_name) == qn and lo <= c.co_firstlineno <= hi and os.path.normcase(c.co_filename) == absp:
+                            o.__defaults__ = tuple(vals) if vals else None
+                            o.__kwdefaults__ = dict(kw) if kw else None
+                            n += 1
+                elif pt[0] == "attr":
+                    _, mname, cq, attr, val = pt
+                    obj = sys.modules[mname]
+                    for part in cq.split("."):
+                        obj = getattr(obj, part)
+                    setattr(obj, attr, val)
+                    n += 1
+            except Exception as e:
+                w.write(f"# patch failed {e!r}\n")
         w.write(f"# swapped {n}\n")
         if job.get("reimport"):
             for name in holders(set(job["reimport"])):
@@ -1315,6 +1465,7 @@ def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
     files = parse_patch(text)
     an.reimport = set()
     an.spans = {}
+    an.patches = []
     data_heavy = False
     changed = {}
     cand = set()
@@ -1409,7 +1560,7 @@ def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
         heavy = set()
     if purge is not None:
         purge = sorted(set(purge) | an.reimport)
-    return {"out": out, "run": run, "heavy": heavy, "purge": purge, "reimport": sorted(an.reimport), "items": items, "est": est, "changed": changed, "fast": fast, "reset": reset, "why": " ".join(why)}
+    return {"out": out, "run": run, "heavy": heavy, "purge": purge, "reimport": sorted(an.reimport), "items": items, "est": est, "patches": list(an.patches), "changed": changed, "fast": fast, "reset": reset, "why": " ".join(why)}
 
 
 def run_all(plans, meta, secs, cost):
@@ -1463,6 +1614,7 @@ def run_all(plans, meta, secs, cost):
             "purge": p.get("purge") if use_fork else None,
             "reimport": p.get("reimport", []),
             "proxy": p.get("proxy"),
+            "patches": p.get("patches", []) if p["fast"] and use_fork else [],
             "proxy_limit": proxy_limit,
         }
         budget = 30 + sum(max(secs[n], cost[n]) * 4 + 2 for n in list(tl) + sorted(hrun))
