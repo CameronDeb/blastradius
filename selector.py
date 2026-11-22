@@ -1077,9 +1077,19 @@ def child_run(job, out_fd):
     heavy = {int(n): int(v) for n, v in job.get("heavy", [])}
     tms = dict(fixed)
     tms.update(heavy)
-    for t in tests:
+    hr = [list(t) for t in job.get("heavy_run") or []]
+    for t in hr:
+        heavy.pop(t[0], None)
+    for t in tests + hr:
         tms[t[0]] = round(t[4] * 1000)
     fails = set()
+
+    def first_failure():
+        # heavy tests that can be cut to a few items are worth checking once
+        # something has failed; the stop rule may still choose to report them
+        if hr:
+            tests.extend(hr)
+            hr.clear()
 
     def should_stop(i):
         # after a failure: report what is left instead of running it, when cheaper
@@ -1111,6 +1121,7 @@ def child_run(job, out_fd):
             w.write(f"{num} {1 if ok else 0} proxy {time.process_time() - c0:.3f}\n")
             if not ok:
                 fails.add(num)
+                first_failure()
                 if should_stop(i):
                     for t in tests[i + 1 :]:
                         w.write(f"{t[0]} S\n")
@@ -1168,6 +1179,7 @@ def child_run(job, out_fd):
                     w.write("#   " + err.replace("\n", "\n#   ") + "\n")
         if not ok:
             fails.add(num)
+            first_failure()
             if should_stop(i):
                 for t in tests[i + 1 :]:
                     w.write(f"{t[0]} S\n")
@@ -1247,7 +1259,9 @@ def main():
                     if r is False:
                         any_fail = True
                 if any_fail:
-                    fails |= p["heavy"]
+                    for n in p["heavy"]:
+                        if n not in p.get("heavy_run", ()) or res["ok"].get(n) is not True:
+                            fails.add(n)
         workers, cost = pack(fails, ms)
         out.write(json.dumps({"commit": cid, "workers": workers}) + "\n")
         out.flush()
@@ -1433,12 +1447,15 @@ def run_all(plans, meta, secs, cost):
         tdir = os.path.join(base_tmp, cid)
         os.makedirs(tdir, exist_ok=True)
         tl = sorted(p["run"])
+        hrun = {n for n in p["heavy"] if n in p.get("items", {}) and p["est"].get(n, 1e9) < secs[n] + WORKER_COST / 1000}
+        p["heavy_run"] = hrun
         job = {
             "changed": p["changed"],
             "fast": p["fast"] and use_fork,
             "tmpdir": tdir,
             "tests": [[n, *meta[n], secs[n], tier(p["est"].get(n, cost[n])), p["est"].get(n, cost[n])] for n in sorted(tl, key=lambda n: (tier(p["est"].get(n, cost[n])), p["est"].get(n, cost[n]), n))],
-            "items": {str(n): v for n, v in p.get("items", {}).items() if n in p["run"]},
+            "items": {str(n): v for n, v in p.get("items", {}).items() if n in p["run"] or n in hrun},
+            "heavy_run": [[n, *meta[n], secs[n], 2, p["est"][n]] for n in sorted(hrun)],
             "fixed": [[n, round(secs[n] * 1000)] for n in sorted(p["out"])],
             "heavy": [[n, round(secs[n] * 1000)] for n in sorted(p["heavy"])],
             "reset_classes": sorted(p["reset"]),
@@ -1447,7 +1464,7 @@ def run_all(plans, meta, secs, cost):
             "proxy": p.get("proxy"),
             "proxy_limit": proxy_limit,
         }
-        budget = 30 + sum(max(secs[n], cost[n]) * 4 + 2 for n in tl)
+        budget = 30 + sum(max(secs[n], cost[n]) * 4 + 2 for n in list(tl) + sorted(hrun))
         if use_fork:
             r, wfd = os.pipe()
             pid = os.fork()
