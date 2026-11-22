@@ -1273,33 +1273,51 @@ def child_run(job, out_fd):
             tests.extend(hr)
             hr.clear()
 
+    def split_keep(rows):
+        # tests whose recorded time dwarfs what checking them costs stay runnable
+        keep = [
+            t for t in rows
+            if (tms[t[0]] >= 1000 and tms[t[0]] > 3 * CPU_FACTOR * 1000 * t[6])
+            # cheap executor tests decide whether the heavy TPC tests get reported
+            or (job.get("exec_gate") and t[1] == "tests.test_executor" and t[6] < 0.3)
+        ]
+        ids = {t[0] for t in keep}
+        return keep, [t for t in rows if t[0] not in ids]
+
     def should_stop(i):
         # report what is left instead of running it, when that is cheaper; with
         # nothing failed yet, stopping also means reporting the heavy tests
-        rem = [t[0] for t in tests[i + 1 :]]
-        if not rem:
+        rows = tests[i + 1 :]
+        if not rows:
+            return False
+        keep, rep_rows = split_keep(rows)
+        if not rep_rows:
             return False
         hv = set(heavy) | {t[0] for t in hr}
-        stop = pack(fails | set(fixed) | hv | set(rem), tms)[1]
+        stop = pack(fails | set(fixed) | hv | {t[0] for t in rep_rows}, tms)[1] + CPU_FACTOR * 1000 * sum(t[6] for t in keep)
         kept = fails | set(fixed) | (set(heavy) if fails else set())
-        cont = CPU_FACTOR * 1000 * sum(t[6] for t in tests[i + 1 :]) + pack(kept, tms)[1]
+        cont = CPU_FACTOR * 1000 * sum(t[6] for t in rows) + pack(kept, tms)[1]
         return stop <= cont
 
     def stop_now(i):
-        for t in tests[i + 1 :] + hr:
+        keep, rep_rows = split_keep(tests[i + 1 :] + hr)
+        for t in rep_rows:
             w.write(f"{t[0]} S\n")
         if not fails:
             w.write("! stopped\n")
+        del tests[i + 1 :]
+        tests.extend(keep)
+        hr.clear()
 
     i = -1
     if should_stop(-1):
         stop_now(-1)
-        i = len(tests)
     while i + 1 < len(tests):
         i += 1
         if i and i % 8 == 0 and not fails and should_stop(i - 1):
             stop_now(i - 1)
-            break
+            if i >= len(tests):
+                break
         num, modn, clsn, meth, secs, tr, _c = tests[i]
         ok = False
         if num == job.get("proxy"):
@@ -1319,9 +1337,7 @@ def child_run(job, out_fd):
                 fails.add(num)
                 first_failure()
                 if should_stop(i):
-                    for t in tests[i + 1 :]:
-                        w.write(f"{t[0]} S\n")
-                    break
+                    stop_now(i)
             continue
         try:
             if modn not in mods:
@@ -1377,9 +1393,7 @@ def child_run(job, out_fd):
             fails.add(num)
             first_failure()
             if should_stop(i):
-                for t in tests[i + 1 :]:
-                    w.write(f"{t[0]} S\n")
-                break
+                stop_now(i)
     w.close()
     os._exit(0)
 
@@ -1745,6 +1759,7 @@ def run_all(plans, meta, secs, cost):
             "reimport": p.get("reimport", []),
             "proxy": p.get("proxy"),
             "tpc_refresh": p.get("tpc_refresh", False),
+            "exec_gate": any(meta[n][0] == "tests.test_executor" for n in p["heavy"]),
             "patches": p.get("patches", []) if p["fast"] and use_fork else [],
             "proxy_limit": proxy_limit,
         }
