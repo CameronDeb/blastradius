@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parsers/trino.py b/sqlglot/parsers/trino.py
+--- a/sqlglot/parsers/trino.py
++++ b/sqlglot/parsers/trino.py
+@@ -138,7 +138,7 @@
+         # this same chunk-continuation loop also serves IF/ELSEIF/ELSE.
+         statements: list[exp.Expr] = []
+ 
+-        while not self._match_texts(terminators):
++        while self._match_texts(terminators):
+             if not self._curr:
+                 if self._chunk_index >= len(self._chunks):
+                     self.raise_error("Unexpected end of routine body")

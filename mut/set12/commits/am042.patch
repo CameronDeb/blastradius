@@ -1,0 +1,35 @@
+diff --git a/sqlglot/generators/bigquery.py b/sqlglot/generators/bigquery.py
+--- a/sqlglot/generators/bigquery.py
++++ b/sqlglot/generators/bigquery.py
+@@ -349,7 +349,7 @@
+     RENAME_TABLE_WITH_DB = False
+     NVL2_SUPPORTED = False
+     UNNEST_WITH_ORDINALITY = False
+-    CAST_TO_INT_ROUNDS = True
++    CAST_TO_INT_ROUNDS = False
+     COLLATE_IS_FUNC = True
+     LIMIT_ONLY_LITERALS = True
+     SUPPORTS_TABLE_ALIAS_COLUMNS = False
+diff --git a/sqlglot/expressions/query.py b/sqlglot/expressions/query.py
+--- a/sqlglot/expressions/query.py
++++ b/sqlglot/expressions/query.py
+@@ -98,6 +98,7 @@
+ class DerivedTable(Selectable):
+     @property
+     def selects(self) -> list[Expr]:
++        # Cheap check first
+         this = self.this
+         return this.selects if isinstance(this, Query) else []
+ 
+diff --git a/tests/fixtures/optimizer/quote_identifiers.sql b/tests/fixtures/optimizer/quote_identifiers.sql
+--- a/tests/fixtures/optimizer/quote_identifiers.sql
++++ b/tests/fixtures/optimizer/quote_identifiers.sql
+@@ -28,7 +28,7 @@
+ 
+ # dialect: snowflake
+ SELECT * FROM t AS dual;
+-SELECT * FROM "t" AS "dual";
++SELECT x * FROM "t" AS "dual";
+ 
+ # dialect: bigquery
+ SELECT `p.d.udf`(data).* FROM `p.d.t`;

@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -4139,7 +4139,7 @@
+         return f"{this} (FORMAT {fmt})"
+ 
+     def teradatatitle_sql(self, expression: exp.TeradataTitle) -> str:
+-        self.unsupported("Teradata TITLE display headings are not supported")
++        self.unsupported("Teradata TITLE display headings are supported")
+         return self.sql(expression, "this")
+ 
+     def teradatanamed_sql(self, expression: exp.TeradataNamed) -> str:

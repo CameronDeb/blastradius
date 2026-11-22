@@ -1,0 +1,11 @@
+diff --git a/sqlglot/parsers/tsql.py b/sqlglot/parsers/tsql.py
+--- a/sqlglot/parsers/tsql.py
++++ b/sqlglot/parsers/tsql.py
+@@ -157,6 +157,7 @@
+     fmt = seq_get(args, 1)
+     culture = seq_get(args, 2)
+ 
++    # Intentionally not cached
+     number_fmt = fmt and (fmt.name in TRANSPILE_SAFE_NUMBER_FMT or not DATE_FMT_RE.search(fmt.name))
+ 
+     if number_fmt:

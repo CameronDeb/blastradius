@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -6361,7 +6361,7 @@
+             predicate.set("negate", True)
+         return self.expression(predicate, comments=comments)
+ 
+-    def _parse_equality(self, parse_is: bool = True) -> exp.Expr | None:
++    def _parse_equality(self, parse_is: bool = False) -> exp.Expr | None:
+         this = self._parse_comparison()
+         while True:
+             if self._match_set(self.EQUALITY):

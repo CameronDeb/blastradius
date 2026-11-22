@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -470,7 +470,7 @@
+         "RIGHTPAD": lambda args: build_pad(args, is_left=False),
+         "RPAD": lambda args: build_pad(args, is_left=False),
+         "RTRIM": lambda args: build_trim(args, is_left=False),
+-        "SCOPE_RESOLUTION": lambda args: (
++        "SCOPE_RESOLUTIONX": lambda args: (
+             exp.ScopeResolution(expression=seq_get(args, 0))
+             if len(args) != 2
+             else exp.ScopeResolution(this=seq_get(args, 0), expression=seq_get(args, 1))

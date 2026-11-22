@@ -1,0 +1,12 @@
+diff --git a/tests/fixtures/optimizer/eliminate_joins.sql b/tests/fixtures/optimizer/eliminate_joins.sql
+--- a/tests/fixtures/optimizer/eliminate_joins.sql
++++ b/tests/fixtures/optimizer/eliminate_joins.sql
+@@ -615,7 +615,7 @@
+     y.b AS b
+   FROM y
+ ) AS y
+-  ON x.a = y.b;
++ ON x.a = y.b;
+ 
+ # title: Remove left join on filtered subquery with LIMIT 1
+ # execute: true

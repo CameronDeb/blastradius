@@ -1,0 +1,11 @@
+diff --git a/setup.cfg b/setup.cfg
+--- a/setup.cfg
++++ b/setup.cfg
+@@ -3,6 +3,7 @@
+ no_implicit_optional = True
+ 
+ [mypy-sqlglot.*]
++# note
+ ignore_errors = False
+ 
+ [mypy-sqlglot.dataframe.*]

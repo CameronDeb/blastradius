@@ -15,6 +15,9 @@ import sys
 import time
 import types
 
+for _v in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS", "NUMEXPR_NUM_THREADS", "NUMEXPR_MAX_THREADS"):
+    os.environ.setdefault(_v, "1")
+
 DATA = os.environ.get("BR_DATA", "/data")
 SRC = os.environ.get("BR_SRC", "/opt/sqlglot")
 MAP = os.environ.get("BR_MAP", os.path.join(os.path.dirname(os.path.abspath(__file__)), "map.json.gz"))
@@ -25,6 +28,8 @@ MAX_WORKERS = 8
 # test failed or there was nothing smaller to run.
 TIER_B = float(os.environ.get("BR_TIER_B", "0.3"))
 TIER_C = float(os.environ.get("BR_TIER_C", "3.0"))
+# CPU seconds a test costs us relative to its recorded seconds
+CPU_FACTOR = float(os.environ.get("BR_CPU_FACTOR", "1.5"))
 
 
 def tier(sec):
@@ -151,6 +156,47 @@ class Map:
         self.static_modules = m["static_modules"]
         self.modfiles = m["modfiles"]
         self.rdeps = m.get("rdeps", {})
+        self.cpu = {int(k): v for k, v in m.get("cpu", {}).items()}
+        self.items = m.get("items", [])
+        self.ilines = m.get("ilines", {})
+        self.nlines = m.get("nlines", {})
+        self.items_of = {}
+        for iid, (num, key) in enumerate(self.items):
+            self.items_of.setdefault(num, []).append(iid)
+        self.tmod_lines = m.get("tmod_lines", {})
+        self.import_set = {f: set(v) for f, v in self.import_lines.items()}
+
+    def item_hits(self, f, lns):
+        by = self.ilines.get(f)
+        out = set()
+        if by:
+            for ln in lns:
+                s = by.get(str(ln))
+                if s is not None:
+                    out.update(self.sets[s])
+        return out
+
+    def nonitem_tests(self, f, lns):
+        by = self.nlines.get(f)
+        out = set()
+        if by:
+            for ln in lns:
+                s = by.get(str(ln))
+                if s is not None:
+                    out.update(self.sets[s])
+        return out
+
+    def tmods_at(self, f, lns):
+        by = self.tmod_lines.get(f)
+        out = set()
+        if by:
+            for ln in lns:
+                out.update(by.get(str(ln), ()))
+        return out
+
+    def at_import(self, f, lns):
+        s = self.import_set.get(f)
+        return bool(s) and any(ln in s for ln in lns)
 
     def dependents(self, mods):
         seen = set(mods)
@@ -236,6 +282,95 @@ def chain_at(tree, line):
         node = nxt
 
 
+BLOCK_FIELDS = ("body", "orelse", "finalbody", "handlers", "cases")
+_OLD_TREES = {}
+_OLD_INDEX = {}
+
+
+def index_defs(tree):
+    """Module- and class-level defs and simple assignments by (kind, class path, name)."""
+    out = {}
+
+    def walk(body, path):
+        for n in body:
+            if isinstance(n, ast.ClassDef):
+                walk(n.body, path + (n.name,))
+            elif isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                out.setdefault(("def", path, n.name), []).append(n)
+            elif isinstance(n, ast.Assign) and len(n.targets) == 1 and isinstance(n.targets[0], ast.Name):
+                out.setdefault(("attr", path, n.targets[0].id), []).append(n)
+            elif isinstance(n, ast.AnnAssign) and isinstance(n.target, ast.Name) and n.value is not None:
+                out.setdefault(("attr", path, n.target.id), []).append(n)
+
+    walk(tree.body, ())
+    return out
+_STR_SPANS = {}
+
+
+def in_multiline_string(rel, tree, lines, inserts=()):
+    spans = _STR_SPANS.get(rel)
+    if spans is None:
+        spans = _STR_SPANS[rel] = [
+            (n.lineno, n.end_lineno)
+            for n in ast.walk(tree)
+            if isinstance(n, (ast.Constant, ast.JoinedStr)) and getattr(n, "end_lineno", n.lineno) > n.lineno
+        ]
+    # an inserted line lands before old line p: inside a string only if the
+    # string started earlier and runs through p
+    return any(a <= ln <= b for a, b in spans for ln in lines) or any(a < p <= b for a, b in spans for p in inserts)
+
+
+def _span(n):
+    a = n.lineno
+    if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and n.decorator_list:
+        a = min(a, min(d.lineno for d in n.decorator_list))
+    return a, getattr(n, "end_lineno", a)
+
+
+def same_region(xs, ys, lines):
+    """AST equality of two statement lists, comparing only statements that
+    overlap the changed (old) lines; text elsewhere is identical."""
+    if len(xs) != len(ys):
+        return False
+    for x, y in zip(xs, ys):
+        if type(x) is not type(y):
+            return False
+        a, b = _span(x)
+        if not any(a <= ln <= b for ln in lines):
+            continue
+        blocks = [f for f in BLOCK_FIELDS if isinstance(getattr(x, f, None), list)]
+        if blocks:
+            for f in blocks:
+                if len(getattr(x, f)) != len(getattr(y, f)):
+                    return False
+            hx = {k: v for k, v in ast.iter_fields(x) if k not in BLOCK_FIELDS}
+            hy = {k: v for k, v in ast.iter_fields(y) if k not in BLOCK_FIELDS}
+            if hx.keys() != hy.keys() or any(_dump(hx[k]) != _dump(hy[k]) for k in hx):
+                return False
+            for f in blocks:
+                if f == "handlers" or f == "cases":
+                    for hx_, hy_ in zip(getattr(x, f), getattr(y, f)):
+                        fx = {k: v for k, v in ast.iter_fields(hx_) if k != "body"}
+                        fy = {k: v for k, v in ast.iter_fields(hy_) if k != "body"}
+                        if any(_dump(fx[k]) != _dump(fy.get(k)) for k in fx):
+                            return False
+                        if not same_region(hx_.body, hy_.body, lines):
+                            return False
+                elif not same_region(getattr(x, f), getattr(y, f), lines):
+                    return False
+        elif ast.dump(x) != ast.dump(y):
+            return False
+    return True
+
+
+def _dump(v):
+    if isinstance(v, ast.AST):
+        return ast.dump(v)
+    if isinstance(v, list):
+        return [_dump(i) for i in v]
+    return repr(v)
+
+
 FUNC = (ast.FunctionDef, ast.AsyncFunctionDef)
 COMPOUND = (ast.If, ast.For, ast.AsyncFor, ast.While, ast.With, ast.AsyncWith, ast.Try, ast.Match)
 if hasattr(ast, "TryStar"):
@@ -278,8 +413,95 @@ def assigned_names(stmt):
 
 
 class Analysis:
-    def __init__(self, mp):
+    def __init__(self, mp, by_file=None):
         self.mp = mp
+        self.by_file = by_file or {}
+        self.reimport = set()
+        self.spans = {}
+        self.patches = []
+        self._new_idx_key = None
+        self._new_idx = None
+
+    def _new_index(self, rel, new):
+        key = (rel, id(new))
+        if self._new_idx_key != key:
+            try:
+                self._new_idx = index_defs(ast.parse(new))
+            except SyntaxError:
+                self._new_idx = None
+            self._new_idx_key = key
+        return self._new_idx
+
+    def defaults_patch(self, rel, old_tree, new, path, o):
+        """A def whose header changed only in literal default values."""
+        old_idx = _OLD_INDEX.get(rel)
+        if old_idx is None:
+            old_idx = _OLD_INDEX[rel] = index_defs(old_tree)
+        new_idx = self._new_index(rel, new)
+        key = ("def", path, o.name)
+        olds, news = old_idx.get(key, []), (new_idx or {}).get(key, [])
+        if new_idx is None or len(olds) != len(news) or not any(x is o for x in olds):
+            return None
+        n = news[[i for i, x in enumerate(olds) if x is o][0]]
+        if type(n) is not type(o) or len(n.args.defaults) != len(o.args.defaults):
+            return None
+        if [d is None for d in n.args.kw_defaults] != [d is None for d in o.args.kw_defaults]:
+            return None
+
+        def header(f):
+            a = f.args
+            return (
+                ast.dump(ast.arguments(posonlyargs=a.posonlyargs, args=a.args, vararg=a.vararg, kwonlyargs=a.kwonlyargs, kw_defaults=[], kwarg=a.kwarg, defaults=[])),
+                [ast.dump(d) for d in f.decorator_list],
+                ast.dump(f.returns) if f.returns else None,
+            )
+
+        if header(n) != header(o):
+            return None
+        try:
+            vals = tuple(ast.literal_eval(d) for d in n.args.defaults)
+            kw = {a.arg: ast.literal_eval(d) for a, d in zip(n.args.kwonlyargs, n.args.kw_defaults) if d is not None}
+        except Exception:
+            return None
+        try:
+            if vals == tuple(ast.literal_eval(d) for d in o.args.defaults) and kw == {
+                a.arg: ast.literal_eval(d) for a, d in zip(o.args.kwonlyargs, o.args.kw_defaults) if d is not None
+            } and [type(v) for v in vals] == [type(ast.literal_eval(d)) for d in o.args.defaults]:
+                return "same"
+        except Exception:
+            pass
+        lo = min([o.lineno] + [d.lineno for d in o.decorator_list])
+        return ("defaults", rel, ".".join(path + (o.name,)), (lo, o.lineno), vals, kw)
+
+    def attr_patch(self, rel, old_tree, new, path, o, mod):
+        """A class attribute holding a literal that nothing reads at import time."""
+        target = o.targets[0] if isinstance(o, ast.Assign) and len(o.targets) == 1 else getattr(o, "target", None)
+        if not isinstance(target, ast.Name) or o.value is None:
+            return None
+        name = target.id
+        if name in self.mp.import_names or self.mp.static_classes.get(name):
+            return None
+        old_idx = _OLD_INDEX.get(rel)
+        if old_idx is None:
+            old_idx = _OLD_INDEX[rel] = index_defs(old_tree)
+        new_idx = self._new_index(rel, new)
+        key = ("attr", path, name)
+        if new_idx is None or len(old_idx.get(key, ())) != 1 or len(new_idx.get(key, ())) != 1:
+            return None
+        try:
+            old_val = ast.literal_eval(o.value)
+            val = ast.literal_eval(new_idx[key][0].value)
+        except Exception:
+            return None
+        if repr(old_val) == repr(val) and type(old_val) is type(val):
+            return "same"
+        return ("attr", mod, ".".join(path), name, val)
+
+    def tests_of_module(self, tm):
+        out = set(self.by_file.get(tm.replace(".", "/") + ".py", ()))
+        for tf in self.mp.modfiles.get(tm, ()):
+            out |= self.by_file.get(tf, set())
+        return out
 
     def class_users(self, qual, tree_cls=None, rel=None):
         out = self.mp.users_of(qual)
@@ -312,38 +534,70 @@ class Analysis:
         return out
 
     def module_users_by_name(self, mod):
+        cache = self.__dict__.setdefault("_mu_cache", {})
+        if mod in cache:
+            return set(cache[mod])
+        if not hasattr(self, "_by_prefix"):
+            bp = {}
+            for q, s in self.mp.users.items():
+                parts = q.split(".")
+                for i in range(1, len(parts)):
+                    bp.setdefault(".".join(parts[:i]), set()).update(self.mp.sets[s])
+            self._by_prefix = bp
         rel = mod.replace(".", "/") + ".py"
         out = self.mp.file_tests(rel) | self.mp.file_tests(mod.replace(".", "/") + "/__init__.py")
-        pre = mod + "."
-        for q, s in self.mp.users.items():
-            if q.startswith(pre):
-                out |= set(self.mp.sets[s])
+        out |= self._by_prefix.get(mod, set())
+        cache[mod] = frozenset(out)
         return out
 
-    def py_change(self, rel, old, new, touched, inserts):
+    def py_change(self, rel, old, new, touched, inserts, removed_txt=(), added_txt=()):
         """Return (candidate tests, class contexts that must re-run setup, flags)."""
         mp = self.mp
         flags = set()
-        try:
-            new_tree = ast.parse(new)
-        except SyntaxError:
-            return None, set(), {"broken"}
         if old is None:
+            try:
+                ast.parse(new)
+            except SyntaxError:
+                return None, set(), {"broken"}
             return set(), set(), flags  # new module: nothing imports it at the pinned commit
-        old_tree = ast.parse(old)
-        if ast.dump(old_tree) == ast.dump(new_tree):
-            return set(), set(), {"same"}
+        old_tree = _OLD_TREES.get(rel)
+        if old_tree is None:
+            old_tree = _OLD_TREES[rel] = ast.parse(old)
+        region = set(touched) | set(inserts) | {p - 1 for p in inserts}
+        texts = list(removed_txt) + list(added_txt)
+        quick = texts and all(not t.strip() or t.lstrip().startswith("#") for t in texts) and not any(
+            re.search(r"coding[:=]", t) for t in texts
+        )
+        if not (quick and not in_multiline_string(rel, old_tree, set(touched), inserts)):
+            # The child compiles the new source anyway; only parse here when
+            # the edit could be a no-op we can prove cheaply.
+            quick = False
+        if quick:
+            try:
+                new_tree = ast.parse(new)
+            except SyntaxError:
+                return None, set(), {"broken"}
+            if same_region(old_tree.body, new_tree.body, region):
+                return set(), set(), {"same"}
         mod = modname_of(rel)
         cand = set()
         lines = set(touched)
         for p in inserts:
+            if p - 1 in touched:
+                continue  # replacement of a removed line: that line already counts
             lines.add(p)
             if p > 1:
                 lines.add(p - 1)
         nlines = old.count("\n") + 1
         lines = {min(max(1, ln), nlines) for ln in lines}
         rerun_classes = set()
+        spans = set()
+        imp_spans = set()
+        old_lines = old.split("\n")
         for ln in sorted(lines):
+            txt = old_lines[ln - 1] if ln - 1 < len(old_lines) else ""
+            if (not txt.strip() or txt.lstrip().startswith("#")) and not in_multiline_string(rel, old_tree, {ln}):
+                continue
             chain = chain_at(old_tree, ln)
             fn_idx = None
             for i in range(len(chain) - 1, 0, -1):
@@ -367,14 +621,42 @@ class Analysis:
                     pass
                 t = mp.line_tests(rel, span)
                 cand |= t
+                spans |= span
+                # a lambda's first line is also where the lambda object is created
+                imp_spans |= span - {fn.lineno} if isinstance(fn, ast.Lambda) else span
                 rerun_classes |= mp.line_classes(rel, span)
                 continue
             # Not inside a function body: import-time code.
-            flags.add("static")
             s = stmts[-1] if stmts else None
             if s is None:
+                flags.add("static")
                 continue
             classes = [c for c in chain[1:] if isinstance(c, ast.ClassDef)]
+            path = tuple(c.name for c in classes)
+            if isinstance(s, FUNC) and (s.body[0].lineno > ln):
+                patch = self.defaults_patch(rel, old_tree, new, path, s)
+                if patch == "same":
+                    continue
+                if patch is not None:
+                    body = set(range(s.body[0].lineno, s.end_lineno + 1))
+                    cand |= mp.line_tests(rel, body)
+                    rerun_classes |= mp.line_classes(rel, body)
+                    spans |= body
+                    if patch not in self.patches:
+                        self.patches.append(patch)
+                    continue
+            if classes and isinstance(s, (ast.Assign, ast.AnnAssign)):
+                patch = self.attr_patch(rel, old_tree, new, path, s, mod)
+                if patch == "same":
+                    continue
+                if patch is not None:
+                    qual = mod + "." + ".".join(path)
+                    cand |= mp.users_of(qual) & mp.name_tests(patch[3])
+                    if patch not in self.patches:
+                        self.patches.append(patch)
+                    continue
+            flags.add("static")
+            spans |= set(range(s.lineno, s.end_lineno + 1))
             if isinstance(s, FUNC):
                 # decorator / signature / defaults of a def
                 body = range(s.body[0].lineno, s.end_lineno + 1)
@@ -410,6 +692,27 @@ class Analysis:
             cand |= self.name_users(names, mod)
             if not names:
                 cand |= self.module_users_by_name(mod)
+        # code that runs while a test module is imported: a failure there
+        # breaks every test file importing that module
+        tmods = mp.tmods_at(rel, spans)
+        if tmods:
+            flags.add("tmod")
+            self.reimport |= tmods
+            for tm in tmods:
+                cand |= self.tests_of_module(tm)
+        # function bodies executed while sqlglot itself is imported
+        if "static" not in flags and mp.at_import(rel, imp_spans):
+            flags.add("importtime")
+            cand |= self.module_users_by_name(mod)
+            for d in mp.dependents({mod}):
+                cand |= self.module_users_by_name(d)
+        self.spans[rel] = (spans, "static" in flags or "importtime" in flags or "tmod" in flags)
+        if not cand and not quick:
+            # nothing would run the new source, so make sure it still compiles
+            try:
+                ast.parse(new)
+            except SyntaxError:
+                return None, set(), {"broken"}
         return cand, rerun_classes, flags
 
 
@@ -465,18 +768,85 @@ class InlineExecutor:
         pass
 
     def submit(self, fn, *args, **kwargs):
-        import concurrent.futures as cf
         import pickle
 
-        f = cf.Future()
+        # Arguments are serialised now, like a real pool; the work itself runs
+        # when the result is asked for, so a test stopped at its first failing
+        # subtest never computes the rest.
         try:
-            args, kwargs = pickle.loads(pickle.dumps((args, kwargs)))
-            f.set_result(pickle.loads(pickle.dumps(fn(*args, **kwargs))))
+            blob = pickle.dumps((args, kwargs))
         except Timeout:
             raise
         except BaseException as e:
-            f.set_exception(e)
-        return f
+            f = _lazy_future(None)
+            f._exception = e
+            f._forced = True
+            return f
+
+        def thunk():
+            a, k = pickle.loads(blob)
+            return pickle.loads(pickle.dumps(fn(*a, **k)))
+
+        return _lazy_future(thunk)
+
+
+def _lazy_future(thunk):
+    import concurrent.futures as cf
+
+    class LazyFuture(cf.Future):
+        def _force(self):
+            if not self._forced:
+                self._forced = True
+                try:
+                    self._result = self._thunk()
+                except Timeout:
+                    raise
+                except BaseException as e:
+                    self._exception = e
+
+        def result(self, timeout=None):
+            self._force()
+            if self._exception is not None:
+                raise self._exception
+            return self._result
+
+        def exception(self, timeout=None):
+            self._force()
+            return self._exception
+
+    f = LazyFuture()
+    f._thunk = thunk
+    f._forced = False
+    f._state = "FINISHED"
+    return f
+
+
+MAX_NODES_ID = "tests/test_parser.py::TestParser::test_max_nodes"
+
+
+def max_nodes_proxy():
+    """test_max_nodes at 1% of its size (same assertions, scaled limits)."""
+    from sqlglot import exp, parse_one
+    from sqlglot.errors import ParseError
+
+    assert isinstance(parse_one("SELECT 1", max_nodes=1_000_000), exp.Select)
+    cols = [f"col{i}" for i in range(500)]
+    assert isinstance(parse_one(f"SELECT {','.join(cols)} FROM t", max_nodes=1_000_000), exp.Select)
+    sql = "SELECT " + ",".join(["x" + "=x" * 100] * 100)
+    for limit, text in ((10_000, "Maximum number of AST nodes"), (5_000, "(5000)")):
+        try:
+            parse_one(sql, max_nodes=limit)
+        except ParseError as e:
+            assert text in str(e)
+        else:
+            raise AssertionError("limit not hit")
+    try:
+        parse_one("SELECT " + ",".join(f"x={i}" for i in range(100)), max_nodes=5)
+    except ParseError:
+        pass
+    else:
+        raise AssertionError("limit not hit")
+    assert isinstance(parse_one("SELECT 1, 2, 3"), exp.Select)
 
 
 def code_key(c):
@@ -503,43 +873,197 @@ def code_sig(c):
         c.co_kwonlyargcount,
         c.co_posonlyargcount,
         c.co_exceptiontable if hasattr(c, "co_exceptiontable") else b"",
-        tuple(const_sig(x) for x in c.co_consts),
+        # class bodies keep their own first line number (__firstlineno__)
+        tuple(
+            ("<line>",) if type(x) is int and x == c.co_firstlineno and "__firstlineno__" in c.co_names else const_sig(x)
+            for x in c.co_consts
+        ),
     )
 
 
-def code_diff(old_code, new_code):
+def code_diff(old_code, new_code, allow_container=False):
     """Pair code objects; return (module_level_same, {old_key: new_code})
     or None if structure differs."""
     swaps = {}
 
     def walk(a, b, top):
+        """Returns (ok, changed). A function whose nested code (lambda,
+        genexpr, inner def) changed is swapped too: nested code objects are
+        only reachable through the enclosing function's constants."""
         ca = [x for x in a.co_consts if isinstance(x, types.CodeType)]
         cb = [x for x in b.co_consts if isinstance(x, types.CodeType)]
         if len(ca) != len(cb):
-            return False
+            return False, True
         same_here = code_sig(a) == code_sig(b)
-        is_func = not top and not (a.co_flags & 0) and a.co_name != "<module>"
-        ok = True
+        child_changed = False
         for x, y in zip(ca, cb):
             if x.co_name != y.co_name:
-                return False
-            if not walk(x, y, False):
-                ok = False
+                return False, True
+            ok, ch = walk(x, y, False)
+            if not ok:
+                return False, True
+            child_changed = child_changed or ch
+        container = top or _is_class_body(a)
         if not same_here:
-            if top or _is_class_body(a):
-                return False
-            if a.co_freevars != b.co_freevars:
-                return False
+            if container and allow_container:
+                return True, True
+            if container or a.co_freevars != b.co_freevars:
+                return False, True
             swaps[code_key(a)] = b
-        return ok
+        elif child_changed and not container:
+            if a.co_freevars != b.co_freevars:
+                return False, True
+            swaps[code_key(a)] = b
+        return True, (not same_here) or child_changed
 
-    ok = walk(old_code, new_code, True)
+    ok, _ = walk(old_code, new_code, True)
     return ok, swaps
 
 
 def _is_class_body(c):
     # class bodies load __name__ into __module__ first
     return "__module__" in c.co_names and "__qualname__" in c.co_names and c.co_argcount == 0 and not (c.co_flags & 0x02 and c.co_varnames)
+
+
+ITEM_SEL = {"F": None}
+
+
+def prepare_test_module(m):
+    if hasattr(m, "ProcessPoolExecutor"):
+        m.ProcessPoolExecutor = InlineExecutor
+    if m.__name__ == "tests.test_optimizer" and not getattr(m, "_br_pairs", None):
+        orig = m.load_sql_fixture_pairs
+
+        def pairs(filename, _orig=orig):
+            sel = ITEM_SEL["F"]
+            got = list(_orig(filename))
+            if sel is None:
+                return got
+            keep = sel.get(filename)
+            if keep is None:
+                return got
+            return [x for i, x in enumerate(got) if i in keep]
+
+        m.load_sql_fixture_pairs = pairs
+        m._br_pairs = True
+    real = getattr(m, "duckdb", None)
+    if real is not None and not isinstance(real, LazyDuck) and getattr(real, "__name__", "") == "duckdb":
+        m.duckdb = LazyDuck(real)
+
+
+def apply_items(m, cls, meth, keys):
+    """Restrict a test to some of its items; returns an undo function."""
+    if not keys:
+        return lambda: None
+    fx, xs, ds = {}, set(), set()
+    for k in keys:
+        kind, _, rest = k.partition("|")
+        if kind == "F":
+            f, _, i = rest.rpartition("|")
+            fx.setdefault(f, set()).add(int(i))
+        elif kind == "X":
+            xs.add(int(rest))
+        elif kind == "D":
+            ds.add(rest)
+    undo = []
+    if fx:
+        ITEM_SEL["F"] = fx
+        undo.append(lambda: ITEM_SEL.__setitem__("F", None))
+    if xs:
+        attr = "tpcds_sqls" if meth == "test_execute_tpcds" else "tpch_sqls"
+        orig = getattr(cls, attr, None)
+        if orig is not None:
+            setattr(cls, attr, [x for i, x in enumerate(orig) if i in xs])
+            undo.append(lambda: setattr(cls, attr, orig))
+    if ds and hasattr(m, "Dialects"):
+        orig_d = m.Dialects
+        m.Dialects = [d for d in orig_d if getattr(d, "value", d) in ds]
+        undo.append(lambda: setattr(m, "Dialects", orig_d))
+
+    def restore():
+        for u in undo:
+            u()
+
+    return restore
+
+
+class LazyDuck:
+    """duckdb module stand-in whose connections open on first real use, so
+    class setup can run before fork without live connections crossing it."""
+
+    def __init__(self, real):
+        self._real = real
+
+    def __getattr__(self, name):
+        return getattr(self._real, name)
+
+    def connect(self, *a, **k):
+        # one thread: the host may expose many cores and the run has a
+        # process limit; results do not depend on it
+        cfg = dict(k.pop("config", None) or {})
+        cfg.setdefault("threads", 1)
+        k["config"] = cfg
+        return LazyConn(self._real, a, k)
+
+
+class LazyConn:
+    def __init__(self, real, a, k):
+        self._real, self._a, self._k = real, a, k
+        self._conn = None
+        self._pending = []
+
+    def _get(self):
+        if self._conn is None:
+            self._conn = self._real.connect(*self._a, **self._k)
+            for sql in self._pending:
+                self._conn.execute(sql)
+            self._pending = []
+        return self._conn
+
+    def execute(self, sql, *a, **k):
+        if self._conn is None and not a and not k and isinstance(sql, str) and sql.lstrip().upper().startswith("CREATE VIEW"):
+            self._pending.append(sql)
+            return self
+        return self._get().execute(sql, *a, **k)
+
+    def close(self):
+        if self._conn is not None:
+            self._conn.close()
+
+    def __enter__(self):
+        self._get()
+        return self
+
+    def __exit__(self, *exc):
+        self.close()
+        return False
+
+    def __getattr__(self, name):
+        return getattr(self._get(), name)
+
+
+def holders(purge):
+    """Grow `purge` with every loaded sqlglot/tests module that holds an object
+    (class, function, module or instance) defined in a purged module."""
+    mods = [(n, m) for n, m in list(sys.modules.items()) if m is not None and n.split(".")[0] in ("sqlglot", "tests")]
+    changed = True
+    while changed:
+        changed = False
+        for name, mod in mods:
+            if name in purge:
+                continue
+            for v in list(vars(mod).values()):
+                if isinstance(v, types.ModuleType):
+                    owner = v.__name__
+                elif isinstance(v, (type, types.FunctionType)):
+                    owner = getattr(v, "__module__", None)
+                else:
+                    owner = type(v).__module__
+                if owner in purge:
+                    purge.add(name)
+                    changed = True
+                    break
+    return sorted(purge)
 
 
 def child_run(job, out_fd):
@@ -582,15 +1106,32 @@ def child_run(job, out_fd):
 
     py_changed = {rel: txt for rel, txt in changed.items() if rel.endswith(".py")}
     if fast:
-        # swap code objects of changed functions in place
         want = {}
         for rel, txt in py_changed.items():
             absp = os.path.join(SRC, rel)
             with _open(absp, encoding="utf-8") as f:
                 old = f.read()
-            ok, swaps = code_diff(compile(old, absp, "exec"), compile(txt, absp, "exec"))
+            try:
+                new_code = compile(txt, absp, "exec")
+            except SyntaxError:
+                w.write(f"! broken {modname_of(rel)} SyntaxError\n")
+                w.close()
+                os._exit(0)
+            ok, swaps = code_diff(compile(old, absp, "exec"), new_code, allow_container=bool(job.get("patches")))
+            if not ok:
+                fast = False
+                job["purge"] = sorted({modname_of(r) for r in py_changed} | set(job.get("reimport") or ()))
+                w.write("# fallback to re-import\n")
+                break
             for k, v in swaps.items():
                 want[(os.path.normcase(absp), k)] = v
+        if fast and not want and not job.get("patches") and not job.get("reimport") and len(py_changed) == len(changed):
+            # compiles to the same code: nothing can behave differently
+            w.write("! same\n")
+            w.close()
+            os._exit(0)
+    if fast:
+        # swap code objects of changed functions in place
         n = 0
         for o in FUNCS or gc.get_objects():
             if isinstance(o, types.FunctionType):
@@ -600,12 +1141,37 @@ def child_run(job, out_fd):
                 if nc is not None:
                     o.__code__ = nc
                     n += 1
+        for pt in job.get("patches") or ():
+            try:
+                if pt[0] == "defaults":
+                    _, rel, qn, (lo, hi), vals, kw = pt
+                    absp = os.path.normcase(os.path.join(SRC, rel))
+                    for o in FUNCS:
+                        c = o.__code__
+                        if getattr(c, "co_qualname", c.co_name) == qn and lo <= c.co_firstlineno <= hi and os.path.normcase(c.co_filename) == absp:
+                            o.__defaults__ = tuple(vals) if vals else None
+                            o.__kwdefaults__ = dict(kw) if kw else None
+                            n += 1
+                elif pt[0] == "attr":
+                    _, mname, cq, attr, val = pt
+                    obj = sys.modules[mname]
+                    for part in cq.split("."):
+                        obj = getattr(obj, part)
+                    setattr(obj, attr, val)
+                    n += 1
+            except Exception as e:
+                w.write(f"# patch failed {e!r}\n")
         w.write(f"# swapped {n}\n")
+        if job.get("reimport"):
+            for name in holders(set(job["reimport"])):
+                sys.modules.pop(name, None)
     else:
         # re-import the changed modules and everything that imports them
         purge = job.get("purge")
         if purge is None:
             purge = [n for n in sys.modules if n.split(".")[0] in ("sqlglot", "tests")]
+        else:
+            purge = holders(set(purge))
         for name in purge:
             sys.modules.pop(name, None)
         overlay = {}
@@ -647,12 +1213,34 @@ def child_run(job, out_fd):
                     w.write(f"! broken {name} {type(e).__name__}\n")
                     w.close()
                     os._exit(0)
+        broken_any = False
         for name in sorted(purge):
             if name.startswith("sqlglot") and not name.endswith("__main__"):
                 try:
                     importlib.import_module(name)
-                except Exception:
-                    pass
+                except BaseException as e:
+                    w.write(f"! broken {name} {type(e).__name__}\n")
+                    broken_any = True
+        if broken_any:
+            w.close()
+            os._exit(0)
+        # a re-imported package loses attributes for submodules that stayed loaded
+        for name, m in list(sys.modules.items()):
+            if m is not None and "." in name and name.split(".")[0] in ("sqlglot", "tests"):
+                parent, _, short = name.rpartition(".")
+                pm = sys.modules.get(parent)
+                if pm is not None and short not in pm.__dict__:
+                    try:
+                        setattr(pm, short, m)
+                    except Exception:
+                        pass
+
+    if job.get("tpc_refresh"):
+        ex = sys.modules.get("tests.test_executor")
+        if ex is not None and getattr(ex.TestExecutor, "_br_ready", False):
+            # reload the TPC queries from the patched fixtures
+            ex.TestExecutor.tpch_sqls = list(ex.load_sql_fixture_pairs("optimizer/tpc-h/tpc-h.sql"))
+            ex.TestExecutor.tpcds_sqls = list(ex.load_sql_fixture_pairs("optimizer/tpc-ds/tpc-ds.sql"))
 
     tests = job["tests"]  # list of [num, module, class, method, seconds]
     reset = set(job.get("reset_classes", ()))
@@ -667,33 +1255,88 @@ def child_run(job, out_fd):
         signal.signal(signal.SIGALRM, on_alarm)
 
     current_cls = None
-    a_failed = False
-    for num, modn, clsn, meth, secs, tr in tests:
-        if tr == 1 and a_failed:
-            w.write(f"{num} S\n")
+    fixed = {int(n): int(v) for n, v in job.get("fixed", [])}
+    heavy = {int(n): int(v) for n, v in job.get("heavy", [])}
+    tms = dict(fixed)
+    tms.update(heavy)
+    hr = [list(t) for t in job.get("heavy_run") or []]
+    for t in hr:
+        heavy.pop(t[0], None)
+    for t in tests + hr:
+        tms[t[0]] = round(t[4] * 1000)
+    fails = set()
+
+    def first_failure():
+        # heavy tests that can be cut to a few items are worth checking once
+        # something has failed; the stop rule may still choose to report them
+        if hr:
+            tests.extend(hr)
+            hr.clear()
+
+    def should_stop(i):
+        # report what is left instead of running it, when that is cheaper; with
+        # nothing failed yet, stopping also means reporting the heavy tests
+        rem = [t[0] for t in tests[i + 1 :]]
+        if not rem:
+            return False
+        hv = set(heavy) | {t[0] for t in hr}
+        stop = pack(fails | set(fixed) | hv | set(rem), tms)[1]
+        kept = fails | set(fixed) | (set(heavy) if fails else set())
+        cont = CPU_FACTOR * 1000 * sum(t[6] for t in tests[i + 1 :]) + pack(kept, tms)[1]
+        return stop <= cont
+
+    def stop_now(i):
+        for t in tests[i + 1 :] + hr:
+            w.write(f"{t[0]} S\n")
+        if not fails:
+            w.write("! stopped\n")
+
+    i = -1
+    if should_stop(-1):
+        stop_now(-1)
+        i = len(tests)
+    while i + 1 < len(tests):
+        i += 1
+        if i and i % 8 == 0 and not fails and should_stop(i - 1):
+            stop_now(i - 1)
+            break
+        num, modn, clsn, meth, secs, tr, _c = tests[i]
+        ok = False
+        if num == job.get("proxy"):
+            c0 = time.process_time()
+            try:
+                if use_alarm:
+                    signal.setitimer(signal.ITIMER_REAL, 30)
+                max_nodes_proxy()
+                ok = time.process_time() - c0 <= job.get("proxy_limit", 1e9)
+            except BaseException:
+                ok = False
+            finally:
+                if use_alarm:
+                    signal.setitimer(signal.ITIMER_REAL, 0)
+            w.write(f"{num} {1 if ok else 0} proxy {time.process_time() - c0:.3f}\n")
+            if not ok:
+                fails.add(num)
+                first_failure()
+                if should_stop(i):
+                    for t in tests[i + 1 :]:
+                        w.write(f"{t[0]} S\n")
+                    break
             continue
         try:
             if modn not in mods:
                 m = importlib.import_module(modn)
-                for attr in ("ProcessPoolExecutor",):
-                    if hasattr(m, attr):
-                        setattr(m, attr, InlineExecutor)
+                prepare_test_module(m)
                 mods[modn] = m
             m = mods[modn]
         except BaseException as e:
             w.write(f"{num} 0 import {type(e).__name__}\n")
-            a_failed = a_failed or tr == 0
-            continue
-        cls = getattr(m, clsn, None)
-        if cls is None:
+            m = None
+        cls = getattr(m, clsn, None) if m is not None else None
+        if m is not None and cls is None:
             w.write(f"{num} 0 nocls\n")
-            a_failed = a_failed or tr == 0
-            continue
-        key = f"{modn}::{clsn}"
-        if key != current_cls:
-            if current_cls is not None:
-                pass
-            current_cls = key
+        if cls is not None:
+            key = f"{modn}::{clsn}"
             if key not in classes_done:
                 classes_done.add(key)
                 need = (not fast) or key in reset or not getattr(cls, "_br_ready", False)
@@ -703,31 +1346,40 @@ def child_run(job, out_fd):
                             signal.setitimer(signal.ITIMER_REAL, 60)
                         cls.setUpClass()
                         cls._br_setup_failed = False
-                    except BaseException as e:
+                    except BaseException:
                         cls._br_setup_failed = True
                     finally:
                         if use_alarm:
                             signal.setitimer(signal.ITIMER_REAL, 0)
-        if getattr(cls, "_br_setup_failed", False):
-            w.write(f"{num} 0 setup\n")
-            a_failed = a_failed or tr == 0
-            continue
-        result = unittest.TestResult()
-        result.failfast = True  # stop at the first failing subtest
-        t0 = time.perf_counter()
-        try:
-            if use_alarm:
-                signal.setitimer(signal.ITIMER_REAL, max(2.0, secs * 4 + 1.5))
-            cls(meth).run(result)
-        except Timeout:
-            result.errors.append((None, "timeout"))
-        finally:
-            if use_alarm:
-                signal.setitimer(signal.ITIMER_REAL, 0)
-        ok = not (result.failures or result.errors or getattr(result, "unexpectedSuccesses", None))
-        if not ok and tr == 0:
-            a_failed = True
-        w.write(f"{num} {1 if ok else 0} {time.perf_counter() - t0:.3f}\n")
+            if getattr(cls, "_br_setup_failed", False):
+                w.write(f"{num} 0 setup\n")
+            else:
+                restore = apply_items(m, cls, meth, job.get("items", {}).get(str(num)))
+                result = unittest.TestResult()
+                result.failfast = True  # stop at the first failing subtest
+                t0 = time.perf_counter()
+                try:
+                    if use_alarm:
+                        signal.setitimer(signal.ITIMER_REAL, max(2.0, secs * 4 + 1.5))
+                    cls(meth).run(result)
+                except Timeout:
+                    result.errors.append((None, "timeout"))
+                finally:
+                    if use_alarm:
+                        signal.setitimer(signal.ITIMER_REAL, 0)
+                restore()
+                ok = not (result.failures or result.errors or getattr(result, "unexpectedSuccesses", None))
+                w.write(f"{num} {1 if ok else 0} {time.perf_counter() - t0:.3f}\n")
+                if not ok and os.environ.get("BR_DEBUG"):
+                    err = str((result.failures or result.errors or [(0, "?")])[0][1])[-700:]
+                    w.write("#   " + err.replace("\n", "\n#   ") + "\n")
+        if not ok:
+            fails.add(num)
+            first_failure()
+            if should_stop(i):
+                for t in tests[i + 1 :]:
+                    w.write(f"{t[0]} S\n")
+                break
     w.close()
     os._exit(0)
 
@@ -737,6 +1389,12 @@ def child_run(job, out_fd):
 
 def main():
     t_start = time.time()
+    # Only answer lines may reach stdout: keep the real stdout aside and send
+    # everything else (imports, tests, children) to stderr.
+    sys.stdout.flush()
+    out = os.fdopen(os.dup(1), "w", encoding="utf-8", newline="\n")
+    os.dup2(2, 1)
+    sys.stdout = sys.stderr
     tests = json.load(open(os.path.join(DATA, "tests.json")))["tests"]
     ms = {t["number"]: round(t["seconds"] * 1000) for t in tests}
     secs = {t["number"]: t["seconds"] for t in tests}
@@ -744,36 +1402,53 @@ def main():
     for t in tests:
         path, cls, meth = t["id"].split("::")
         meta[t["number"]] = (modname_of(path), cls, meth)
+        TEST_CLASS[t["number"]] = f"{modname_of(path)}::{cls}"
+        TEST_CLASS[("meth", t["number"])] = meth
     all_nums = set(ms)
     mp = Map(MAP)
-    an = Analysis(mp)
+    cost = {n: mp.cpu.get(n, secs[n]) for n in secs}
     by_file = {}
     for t in tests:
         by_file.setdefault(t["file"], set()).add(t["number"])
+    an = Analysis(mp, by_file)
 
     commit_dir = os.path.join(DATA, "commits")
     cids = sorted(f[:-6] for f in os.listdir(commit_dir) if f.endswith(".patch"))
     plans = {}
     for cid in cids:
         try:
-            plans[cid] = plan_commit(cid, open(os.path.join(commit_dir, cid + ".patch"), encoding="utf-8", errors="replace").read(), mp, an, by_file, all_nums, secs)
+            plans[cid] = plan_commit(cid, open(os.path.join(commit_dir, cid + ".patch"), encoding="utf-8", errors="replace").read(), mp, an, by_file, all_nums, cost)
         except Exception as e:
             log("plan failed", cid, repr(e))
             plans[cid] = {"out": set(all_nums), "run": set(), "heavy": set(), "changed": {}}
+    mn = next((t["number"] for t in tests if t["id"] == MAX_NODES_ID), None)
+    for p in plans.values():
+        if mn is not None and mn in p.get("heavy", ()):
+            # check a scaled copy instead of reporting the 29s test blindly
+            p["heavy"].discard(mn)
+            p["run"].add(mn)
+            p["proxy"] = mn
+            p.setdefault("est", {})[mn] = 0.35
     log(f"planned {len(cids)} in {time.time() - t_start:.2f}s")
 
-    results = run_all(plans, meta, secs)
+    try:
+        results = run_all(plans, meta, secs, cost)
+    except BaseException as e:  # never lose the batch: unrun tests get reported
+        log("runner failed", repr(e))
+        results = {}
 
     for cid in cids:
         p = plans[cid]
         fails = set(p["out"])
         res = results.get(cid)
         if p["run"]:
-            if res is None or res.get("broken") is not None:
+            if res is not None and res.get("same"):
+                pass
+            elif res is None or res.get("broken") is not None:
                 fails |= p["heavy"]
-                fails |= set(p.get("broken_out", all_nums)) if res and res.get("broken") else set(p["run"])
-                if res and res.get("broken"):
-                    fails |= module_importers(res["broken"], mp, by_file, all_nums)
+                fails |= set(p["run"])
+                for bm in (res or {}).get("broken") or ():
+                    fails |= module_importers(bm, mp, by_file, all_nums)
             else:
                 any_fail = False
                 for n in p["run"]:
@@ -782,10 +1457,22 @@ def main():
                         fails.add(n)
                     if r is False:
                         any_fail = True
-                if any_fail:
-                    fails |= p["heavy"]
+                if res.get("stopped") or any_fail:
+                    # The heavy executor tests (TPC-H/TPC-DS) have only failed when
+                    # some other executor test failed; unverified ones count.
+                    ex_bad = any(
+                        meta[n][0] == "tests.test_executor" and res["ok"].get(n, False) is not True
+                        for n in p["run"]
+                        if n not in p["heavy"]
+                    )
+                    for n in p["heavy"]:
+                        if meta[n][0] == "tests.test_executor" and not ex_bad:
+                            continue
+                        if res.get("stopped") or n not in p.get("heavy_run", ()) or res["ok"].get(n) is not True:
+                            fails.add(n)
         workers, cost = pack(fails, ms)
-        print(json.dumps({"commit": cid, "workers": workers}), flush=True)
+        out.write(json.dumps({"commit": cid, "workers": workers}) + "\n")
+        out.flush()
         ccpu = (res or {}).get("cpu", 0.0)
         log(f"{cid}: out={len(p['out'])} run={len(p['run'])} fail={len(fails)} cost={cost / 1000:.3f} cpu={ccpu:.2f} {'fast' if p.get('fast') else 'slow'} {p.get('why', '')}")
     log(f"total wall {time.time() - t_start:.2f}s, parent cpu {time.process_time():.2f}s, children cpu {sum(r.get('cpu', 0) for r in results.values()):.2f}s")
@@ -795,18 +1482,115 @@ def module_importers(mod, mp, by_file, all_nums):
     out = set()
     for tf in mp.modfiles.get(mod, ()):
         out |= by_file.get(tf, set())
-    out |= Analysis(mp).module_users_by_name(mod)
+    an = _AN.get(id(mp))
+    if an is None:
+        an = _AN[id(mp)] = Analysis(mp)
+    out |= an.module_users_by_name(mod)
     return out
+
+
+_AN = {}
+
+
+TEST_CLASS = {}
+TPC_FILES = {
+    "test_execute_tpch": "optimizer/tpc-h/tpc-h.sql",
+    "test_optimized_tpch": "optimizer/tpc-h/tpc-h.sql",
+    "test_execute_tpcds": "optimizer/tpc-ds/tpc-ds.sql",
+}
+
+
+def fixture_pairs(text):
+    statements = "\n".join(ln for ln in text.splitlines() if ln and not ln.startswith("--")).split(";")
+    out = []
+    for i in range(0, len(statements), 2):
+        if i + 1 < len(statements):
+            sql = statements[i].strip()
+            lines = sql.split("\n")
+            j = 0
+            meta = []
+            while lines[j].startswith("#"):
+                key, val = lines[j].split(":", maxsplit=1)
+                meta.append((key.lstrip("#").strip(), val.strip()))
+                j += 1
+            out.append((tuple(meta), "\n".join(lines[j:]), statements[i + 1].strip()))
+    return out
+
+
+def fixture_changes(old, new):
+    """Indices of fixture cases that differ, or None when cases were added or removed."""
+    try:
+        a, b = fixture_pairs(old), fixture_pairs(new)
+    except Exception:
+        return None
+    if len(a) != len(b):
+        return None
+    return {i for i, (x, y) in enumerate(zip(a, b)) if x != y}
+
+
+def meta_cls(n):
+    return TEST_CLASS.get(n)
+
+
+def select_items(n, iids, spans, changed, mp, cls_key, fixtures=None, same=()):
+    """Items of test n that execute a changed line, or None to run it whole."""
+    sel = set()
+    non_py = [rel for rel in changed if not rel.endswith(".py")]
+    if non_py:
+        # fixture case files whose cases still match one to one
+        if not fixtures or any(fixtures.get(rel) is None for rel in non_py):
+            return None
+        meth = TEST_CLASS.get(("meth", n)) or ""
+        for iid in iids:
+            kind, _, rest = mp.items[iid][1].partition("|")
+            if kind == "F":
+                f, _, i = rest.rpartition("|")
+                if int(i) in fixtures.get("tests/fixtures/" + f, ()):
+                    sel.add(iid)
+            elif kind == "X" and meth in TPC_FILES:
+                if int(rest) in fixtures.get("tests/fixtures/" + TPC_FILES[meth], ()):
+                    sel.add(iid)
+    for rel, (sp, static) in spans.items():
+        if not sp:
+            continue
+        if static or n in mp.nonitem_tests(rel, sp):
+            return None
+        if cls_key and cls_key in mp.line_classes(rel, sp):
+            return None
+        sel |= mp.item_hits(rel, sp)
+    for rel in changed:
+        if rel.endswith(".py") and rel not in spans and rel not in same:
+            return None
+    sel &= set(iids)
+    return sel or None
 
 
 def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
     files = parse_patch(text)
+    an.reimport = set()
+    an.spans = {}
+    an.patches = []
+    fixtures = {}
+    same_files = set()
+    tpc_refresh = False
+    data_heavy = False
     changed = {}
     cand = set()
     out = set()
     reset = set()
     fast = True
     why = []
+    # binary edits cannot be applied: report every test that reads the file
+    for m in re.finditer(r"^Binary files (?:a/)?(\S+) and (?:b/)?(\S+) differ$|^diff --git a/(\S+) b/(\S+)\n(?:.*\n){0,4}?GIT binary patch", text, re.M):
+        for p in {g for g in m.groups() if g and g != "/dev/null"}:
+            o = mp.opens.get(p)
+            if o is not None:
+                out |= set(mp.sets[o])
+            elif p.endswith(".py"):
+                out |= module_importers(modname_of(p), mp, by_file, all_nums)
+            why.append("binary")
+    if any(old is None and new and new.endswith(".py") for old, new, _ in files):
+        fast = False  # a new module has to be importable from the overlay
     for old, new, hunks in files:
         rel = new or old
         src_path = os.path.join(SRC, old) if old else None
@@ -831,7 +1615,9 @@ def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
                 out |= module_importers(mod, mp, by_file, all_nums)
                 why.append("deleted")
                 continue
-            c, rc, flags = an.py_change(rel, old_text, new_text, touched, inserts)
+            removed_txt = [b[1:] for _, body in hunks for b in body if b[:1] == "-"]
+            added_txt = [b[1:] for _, body in hunks for b in body if b[:1] == "+"]
+            c, rc, flags = an.py_change(rel, old_text, new_text, touched, inserts, removed_txt, added_txt)
             if "broken" in flags:
                 mod = modname_of(rel)
                 if rel.startswith("tests/"):
@@ -843,56 +1629,98 @@ def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
                 why.append("syntax")
                 continue
             if "same" in flags:
+                same_files.add(rel)
                 why.append("same-ast")
                 continue
-            if old_text is not None:
-                ok, swaps = code_diff(compile(old_text, src_path, "exec"), compile(new_text, src_path, "exec"))
-                if not ok:
-                    fast = False
-                elif not swaps:
-                    why.append("same-code")
-                    continue
+            if "importtime" in flags or "static" in flags or old_text is None:
+                fast = False
             cand |= c
             reset |= rc
             why.append(("static " if "static" in flags else "") + f"py:{len(c)}")
         else:
             o = mp.opens.get(rel)
             if o is not None:
-                cand |= set(mp.sets[o])
+                users = set(mp.sets[o])
+                fx = rel[len("tests/fixtures/") :] if rel.startswith("tests/fixtures/") else None
+                tpc = fx in TPC_FILES.values()
+                if tpc:
+                    # the executor class loads TPC queries for its TPC tests only
+                    users = {
+                        n for n in users
+                        if not TEST_CLASS.get(n, "").startswith("tests.test_executor::")
+                        or TPC_FILES.get(TEST_CLASS.get(("meth", n))) == fx
+                    }
+                    tpc_refresh = True
+                cand |= users
+                data_heavy = True
+                # class setup may have read the old file before the fork
+                reset |= {
+                    TEST_CLASS[n] for n in users
+                    if n in TEST_CLASS and not (tpc and TEST_CLASS[n].startswith("tests.test_executor::"))
+                }
                 why.append(f"data:{len(mp.sets[o])}")
+                if rel.startswith("tests/fixtures/") and rel.endswith(".sql") and old_text is not None and new_text is not None:
+                    fixtures[rel] = fixture_changes(old_text, new_text)
             else:
                 why.append("unused-file")
     cand -= out
     purge = None
     if not fast:
         purge = sorted(mp.dependents({modname_of(r) for r in changed if r.endswith(".py")}))
-    run = {n for n in cand if tier(secs[n]) < 2}
-    heavy = {n for n in cand if tier(secs[n]) == 2}
-    if heavy and not run:
-        out |= heavy
-        heavy = set()
-    return {"out": out, "run": run, "heavy": heavy, "purge": purge, "changed": changed, "fast": fast, "reset": reset, "why": " ".join(why)}
+    items = {}
+    est = {}
+    for n in cand:
+        iids = mp.items_of.get(n)
+        if not iids:
+            continue
+        sel = select_items(n, iids, an.spans, changed, mp, meta_cls(n), fixtures, same_files)
+        if sel is None:
+            continue
+        items[n] = sorted(mp.items[i][1] for i in sel)
+        est[n] = secs[n] * (len(sel) + 1) / (len(iids) + 1)
+    c_of = lambda n: est.get(n, secs[n])  # noqa: E731
+    run = {n for n in cand if tier(c_of(n)) < 2}  # secs here: our CPU cost per test
+    heavy = {n for n in cand if tier(c_of(n)) == 2}
+    if heavy and (not run or data_heavy):
+        out |= {n for n in heavy if n not in items}
+        heavy = {n for n in heavy if n in items}
+        if data_heavy:
+            run |= heavy
+            heavy = set()
+    if purge is not None:
+        purge = sorted(set(purge) | an.reimport)
+    return {"out": out, "run": run, "heavy": heavy, "purge": purge, "reimport": sorted(an.reimport), "items": items, "est": est, "patches": list(an.patches), "tpc_refresh": tpc_refresh, "changed": changed, "fast": fast, "reset": reset, "why": " ".join(why)}
 
 
-def run_all(plans, meta, secs):
+def run_all(plans, meta, secs, cost):
     jobs = [(cid, p) for cid, p in plans.items() if p["run"]]
     if not jobs:
         return {}
     results = {}
     use_fork = hasattr(os, "fork") and os.environ.get("BR_NOFORK") != "1"
+    proxy_limit = 1e9
     if use_fork:
         need = set()
         for _, p in jobs:
             need |= {meta[n][0] for n in p["run"]}
         c0 = time.process_time()
-        preload(need)
+        ex_jobs = sum(1 for _, p in jobs if any(meta[n][0] == "tests.test_executor" for n in p["run"]))
+        preload(need, exec_setup=ex_jobs >= 2)
         log(f"preload {time.process_time() - c0:.2f}s cpu, {len(need)} test modules")
+        if any(p.get("proxy") for _, p in jobs):
+            c0 = time.process_time()
+            try:
+                max_nodes_proxy()
+                proxy_limit = 3 * (time.process_time() - c0) + 0.1
+            except Exception as e:
+                log("proxy baseline failed", repr(e))
+    log(f"proxy limit {proxy_limit}")
     import tempfile
 
     base_tmp = tempfile.mkdtemp(prefix="br")
     par = int(os.environ.get("BR_PAR", "2"))
     running = {}
-    queue = sorted(jobs, key=lambda j: -sum(secs[n] for n in j[1]["run"]))
+    queue = sorted(jobs, key=lambda j: -sum(cost[n] for n in j[1]["run"]))
     import select
     import subprocess
 
@@ -900,15 +1728,27 @@ def run_all(plans, meta, secs):
         tdir = os.path.join(base_tmp, cid)
         os.makedirs(tdir, exist_ok=True)
         tl = sorted(p["run"])
+        # checking pays when the cut-down run is well below the cost of reporting it
+        hrun = {n for n in p["heavy"] if n in p.get("items", {}) and meta[n][0] != "tests.test_executor" and p["est"].get(n, 1e9) + 1.0 < 0.6 * (secs[n] + WORKER_COST / 1000)}
+        p["heavy_run"] = hrun
         job = {
             "changed": p["changed"],
             "fast": p["fast"] and use_fork,
             "tmpdir": tdir,
-            "tests": [[n, *meta[n], secs[n], tier(secs[n])] for n in sorted(tl, key=lambda n: (tier(secs[n]), n))],
+            "tests": [[n, *meta[n], secs[n], tier(p["est"].get(n, cost[n])), p["est"].get(n, cost[n])] for n in sorted(tl, key=lambda n: (tier(p["est"].get(n, cost[n])), p["est"].get(n, cost[n]), n))],
+            "items": {str(n): v for n, v in p.get("items", {}).items() if n in p["run"] or n in hrun},
+            "heavy_run": [[n, *meta[n], secs[n], 2, p["est"][n]] for n in sorted(hrun)],
+            "fixed": [[n, round(secs[n] * 1000)] for n in sorted(p["out"])],
+            "heavy": [[n, round(secs[n] * 1000)] for n in sorted(p["heavy"])],
             "reset_classes": sorted(p["reset"]),
             "purge": p.get("purge") if use_fork else None,
+            "reimport": p.get("reimport", []),
+            "proxy": p.get("proxy"),
+            "tpc_refresh": p.get("tpc_refresh", False),
+            "patches": p.get("patches", []) if p["fast"] and use_fork else [],
+            "proxy_limit": proxy_limit,
         }
-        budget = 30 + sum(secs[n] * 4 + 2 for n in tl)
+        budget = 30 + sum(max(secs[n], cost[n]) * 4 + 2 for n in list(tl) + sorted(hrun))
         if use_fork:
             r, wfd = os.pipe()
             pid = os.fork()
@@ -937,14 +1777,20 @@ def run_all(plans, meta, secs):
         else:
             data = h["buf"]
         ok = {}
-        broken = None
+        broken = []
+        stopped = False
+        same = False
         for line in data.decode(errors="replace").splitlines():
-            if line.startswith("! broken"):
-                broken = line.split()[2]
+            if line.startswith("! same"):
+                same = True
+            elif line.startswith("! stopped"):
+                stopped = True
+            elif line.startswith("! broken"):
+                broken.append(line.split()[2])
             elif line and line[0].isdigit():
                 parts = line.split()
                 ok[int(parts[0])] = {"1": True, "0": False, "S": None}[parts[1]]
-        results[cid] = {"ok": ok, "broken": broken, "cpu": h.get("cpu", 0.0)}
+        results[cid] = {"ok": ok, "broken": broken or None, "cpu": h.get("cpu", 0.0), "stopped": stopped, "same": same}
 
     if not use_fork:
         # Windows/local: simple sequential pool of subprocesses
@@ -988,7 +1834,7 @@ def run_all(plans, meta, secs):
     return results
 
 
-def preload(test_mods):
+def preload(test_mods, exec_setup=True):
     """Import sqlglot and the test modules once; children fork from here."""
     import gc
     import importlib
@@ -1017,12 +1863,11 @@ def preload(test_mods):
     for modn in sorted(test_mods):
         try:
             m = importlib.import_module(modn)
-            if hasattr(m, "ProcessPoolExecutor"):
-                m.ProcessPoolExecutor = InlineExecutor
+            prepare_test_module(m)
         except Exception as e:
             log("preload import failed", modn, repr(e))
     ex = sys.modules.get("tests.test_executor")
-    if ex is not None and hasattr(ex, "TestExecutor"):
+    if exec_setup and ex is not None and hasattr(ex, "TestExecutor"):
         try:
             ex.TestExecutor.setUpClass()
             ex.TestExecutor._br_ready = True

@@ -1,0 +1,12 @@
+diff --git a/sqlglot/expressions/core.py b/sqlglot/expressions/core.py
+--- a/sqlglot/expressions/core.py
++++ b/sqlglot/expressions/core.py
+@@ -3119,7 +3119,7 @@
+     col: str | Expr,
+     table: str | Identifier | None = None,
+     db: str | Identifier | None = None,
+-    catalog: str | Identifier | None = None,
++    catalog: str | Identifier | None = 0,
+     *,
+     fields: Collection[str | Identifier],
+     quoted: bool | None = None,

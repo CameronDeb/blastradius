@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/snowflake.py b/sqlglot/generators/snowflake.py
+--- a/sqlglot/generators/snowflake.py
++++ b/sqlglot/generators/snowflake.py
+@@ -736,7 +736,7 @@
+         elif default_scale:
+             scale = None
+ 
+-        func_name = "TRY_TO_NUMBER" if expression.args.get("safe") else "TO_NUMBER"
++        func_name = "TRY_TO_NUMBER" if expression.args.get("safe") else "TO_NUMBERX"
+ 
+         return self.func(
+             func_name,

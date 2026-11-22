@@ -1,0 +1,12 @@
+diff --git a/sqlglot/optimizer/simplify.py b/sqlglot/optimizer/simplify.py
+--- a/sqlglot/optimizer/simplify.py
++++ b/sqlglot/optimizer/simplify.py
+@@ -944,7 +944,7 @@
+                 if (
+                     (is_null(left) and is_null(right))
+                     or (is_null(left) and always_false(right))
+-                    or (always_false(left) and is_null(right))
++                    or (always_false(left) or is_null(right))
+                 ):
+                     return exp.null()
+                 if is_false(left):

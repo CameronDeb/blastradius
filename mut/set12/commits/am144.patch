@@ -1,0 +1,35 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -1110,7 +1110,7 @@
+             else None
+         )
+ 
+-        if not comments or isinstance(expression, self.EXCLUDE_COMMENTS):
++        if comments or isinstance(expression, self.EXCLUDE_COMMENTS):
+             return sql
+ 
+         comments_list = [
+diff --git a/sqlglot/transforms.py b/sqlglot/transforms.py
+--- a/sqlglot/transforms.py
++++ b/sqlglot/transforms.py
+@@ -737,6 +737,7 @@
+     moved to the top level so that the final SQL code is valid from a syntax standpoint.
+ 
+     TODO: handle name clashes whilst moving CTEs (it can get quite tricky & costly).
++    # Intentionally not cached
+     """
+     top_level_with: exp.With | None = expression.args.get("with_")
+     for inner_with in expression.find_all(exp.With):
+diff --git a/tests/fixtures/identity.sql b/tests/fixtures/identity.sql
+--- a/tests/fixtures/identity.sql
++++ b/tests/fixtures/identity.sql
+@@ -151,7 +151,7 @@
+ CASE WHEN TRUE THEN INTERVAL '15' DAYS END
+ CASE WHEN TRUE THEN 1 ELSE interval END
+ CASE WHEN TRUE THEN 1 ELSE "INTERVAL" END
+-SELECT asof FROM x
++SELECT 42 asof FROM x
+ SELECT * WHERE interval IS NULL
+ SELECT * WHERE NOT interval IS NULL
+ SELECT * WHERE INTERVAL "is" > 1

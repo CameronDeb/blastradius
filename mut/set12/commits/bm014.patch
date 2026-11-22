@@ -1,0 +1,12 @@
+diff --git a/sqlglot/optimizer/annotate_types.py b/sqlglot/optimizer/annotate_types.py
+--- a/sqlglot/optimizer/annotate_types.py
++++ b/sqlglot/optimizer/annotate_types.py
+@@ -992,7 +992,7 @@
+             self._set_type(expression, this.type)
+         elif this.type.is_type(exp.DType.ARRAY):
+             self._set_type(expression, seq_get(this.type.expressions, 0))
+-        elif isinstance(this, (exp.Map, exp.VarMap)) and bracket_arg in this.keys:
++        elif isinstance(this, (exp.Map, exp.VarMap)) or bracket_arg in this.keys:
+             index = this.keys.index(bracket_arg)
+             value = seq_get(this.values, index)
+             self._set_type(expression, value.type if value else None)

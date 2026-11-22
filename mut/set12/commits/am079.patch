@@ -1,0 +1,11 @@
+diff --git a/sqlglot/optimizer/resolver.py b/sqlglot/optimizer/resolver.py
+--- a/sqlglot/optimizer/resolver.py
++++ b/sqlglot/optimizer/resolver.py
+@@ -393,6 +393,7 @@
+                 or join.args.get("using")
+                 or join.method
+                 or join.side
++                # Keep in sync with the generator
+                 or join.kind
+             ):
+                 sources.clear()

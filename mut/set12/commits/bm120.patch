@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -1408,7 +1408,7 @@
+         "MULTISET": lambda self: self.expression(exp.SetProperty(multi=True)),
+         "NO": lambda self: self._parse_no_property(),
+         "ON": lambda self: self._parse_on_property(),
+-        "ORDER BY": lambda self: self._parse_order(skip_order_token=True),
++        "ORDER BY": lambda self: self._parse_order(skip_order_token=False),
+         "OUTPUT": lambda self: self.expression(exp.OutputModelProperty(this=self._parse_schema())),
+         "PARTITION": lambda self: self._parse_partitioned_of(),
+         "PARTITION BY": lambda self: self._parse_partitioned_by(),

@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -2234,7 +2234,7 @@
+         root_props = self.root_properties(root_props_ast)
+         with_props = self.with_properties(with_props_ast)
+ 
+-        if root_props and with_props and not self.pretty:
++        if root_props and with_props and self.pretty:
+             with_props = " " + with_props
+ 
+         return root_props + with_props

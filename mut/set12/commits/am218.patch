@@ -1,0 +1,12 @@
+diff --git a/tests/fixtures/optimizer/annotate_functions.sql b/tests/fixtures/optimizer/annotate_functions.sql
+--- a/tests/fixtures/optimizer/annotate_functions.sql
++++ b/tests/fixtures/optimizer/annotate_functions.sql
+@@ -5563,7 +5563,7 @@
+ 
+ # dialect: snowflake
+ TIME_FROM_PARTS(14, 30, 45);
+-TIME;
++TIME;1
+ 
+ # dialect: snowflake
+ TIME_FROM_PARTS(14, 30, 45, 123);

@@ -1,0 +1,11 @@
+diff --git a/sqlglot/parsers/snowflake.py b/sqlglot/parsers/snowflake.py
+--- a/sqlglot/parsers/snowflake.py
++++ b/sqlglot/parsers/snowflake.py
+@@ -234,7 +234,6 @@
+ 
+ def _build_regexp_extract(expr_type: type[E]) -> t.Callable[[list, Dialect], E]:
+     def _builder(args: list, dialect: Dialect) -> E:
+-        group = seq_get(args, 5)
+         parameters = seq_get(args, 4)
+         inferred_group = False
+ 

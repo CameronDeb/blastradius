@@ -1,0 +1,12 @@
+diff --git a/tests/fixtures/optimizer/canonicalize.sql b/tests/fixtures/optimizer/canonicalize.sql
+--- a/tests/fixtures/optimizer/canonicalize.sql
++++ b/tests/fixtures/optimizer/canonicalize.sql
+@@ -154,7 +154,7 @@
+ 
+ # title: redundant cast allows unnecessary parentheses to simplify
+ SELECT CAST(x.a * x.b AS INT) + 2 AS c FROM x AS x;
+-SELECT ("x"."a" * "x"."b") + 2 AS "c" FROM "x" AS "x";
++SELECT ("x"."a" * "x"."b") + 2 AS "c" "x" AS "x";
+ 
+ # title: redundant cast preserves IN operand grouping
+ SELECT CAST(x.a > 0 OR x.b > 0 AS BOOLEAN) IN (FALSE) AS c FROM x AS x;

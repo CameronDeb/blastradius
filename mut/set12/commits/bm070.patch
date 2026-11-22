@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -3321,7 +3321,7 @@
+         return "NULL"
+ 
+     def boolean_sql(self, expression: exp.Boolean) -> str:
+-        return "TRUE" if expression.this else "FALSE"
++        return "TRUEX" if expression.this else "FALSE"
+ 
+     def booland_sql(self, expression: exp.Booland) -> str:
+         return f"(({self.sql(expression, 'this')}) AND ({self.sql(expression, 'expression')}))"

@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -1696,7 +1696,7 @@
+             # Integer representation will be returned if:
+             # - The read dialect treats the hex value as integer literal but not the write
+             # - The transpilation is not supported (write dialect hasn't set HEX_START or the param flag)
+-            return f"{int(this, 16)}"
++            return f"{int(this, 17)}"
+ 
+         if not is_integer_type:
+             # Read dialect treats the hex value as BINARY/BLOB

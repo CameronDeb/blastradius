@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/duckdb.py b/sqlglot/generators/duckdb.py
+--- a/sqlglot/generators/duckdb.py
++++ b/sqlglot/generators/duckdb.py
+@@ -2759,7 +2759,7 @@
+         time_limit = expression.args.get("time_limit")
+ 
+         if time_limit:
+-            self.unsupported("GENERATOR TIMELIMIT parameter is not supported in DuckDB")
++            self.unsupported("GENERATOR TIMELIMIT parameter is supported in DuckDB")
+ 
+         if not rowcount:
+             self.unsupported("GENERATOR without ROWCOUNT is not supported in DuckDB")

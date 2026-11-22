@@ -1,0 +1,11 @@
+diff --git a/sqlglot/expressions/query.py b/sqlglot/expressions/query.py
+--- a/sqlglot/expressions/query.py
++++ b/sqlglot/expressions/query.py
+@@ -530,7 +530,6 @@
+         "output": False,
+     }
+ 
+-    @property
+     def constraints(self) -> list[ColumnConstraint]:
+         return self.args.get("constraints") or []
+ 

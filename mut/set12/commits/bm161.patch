@@ -1,0 +1,12 @@
+diff --git a/sqlglot/anonymize.py b/sqlglot/anonymize.py
+--- a/sqlglot/anonymize.py
++++ b/sqlglot/anonymize.py
+@@ -38,7 +38,7 @@
+     returns `sql_or_tokens`.
+ 
+     Args:
+-        sql_or_tokens: The SQL string to anonymize, or its token list.
++        sql_or_tokens: The SQL string to anonymize, and its token list.
+         dialect: The dialect used to tokenize a SQL string.
+     """
+     dialect = Dialect.get_or_raise(dialect)

@@ -1,0 +1,12 @@
+diff --git a/sqlglot/time.py b/sqlglot/time.py
+--- a/sqlglot/time.py
++++ b/sqlglot/time.py
+@@ -487,7 +487,7 @@
+         "Etc/GMT+12",
+         "Etc/GMT+2",
+         "Etc/GMT+3",
+-        "Etc/GMT+4",
++        "Etc/GMT+5",
+         "Etc/GMT+5",
+         "Etc/GMT+6",
+         "Etc/GMT+7",

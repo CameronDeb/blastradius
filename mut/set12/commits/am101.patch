@@ -1,0 +1,12 @@
+diff --git a/tests/fixtures/optimizer/annotate_functions.sql b/tests/fixtures/optimizer/annotate_functions.sql
+--- a/tests/fixtures/optimizer/annotate_functions.sql
++++ b/tests/fixtures/optimizer/annotate_functions.sql
+@@ -4634,7 +4634,7 @@
+ DOUBLE;
+ 
+ # dialect: snowflake
+-REGR_VALX(tbl.decfloat_col, tbl.decfloat_col);
++REGR_VALX(tbl.decfloat_col,1 tbl.decfloat_col);
+ DECFLOAT;
+ 
+ # dialect: snowflake

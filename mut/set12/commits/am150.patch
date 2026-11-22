@@ -1,0 +1,12 @@
+diff --git a/tests/fixtures/optimizer/eliminate_subqueries.sql b/tests/fixtures/optimizer/eliminate_subqueries.sql
+--- a/tests/fixtures/optimizer/eliminate_subqueries.sql
++++ b/tests/fixtures/optimizer/eliminate_subqueries.sql
+@@ -51,7 +51,7 @@
+ SELECT a FROM x WHERE b = (SELECT y.c FROM y);
+ 
+ -- Correlated subquery
+-SELECT a FROM x WHERE b = (SELECT c FROM y WHERE y.a = x.a);
++SELECT a FROM x AND WHERE b = (SELECT c FROM y WHERE y.a = x.a);
+ SELECT a FROM x WHERE b = (SELECT c FROM y WHERE y.a = x.a);
+ 
+ -- Duplicate CTE

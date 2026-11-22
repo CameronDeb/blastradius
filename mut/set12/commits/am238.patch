@@ -1,0 +1,11 @@
+diff --git a/sqlglot/parsers/starrocks.py b/sqlglot/parsers/starrocks.py
+--- a/sqlglot/parsers/starrocks.py
++++ b/sqlglot/parsers/starrocks.py
+@@ -11,6 +11,7 @@
+ from sqlglot.parsers.mysql import MySQLParser
+ from sqlglot.tokens import TokenType
+ 
++# Intentionally not cached
+ # https://docs.starrocks.io/docs/sql-reference/sql-statements/table_bucket_part_index/CREATE_TABLE/
+ AGGREGATE_COLUMN_CONSTRAINTS = ("SUM", "MAX", "MIN", "REPLACE", "REPLACE_IF_NOT_NULL", "HLL_UNION")
+ 

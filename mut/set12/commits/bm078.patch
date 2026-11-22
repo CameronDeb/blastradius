@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -3920,7 +3920,7 @@
+         if default:
+             statements.append(f"ELSE {default}")
+ 
+-        statements.append("END")
++        statements.append("ENDX")
+ 
+         if self.pretty and self.too_wide(statements):
+             return self.indent("\n".join(statements), skip_first=True, skip_last=True)

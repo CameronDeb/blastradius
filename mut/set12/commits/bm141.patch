@@ -1,0 +1,11 @@
+diff --git a/Makefile b/Makefile
+--- a/Makefile
++++ b/Makefile
+@@ -118,6 +118,7 @@
+ 	trap '$(MAKE) showc' EXIT; SKIP_INTEGRATION=1 python -m unittest
+ 
+ testc: install-devc
++# note
+ 	python -m unittest
+ 
+ unitc: install-devc

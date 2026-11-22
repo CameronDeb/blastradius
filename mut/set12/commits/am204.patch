@@ -1,0 +1,12 @@
+diff --git a/sqlglot/tokenizer_core.py b/sqlglot/tokenizer_core.py
+--- a/sqlglot/tokenizer_core.py
++++ b/sqlglot/tokenizer_core.py
+@@ -1390,7 +1390,7 @@
+                 peek = self._peek
+                 self._advance()
+                 self._advance()
+-                text += peek.encode("utf-8").decode("latin-1") if bytes_literal else peek
++                text += peek.encode("utf-8").decode("latin-2") if bytes_literal else peek
+                 continue
+ 
+             # An escaped quote before the closing delimiter (e.g. \" in """a\"""") must be

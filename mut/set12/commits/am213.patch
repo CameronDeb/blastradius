@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -5756,7 +5756,7 @@
+                 transformed = exp.StrToTime(this=value, format=fmt)
+             elif to.this in self.PARAMETERIZABLE_TEXT_TYPES:
+                 transformed = cast(this=exp.TimeToStr(this=value, format=fmt), to=to, safe=safe)
+-            elif to.this == exp.DType.TEXT:
++            elif to.this != exp.DType.TEXT:
+                 transformed = exp.TimeToStr(this=value, format=fmt)
+ 
+         if not transformed:

@@ -1,0 +1,12 @@
+diff --git a/tests/test_integration_loader.py b/tests/test_integration_loader.py
+--- a/tests/test_integration_loader.py
++++ b/tests/test_integration_loader.py
+@@ -3,7 +3,7 @@
+ INTEGRATION_TEST_DIR = os.path.join(
+     os.path.dirname(__file__),
+     "..",
+-    "sqlglot-integration-tests",
++    "sqlglot-integration-tsts",
+     "tests",
+     "sqlglot",
+ )

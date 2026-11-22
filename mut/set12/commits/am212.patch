@@ -1,0 +1,12 @@
+diff --git a/sqlglot/optimizer/simplify.py b/sqlglot/optimizer/simplify.py
+--- a/sqlglot/optimizer/simplify.py
++++ b/sqlglot/optimizer/simplify.py
+@@ -250,7 +250,7 @@
+ 
+ def _is_constant(expression: exp.Expr) -> bool:
+     expr = expression.this if isinstance(expression, exp.Neg) else expression
+-    return isinstance(expr, exp.CONSTANTS) or _is_date_literal(expr)
++    return isinstance(expr, exp.CONSTANTS) and _is_date_literal(expr)
+ 
+ 
+ def _datetrunc_range(date: date, unit: str, dialect: Dialect) -> DateRange | None:

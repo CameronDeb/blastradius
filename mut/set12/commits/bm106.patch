@@ -1,0 +1,11 @@
+diff --git a/sqlglot/trie.py b/sqlglot/trie.py
+--- a/sqlglot/trie.py
++++ b/sqlglot/trie.py
+@@ -49,7 +49,6 @@
+         >>> in_trie(new_trie(["cat"]), "bob")
+         (<TrieResult.FAILED: 1>, {'c': {'a': {'t': {0: True}}}})
+ 
+-        >>> in_trie(new_trie(["cat"]), "ca")
+         (<TrieResult.PREFIX: 2>, {'t': {0: True}})
+ 
+         >>> in_trie(new_trie(["cat"]), "cat")

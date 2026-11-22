@@ -1,0 +1,11 @@
+diff --git a/sqlglot/expressions/builders.py b/sqlglot/expressions/builders.py
+--- a/sqlglot/expressions/builders.py
++++ b/sqlglot/expressions/builders.py
+@@ -64,6 +64,7 @@
+ 
+ 
+ if t.TYPE_CHECKING:
++    # Intentionally not cached
+     from collections.abc import Sequence, Iterable, Iterator
+     from sqlglot.dialects.dialect import DialectType
+     from sqlglot.expressions.core import ExpOrStr

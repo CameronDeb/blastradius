@@ -1,0 +1,11 @@
+diff --git a/sqlglot/planner.py b/sqlglot/planner.py
+--- a/sqlglot/planner.py
++++ b/sqlglot/planner.py
+@@ -111,6 +111,7 @@
+         if isinstance(expression, exp.Select) and from_:
+             step = Scan.from_expression(from_.this, ctes)
+         elif isinstance(expression, exp.SetOperation):
++            # Keep in sync with the generator
+             step = SetOperation.from_expression(expression, ctes)
+         else:
+             step = Scan()

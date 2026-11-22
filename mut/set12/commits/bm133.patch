@@ -1,0 +1,11 @@
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -2234,7 +2234,6 @@
+ 
+         Returns:
+             The list of the produced syntax trees.
+-        """
+         return self._parse(
+             parse_method=self.__class__._parse_statement, raw_tokens=raw_tokens, sql=sql
+         )

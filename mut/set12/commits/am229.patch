@@ -1,0 +1,11 @@
+diff --git a/sqlglot/generators/spark.py b/sqlglot/generators/spark.py
+--- a/sqlglot/generators/spark.py
++++ b/sqlglot/generators/spark.py
+@@ -217,6 +217,7 @@
+                 condition_expr = inner.this
+ 
+         if isinstance(condition_expr, exp.ObjectId):
++            # Cheap check first
+             object_type = condition_expr.expression
+             if (
+                 (object_type is None or object_type.name.upper() == "U")

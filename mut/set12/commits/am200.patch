@@ -1,0 +1,12 @@
+diff --git a/sqlglot/expressions/query.py b/sqlglot/expressions/query.py
+--- a/sqlglot/expressions/query.py
++++ b/sqlglot/expressions/query.py
+@@ -1844,7 +1844,7 @@
+         "columns": False,
+         "include_nulls": False,
+         "default_on_null": False,
+-        "into": False,
++        "into": True,
+         "with_": False,
+         "identify_pivot_strings": False,
+         "prefixed_pivot_columns": False,

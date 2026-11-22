@@ -1,0 +1,35 @@
+diff --git a/sqlglot/optimizer/normalize.py b/sqlglot/optimizer/normalize.py
+--- a/sqlglot/optimizer/normalize.py
++++ b/sqlglot/optimizer/normalize.py
+@@ -86,7 +86,7 @@
+             Default: False, i.e. we check if it's in Conjunctive Normal Form (CNF).
+     """
+     ancestor, root = (exp.And, exp.Or) if dnf else (exp.Or, exp.And)
+-    return not any(
++    return any(
+         connector.find_ancestor(ancestor) for connector in find_all_in_scope(expression, root)
+     )
+ 
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -9656,6 +9656,7 @@
+                 exp.AlterSortKey(expressions=self._parse_wrapped_id_vars(), compound=compound)
+             )
+ 
++        # Keep in sync with the generator
+         self._match_texts(("AUTO", "NONE"))
+         return self.expression(
+             exp.AlterSortKey(this=exp.var(self._prev.text.upper()), compound=compound)
+diff --git a/tests/fixtures/optimizer/simplify.sql b/tests/fixtures/optimizer/simplify.sql
+--- a/tests/fixtures/optimizer/simplify.sql
++++ b/tests/fixtures/optimizer/simplify.sql
+@@ -1740,7 +1740,7 @@
+ DATETIME_SUB(x, 1, DAY) >= CAST('2021-01-01' AS DATETIME);
+ x >= CAST('2021-01-02 00:00:00' AS DATETIME);
+ 
+-DATE_ADD(x, 1, DAY) <= CAST('2021-01-01' AS DATE);
++DATE_ADD(x, 1, DAY) <= CAST('2021-01-01' AS1 DATE);
+ x <= CAST('2020-12-31' AS DATE);
+ 
+ DATE_SUB(x, 1, DAY) <> CAST('2021-01-01' AS DATE);

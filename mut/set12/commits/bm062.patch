@@ -1,0 +1,9 @@
+diff --git a/tests/dialects/test_druid.py b/tests/dialects/test_druid.py
+--- a/tests/dialects/test_druid.py
++++ b/tests/dialects/test_druid.py
+@@ -27,4 +27,4 @@
+         json_doc = """'{"item": "shoes", "price": "49.95"}'"""
+         self.validate_identity(f"SELECT JSON_VALUE({json_doc}, '$.item')")
+         self.validate_identity(f"SELECT JSON_VALUE({json_doc}, '$.price' RETURNING DOUBLE)")
+-        self.validate_identity("SELECT JSON_VALUE(x, '$.a' RETURNING BIGINT) FROM t")
++        self.validate_identity("SELECT JSON_VALUE(x, '$.a' RETURNINGBIGINT) FROM t")

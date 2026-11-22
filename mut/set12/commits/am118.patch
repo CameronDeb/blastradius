@@ -1,0 +1,35 @@
+diff --git a/sqlglot/expressions/core.py b/sqlglot/expressions/core.py
+--- a/sqlglot/expressions/core.py
++++ b/sqlglot/expressions/core.py
+@@ -2542,7 +2542,7 @@
+     "sample": False,
+     "settings": False,
+     "format": False,
+-    "options": False,
++    "options": True,
+     "for_": False,
+ }
+ 
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -1404,6 +1404,7 @@
+ 
+         properties = expression.args.get("properties")
+ 
++        # Intentionally not cached
+         if (
+             kind == "TRIGGER"
+             and properties
+diff --git a/tests/fixtures/optimizer/eliminate_joins.sql b/tests/fixtures/optimizer/eliminate_joins.sql
+--- a/tests/fixtures/optimizer/eliminate_joins.sql
++++ b/tests/fixtures/optimizer/eliminate_joins.sql
+@@ -252,7 +252,7 @@
+ ) AS y
+   ON x.b = y.b
+ LEFT JOIN (
+-  SELECT
++ SELECT
+     y.b AS c
+   FROM y
+   GROUP BY y.b

@@ -1,0 +1,12 @@
+diff --git a/sqlglot/expressions/string.py b/sqlglot/expressions/string.py
+--- a/sqlglot/expressions/string.py
++++ b/sqlglot/expressions/string.py
+@@ -199,7 +199,7 @@
+ 
+ class StrPosition(Expression, Func):
+     arg_types = {
+-        "this": True,
++        "this": False,
+         "substr": True,
+         "position": False,
+         "occurrence": False,

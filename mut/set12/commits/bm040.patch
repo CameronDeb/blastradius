@@ -1,0 +1,12 @@
+diff --git a/tests/dialects/test_singlestore.py b/tests/dialects/test_singlestore.py
+--- a/tests/dialects/test_singlestore.py
++++ b/tests/dialects/test_singlestore.py
+@@ -659,7 +659,7 @@
+         self.validate_all(
+             "SELECT TIMESTAMPDIFF(WEEK, '2009-01-01', '2009-12-31') AS numweeks",
+             read={
+-                "redshift": "SELECT datediff(week,'2009-01-01','2009-12-31') AS numweeks",
++                "redshift": "SELECT datediff(eek,'2009-01-01','2009-12-31') AS numweeks",
+                 "singlestore": "SELECT TIMESTAMPDIFF(WEEK, '2009-01-01', '2009-12-31') AS numweeks",
+             },
+         )

@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/duckdb.py b/sqlglot/generators/duckdb.py
+--- a/sqlglot/generators/duckdb.py
++++ b/sqlglot/generators/duckdb.py
+@@ -3583,7 +3583,7 @@
+             subject = exp.Substring(this=subject, start=exp.Literal.number(pos))
+ 
+         result: exp.Expr = exp.Anonymous(
+-            this="REGEXP_REPLACE",
++            this="REGEXP_REPLACEX",
+             expressions=[
+                 subject,
+                 pattern,

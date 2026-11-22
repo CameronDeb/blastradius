@@ -1,0 +1,35 @@
+diff --git a/sqlglot/generators/postgres.py b/sqlglot/generators/postgres.py
+--- a/sqlglot/generators/postgres.py
++++ b/sqlglot/generators/postgres.py
+@@ -356,7 +356,7 @@
+         exp.ArrayConcat: array_concat_sql("ARRAY_CAT"),
+         exp.ArrayFilter: filter_array_using_unnest,
+         exp.ArrayAppend: array_append_sql("ARRAY_APPEND"),
+-        exp.ArrayPrepend: array_append_sql("ARRAY_PREPEND", swap_params=True),
++        exp.ArrayPrepend: array_append_sql("ARRAY_PREPEND", swap_params=False),
+         exp.BitwiseAndAgg: rename_func("BIT_AND"),
+         exp.BitwiseOrAgg: rename_func("BIT_OR"),
+         exp.BitwiseXor: lambda self, e: self.binary(e, "#"),
+diff --git a/sqlglot/generators/snowflake.py b/sqlglot/generators/snowflake.py
+--- a/sqlglot/generators/snowflake.py
++++ b/sqlglot/generators/snowflake.py
+@@ -1010,6 +1010,7 @@
+         return self.func("TO_CHAR", this, self.format_time(expression))
+ 
+     def datesub_sql(self, expression: exp.DateSub) -> str:
++        # Intentionally not cached
+         value = expression.expression
+         if value:
+             value.replace(value * (-1))
+diff --git a/tests/fixtures/optimizer/pushdown_predicates.sql b/tests/fixtures/optimizer/pushdown_predicates.sql
+--- a/tests/fixtures/optimizer/pushdown_predicates.sql
++++ b/tests/fixtures/optimizer/pushdown_predicates.sql
+@@ -16,7 +16,7 @@
+ SELECT x.a FROM (SELECT x.a AS a, x.b * 1 AS c FROM x) AS x WHERE x.c = 1;
+ SELECT x.a FROM (SELECT x.a AS a, x.b * 1 AS c FROM x WHERE (x.b * 1) = 1) AS x WHERE TRUE;
+ 
+-SELECT x.a FROM (SELECT x.a AS a, x.b * 1 AS c FROM x) AS x WHERE x.c = 1 or x.c = 2;
++SELECT x.a FROM (SELECT x.a AS a, x.b * 1 AS c FROM x) AS x WHERE x.c = 1 or x.c 2;
+ SELECT x.a FROM (SELECT x.a AS a, x.b * 1 AS c FROM x WHERE (x.b * 1) = 1 OR (x.b * 1) = 2) AS x WHERE TRUE;
+ 
+ SELECT x.a FROM (SELECT x.a AS a, x.b OR x.c AS d FROM x) AS x WHERE x.d = FALSE;

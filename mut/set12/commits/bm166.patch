@@ -1,0 +1,12 @@
+diff --git a/tests/fixtures/pretty.sql b/tests/fixtures/pretty.sql
+--- a/tests/fixtures/pretty.sql
++++ b/tests/fixtures/pretty.sql
+@@ -329,7 +329,7 @@
+   comment
+ */
+ SELECT * FROM foo;
+-/*
++/*1
+   multi
+   line
+   comment

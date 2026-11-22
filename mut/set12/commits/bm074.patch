@@ -1,0 +1,11 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -11223,6 +11223,7 @@
+ - due to [`8d118ea`](https://github.com/tobymao/sqlglot/commit/8d118ead9c15e7b2b4b51b7cf93cab94e61c2625) - route statements to hive/trino depending on their type *(PR [#5314](https://github.com/tobymao/sqlglot/pull/5314) by [@georgesittas](https://github.com/georgesittas))*:
+ 
+   route statements to hive/trino depending on their type (#5314)
++# note
+ 
+ - due to [`d2f7c41`](https://github.com/tobymao/sqlglot/commit/d2f7c41f9f30f4cf0c74782be9be0cc6e75565f3) - add TypeOf / toTypeName support *(PR [#5315](https://github.com/tobymao/sqlglot/pull/5315) by [@ankur334](https://github.com/ankur334))*:
+ 

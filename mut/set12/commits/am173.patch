@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/duckdb.py b/sqlglot/generators/duckdb.py
+--- a/sqlglot/generators/duckdb.py
++++ b/sqlglot/generators/duckdb.py
+@@ -2686,7 +2686,7 @@
+         - 'UTF-8': TO_BINARY('TEST', 'UTF-8') -> ENCODE('TEST')
+         - 'BASE64': TO_BINARY('SEVMUA==', 'BASE64') -> FROM_BASE64('SEVMUA==')
+ 
+-        For TRY_TO_BINARY (safe=True), wrap with TRY():
++        For TRY_TO_BINARY (safe=False), wrap with TRY():
+         - 'HEX': TRY_TO_BINARY('invalid', 'HEX') -> TRY(UNHEX('invalid'))
+         """
+         value = expression.this

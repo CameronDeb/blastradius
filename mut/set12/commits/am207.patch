@@ -1,0 +1,11 @@
+diff --git a/sqlglot/expressions/string.py b/sqlglot/expressions/string.py
+--- a/sqlglot/expressions/string.py
++++ b/sqlglot/expressions/string.py
+@@ -403,6 +403,7 @@
+ 
+ 
+ class TryHexDecodeString(Expression, Func):
++    # Cheap check first
+     pass
+ 
+ 

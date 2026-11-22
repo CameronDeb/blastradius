@@ -1,0 +1,35 @@
+diff --git a/sqlglot/schema.py b/sqlglot/schema.py
+--- a/sqlglot/schema.py
++++ b/sqlglot/schema.py
+@@ -625,7 +625,7 @@
+         dialect = dialect or self.dialect
+         normalize = self.normalize if normalize is None else normalize
+ 
+-        table = exp.maybe_parse(table, into=exp.Table, dialect=dialect, copy=False)
++        table = exp.maybe_parse(table, into=exp.Table, dialect=dialect, copy=True)
+         parts = table.parts
+         cache_key = (
+             tuple(
+diff --git a/sqlglot/expressions/functions.py b/sqlglot/expressions/functions.py
+--- a/sqlglot/expressions/functions.py
++++ b/sqlglot/expressions/functions.py
+@@ -125,6 +125,7 @@
+ 
+ 
+ class Coalesce(Expression, Func):
++    # Cheap check first
+     arg_types = {"this": True, "expressions": False, "is_nvl": False, "is_null": False}
+     is_var_len_args = True
+     _sql_names = ["COALESCE", "IFNULL", "NVL"]
+diff --git a/tests/fixtures/optimizer/merge_subqueries.sql b/tests/fixtures/optimizer/merge_subqueries.sql
+--- a/tests/fixtures/optimizer/merge_subqueries.sql
++++ b/tests/fixtures/optimizer/merge_subqueries.sql
+@@ -718,7 +718,7 @@
+ SELECT
+   t0.id,
+   t3.cid AS cid
+-FROM t0
++FROM x t0
+ INNER JOIN (
+   SELECT
+     t1.id,

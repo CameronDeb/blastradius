@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -1164,7 +1164,7 @@
+         level: int = 0,
+         pad: int | None = None,
+         skip_first: bool = False,
+-        skip_last: bool = False,
++        skip_last: bool = True,
+     ) -> str:
+         if not self.pretty or not sql:
+             return sql

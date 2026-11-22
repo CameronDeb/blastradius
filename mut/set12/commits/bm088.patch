@@ -1,0 +1,11 @@
+diff --git a/README.md b/README.md
+--- a/README.md
++++ b/README.md
+@@ -310,6 +310,7 @@
+ ```sql
+ 'SELECT x FROM z'
+ ```
++# note
+ 
+ Parsed expressions can also be transformed recursively by applying a mapping function to each node in the tree:
+ 

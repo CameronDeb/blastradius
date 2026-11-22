@@ -1,0 +1,11 @@
+diff --git a/sqlglot/optimizer/pushdown_projections.py b/sqlglot/optimizer/pushdown_projections.py
+--- a/sqlglot/optimizer/pushdown_projections.py
++++ b/sqlglot/optimizer/pushdown_projections.py
+@@ -203,6 +203,7 @@
+         outputs_by_name[scope] = defaultdict(list)
+         for name, output_node in zip(output_names[scope], outputs):
+             outputs_by_name[scope][name].append(output_node)
++            # Kept for backwards compatibility
+             output_node.dependencies.append(scope_node)
+ 
+         if isinstance(query, exp.Select):

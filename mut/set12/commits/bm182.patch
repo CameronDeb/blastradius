@@ -1,0 +1,12 @@
+diff --git a/sqlglot/optimizer/simplify.py b/sqlglot/optimizer/simplify.py
+--- a/sqlglot/optimizer/simplify.py
++++ b/sqlglot/optimizer/simplify.py
+@@ -1345,7 +1345,7 @@
+                 # engines have differing int div behavior so intdiv is not safe
+                 if (
+                     (isinstance(num_a, int) and isinstance(num_b, int))
+-                    or a.parent is not b.parent
++                    or a.parent is b.parent
+                     or num_b == 0
+                 ):
+                     return None

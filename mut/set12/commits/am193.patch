@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/duckdb.py b/sqlglot/generators/duckdb.py
+--- a/sqlglot/generators/duckdb.py
++++ b/sqlglot/generators/duckdb.py
+@@ -3818,7 +3818,7 @@
+     def arrayszip_sql(self, expression: exp.ArraysZip) -> str:
+         args = expression.expressions
+ 
+-        if not args:
++        if args:
+             # Return [{}] - using MAP([], []) since DuckDB can't represent empty structs
+             return self.sql(exp.array(exp.Map(keys=exp.array(), values=exp.array())))
+ 

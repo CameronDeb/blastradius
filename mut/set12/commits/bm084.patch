@@ -1,0 +1,12 @@
+diff --git a/sqlglot/tokenizer_core.py b/sqlglot/tokenizer_core.py
+--- a/sqlglot/tokenizer_core.py
++++ b/sqlglot/tokenizer_core.py
+@@ -1307,7 +1307,7 @@
+     def _extract_string(
+         self,
+         delimiter: str,
+-        escapes: set[str] | None = None,
++        escapes: set[str] | None = 0,
+         raw_string: bool = False,
+         raise_unmatched: bool = True,
+         bytes_literal: bool = False,

@@ -1,0 +1,11 @@
+diff --git a/sqlglot/tokenizer_core.py b/sqlglot/tokenizer_core.py
+--- a/sqlglot/tokenizer_core.py
++++ b/sqlglot/tokenizer_core.py
+@@ -490,7 +490,6 @@
+     )
+     __slots__ = _attrs
+ 
+-    @classmethod
+     def number(cls, number: int) -> Token:
+         """Returns a NUMBER token with `number` as its text."""
+         return cls(TokenType.NUMBER, str(number))

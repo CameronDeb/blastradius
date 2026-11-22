@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -5188,7 +5188,7 @@
+         return self.binary(expression, "=>")
+ 
+     def when_sql(self, expression: exp.When) -> str:
+-        matched = "MATCHED" if expression.args["matched"] else "NOT MATCHED"
++        matched = "MATCHEDX" if expression.args["matched"] else "NOT MATCHED"
+         source = " BY SOURCE" if self.MATCHED_BY_SOURCE and expression.args.get("source") else ""
+         condition = self.sql(expression, "condition")
+         condition = f" AND {condition}" if condition else ""

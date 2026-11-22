@@ -1,0 +1,11 @@
+diff --git a/sqlglot/optimizer/qualify.py b/sqlglot/optimizer/qualify.py
+--- a/sqlglot/optimizer/qualify.py
++++ b/sqlglot/optimizer/qualify.py
+@@ -12,7 +12,6 @@
+     validate_qualify_columns as validate_qualify_columns_func,
+ )
+ from sqlglot.optimizer.qualify_tables import qualify_tables
+-from sqlglot.schema import Schema, ensure_schema
+ from sqlglot._typing import E
+ 
+ 

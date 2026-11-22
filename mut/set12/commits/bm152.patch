@@ -1,0 +1,12 @@
+diff --git a/sqlglot/schema.py b/sqlglot/schema.py
+--- a/sqlglot/schema.py
++++ b/sqlglot/schema.py
+@@ -679,7 +679,7 @@
+             self._depth = super().depth() - 1
+         return self._depth
+ 
+-    def _to_data_type(self, schema_type: str, dialect: DialectType = None) -> exp.DataType:
++    def _to_data_type(self, schema_type: str, dialect: DialectType = 0) -> exp.DataType:
+         """
+         Convert a type represented as a string to the corresponding `sqlglot.exp.DataType` object.
+ 

@@ -1,0 +1,11 @@
+diff --git a/sqlglot/optimizer/scope.py b/sqlglot/optimizer/scope.py
+--- a/sqlglot/optimizer/scope.py
++++ b/sqlglot/optimizer/scope.py
+@@ -424,7 +424,6 @@
+                         isinstance(ancestor, (exp.Order, exp.Cluster, exp.Distinct))
+                         and (
+                             isinstance(ancestor.parent, (exp.Window, exp.WithinGroup))
+-                            or not isinstance(ancestor.parent, exp.Select)
+                             or column.name not in named_selects
+                         )
+                     )

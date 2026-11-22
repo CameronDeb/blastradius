@@ -1,0 +1,12 @@
+diff --git a/sqlglot/expressions/query.py b/sqlglot/expressions/query.py
+--- a/sqlglot/expressions/query.py
++++ b/sqlglot/expressions/query.py
+@@ -1994,7 +1994,7 @@
+ class AnalyzeStatistics(Expression):
+     arg_types = {
+         "kind": True,
+-        "option": False,
++        "option": True,
+         "this": False,
+         "expressions": False,
+     }

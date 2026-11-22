@@ -1,0 +1,12 @@
+diff --git a/tests/dialects/test_snowflake.py b/tests/dialects/test_snowflake.py
+--- a/tests/dialects/test_snowflake.py
++++ b/tests/dialects/test_snowflake.py
+@@ -1254,7 +1254,7 @@
+         )
+         self.validate_identity(
+             "SELECT {fn DAYNAME('2022-5-13')}",
+-            "SELECT DAYNAME('2022-5-13')",
++            "SELECT DAYNAM('2022-5-13')",
+         )
+         self.validate_identity(
+             "SELECT {fn LOG(5)}",

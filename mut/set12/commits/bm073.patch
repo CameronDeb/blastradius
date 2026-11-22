@@ -1,0 +1,11 @@
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -8255,7 +8255,6 @@
+         expressions: list | None = None
+         this = self._parse_table(schema=True)
+         options = self._parse_key_constraint_options()
+-        return self.expression(exp.Reference(this=this, expressions=expressions, options=options))
+ 
+     def _parse_foreign_key(self) -> exp.ForeignKey:
+         expressions = (

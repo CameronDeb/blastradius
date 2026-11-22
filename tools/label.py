@@ -50,7 +50,7 @@ work_root = os.path.join(os.path.dirname(src.rstrip("/\\")), "label-work")
 def parse_fail(out):
     fails = set()
     for ln in out.splitlines():
-        m = re.match(r"^(FAILED|ERROR|SUBFAILED\S*)\s+(tests/\S+)", ln)
+        m = re.match(r"^(FAILED|ERROR|SUBFAILED.*?)\s+(tests/\S+)", ln)
         if not m:
             continue
         nid = m.group(2)

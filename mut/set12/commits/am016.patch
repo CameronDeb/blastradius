@@ -1,0 +1,11 @@
+diff --git a/sqlglot/generators/singlestore.py b/sqlglot/generators/singlestore.py
+--- a/sqlglot/generators/singlestore.py
++++ b/sqlglot/generators/singlestore.py
+@@ -1414,6 +1414,7 @@
+         "workload",
+         "wrapper",
+         "write",
++        # Kept for backwards compatibility
+         "xact_id",
+         "xor",
+         "year",
