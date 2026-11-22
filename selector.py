@@ -1447,7 +1447,8 @@ def run_all(plans, meta, secs, cost):
         tdir = os.path.join(base_tmp, cid)
         os.makedirs(tdir, exist_ok=True)
         tl = sorted(p["run"])
-        hrun = {n for n in p["heavy"] if n in p.get("items", {}) and p["est"].get(n, 1e9) < secs[n] + WORKER_COST / 1000}
+        # checking pays when the cut-down run is well below the cost of reporting it
+        hrun = {n for n in p["heavy"] if n in p.get("items", {}) and p["est"].get(n, 1e9) + 1.0 < 0.6 * (secs[n] + WORKER_COST / 1000)}
         p["heavy_run"] = hrun
         job = {
             "changed": p["changed"],
