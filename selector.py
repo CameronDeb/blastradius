@@ -26,7 +26,7 @@ MAX_WORKERS = 8
 TIER_B = float(os.environ.get("BR_TIER_B", "0.3"))
 TIER_C = float(os.environ.get("BR_TIER_C", "3.0"))
 # CPU seconds a test costs us relative to its recorded seconds
-CPU_FACTOR = float(os.environ.get("BR_CPU_FACTOR", "1.2"))
+CPU_FACTOR = float(os.environ.get("BR_CPU_FACTOR", "1.1"))
 
 
 def tier(sec):
@@ -153,6 +153,7 @@ class Map:
         self.static_modules = m["static_modules"]
         self.modfiles = m["modfiles"]
         self.rdeps = m.get("rdeps", {})
+        self.cpu = {int(k): v for k, v in m.get("cpu", {}).items()}
         self.tmod_lines = m.get("tmod_lines", {})
         self.import_set = {f: set(v) for f, v in self.import_lines.items()}
 
@@ -253,6 +254,19 @@ def chain_at(tree, line):
 
 
 BLOCK_FIELDS = ("body", "orelse", "finalbody", "handlers", "cases")
+_OLD_TREES = {}
+_STR_SPANS = {}
+
+
+def in_multiline_string(rel, tree, lines):
+    spans = _STR_SPANS.get(rel)
+    if spans is None:
+        spans = _STR_SPANS[rel] = [
+            (n.lineno, n.end_lineno)
+            for n in ast.walk(tree)
+            if isinstance(n, (ast.Constant, ast.JoinedStr)) and getattr(n, "end_lineno", n.lineno) > n.lineno
+        ]
+    return any(a < ln <= b or a <= ln < b for a, b in spans for ln in lines)
 
 
 def _span(n):
@@ -406,19 +420,35 @@ class Analysis:
         cache[mod] = frozenset(out)
         return out
 
-    def py_change(self, rel, old, new, touched, inserts):
+    def py_change(self, rel, old, new, touched, inserts, removed_txt=(), added_txt=()):
         """Return (candidate tests, class contexts that must re-run setup, flags)."""
         mp = self.mp
         flags = set()
-        try:
-            new_tree = ast.parse(new)
-        except SyntaxError:
-            return None, set(), {"broken"}
         if old is None:
+            try:
+                ast.parse(new)
+            except SyntaxError:
+                return None, set(), {"broken"}
             return set(), set(), flags  # new module: nothing imports it at the pinned commit
-        old_tree = ast.parse(old)
-        if same_region(old_tree.body, new_tree.body, set(touched) | set(inserts) | {p - 1 for p in inserts}):
-            return set(), set(), {"same"}
+        old_tree = _OLD_TREES.get(rel)
+        if old_tree is None:
+            old_tree = _OLD_TREES[rel] = ast.parse(old)
+        region = set(touched) | set(inserts) | {p - 1 for p in inserts}
+        texts = list(removed_txt) + list(added_txt)
+        quick = texts and all(not t.strip() or t.lstrip().startswith("#") for t in texts) and not any(
+            re.search(r"coding[:=]", t) for t in texts
+        )
+        if not (quick and not in_multiline_string(rel, old_tree, region)):
+            # The child compiles the new source anyway; only parse here when
+            # the edit could be a no-op we can prove cheaply.
+            quick = False
+        if quick:
+            try:
+                new_tree = ast.parse(new)
+            except SyntaxError:
+                return None, set(), {"broken"}
+            if same_region(old_tree.body, new_tree.body, region):
+                return set(), set(), {"same"}
         mod = modname_of(rel)
         cand = set()
         lines = set(touched)
@@ -430,6 +460,7 @@ class Analysis:
         lines = {min(max(1, ln), nlines) for ln in lines}
         rerun_classes = set()
         spans = set()
+        imp_spans = set()
         for ln in sorted(lines):
             chain = chain_at(old_tree, ln)
             fn_idx = None
@@ -455,6 +486,8 @@ class Analysis:
                 t = mp.line_tests(rel, span)
                 cand |= t
                 spans |= span
+                # a lambda's first line is also where the lambda object is created
+                imp_spans |= span - {fn.lineno} if isinstance(fn, ast.Lambda) else span
                 rerun_classes |= mp.line_classes(rel, span)
                 continue
             # Not inside a function body: import-time code.
@@ -508,7 +541,7 @@ class Analysis:
             for tm in tmods:
                 cand |= self.tests_of_module(tm)
         # function bodies executed while sqlglot itself is imported
-        if "static" not in flags and mp.at_import(rel, spans):
+        if "static" not in flags and mp.at_import(rel, imp_spans):
             flags.add("importtime")
             cand |= self.module_users_by_name(mod)
             for d in mp.dependents({mod}):
@@ -721,7 +754,13 @@ def child_run(job, out_fd):
             absp = os.path.join(SRC, rel)
             with _open(absp, encoding="utf-8") as f:
                 old = f.read()
-            ok, swaps = code_diff(compile(old, absp, "exec"), compile(txt, absp, "exec"))
+            try:
+                new_code = compile(txt, absp, "exec")
+            except SyntaxError:
+                w.write(f"! broken {modname_of(rel)} SyntaxError\n")
+                w.close()
+                os._exit(0)
+            ok, swaps = code_diff(compile(old, absp, "exec"), new_code)
             if not ok:
                 fast = False
                 job["purge"] = sorted({modname_of(r) for r in py_changed} | set(job.get("reimport") or ()))
@@ -842,13 +881,13 @@ def child_run(job, out_fd):
             return False
         base = fails | set(fixed) | set(heavy)
         stop = pack(base | set(rem), tms)[1]
-        cont = CPU_FACTOR * 1000 * sum(t[4] for t in tests[i + 1 :]) + pack(base, tms)[1]
+        cont = CPU_FACTOR * 1000 * sum(t[6] for t in tests[i + 1 :]) + pack(base, tms)[1]
         return stop <= cont
 
     i = -1
     while i + 1 < len(tests):
         i += 1
-        num, modn, clsn, meth, secs, tr = tests[i]
+        num, modn, clsn, meth, secs, tr, _c = tests[i]
         ok = False
         try:
             if modn not in mods:
@@ -923,6 +962,7 @@ def main():
         meta[t["number"]] = (modname_of(path), cls, meth)
     all_nums = set(ms)
     mp = Map(MAP)
+    cost = {n: mp.cpu.get(n, secs[n]) for n in secs}
     by_file = {}
     for t in tests:
         by_file.setdefault(t["file"], set()).add(t["number"])
@@ -933,13 +973,13 @@ def main():
     plans = {}
     for cid in cids:
         try:
-            plans[cid] = plan_commit(cid, open(os.path.join(commit_dir, cid + ".patch"), encoding="utf-8", errors="replace").read(), mp, an, by_file, all_nums, secs)
+            plans[cid] = plan_commit(cid, open(os.path.join(commit_dir, cid + ".patch"), encoding="utf-8", errors="replace").read(), mp, an, by_file, all_nums, cost)
         except Exception as e:
             log("plan failed", cid, repr(e))
             plans[cid] = {"out": set(all_nums), "run": set(), "heavy": set(), "changed": {}}
     log(f"planned {len(cids)} in {time.time() - t_start:.2f}s")
 
-    results = run_all(plans, meta, secs)
+    results = run_all(plans, meta, secs, cost)
 
     for cid in cids:
         p = plans[cid]
@@ -1016,7 +1056,9 @@ def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
                 out |= module_importers(mod, mp, by_file, all_nums)
                 why.append("deleted")
                 continue
-            c, rc, flags = an.py_change(rel, old_text, new_text, touched, inserts)
+            removed_txt = [b[1:] for _, body in hunks for b in body if b[:1] == "-"]
+            added_txt = [b[1:] for _, body in hunks for b in body if b[:1] == "+"]
+            c, rc, flags = an.py_change(rel, old_text, new_text, touched, inserts, removed_txt, added_txt)
             if "broken" in flags:
                 mod = modname_of(rel)
                 if rel.startswith("tests/"):
@@ -1047,7 +1089,7 @@ def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
     purge = None
     if not fast:
         purge = sorted(mp.dependents({modname_of(r) for r in changed if r.endswith(".py")}))
-    run = {n for n in cand if tier(secs[n]) < 2}
+    run = {n for n in cand if tier(secs[n]) < 2}  # secs here: our CPU cost per test
     heavy = {n for n in cand if tier(secs[n]) == 2}
     if heavy and (not run or data_heavy):
         out |= heavy
@@ -1057,7 +1099,7 @@ def plan_commit(cid, text, mp, an, by_file, all_nums, secs):
     return {"out": out, "run": run, "heavy": heavy, "purge": purge, "reimport": sorted(an.reimport), "changed": changed, "fast": fast, "reset": reset, "why": " ".join(why)}
 
 
-def run_all(plans, meta, secs):
+def run_all(plans, meta, secs, cost):
     jobs = [(cid, p) for cid, p in plans.items() if p["run"]]
     if not jobs:
         return {}
@@ -1075,7 +1117,7 @@ def run_all(plans, meta, secs):
     base_tmp = tempfile.mkdtemp(prefix="br")
     par = int(os.environ.get("BR_PAR", "2"))
     running = {}
-    queue = sorted(jobs, key=lambda j: -sum(secs[n] for n in j[1]["run"]))
+    queue = sorted(jobs, key=lambda j: -sum(cost[n] for n in j[1]["run"]))
     import select
     import subprocess
 
@@ -1087,14 +1129,14 @@ def run_all(plans, meta, secs):
             "changed": p["changed"],
             "fast": p["fast"] and use_fork,
             "tmpdir": tdir,
-            "tests": [[n, *meta[n], secs[n], tier(secs[n])] for n in sorted(tl, key=lambda n: (tier(secs[n]), secs[n], n))],
+            "tests": [[n, *meta[n], secs[n], tier(cost[n]), cost[n]] for n in sorted(tl, key=lambda n: (tier(cost[n]), cost[n], n))],
             "fixed": [[n, round(secs[n] * 1000)] for n in sorted(p["out"])],
             "heavy": [[n, round(secs[n] * 1000)] for n in sorted(p["heavy"])],
             "reset_classes": sorted(p["reset"]),
             "purge": p.get("purge") if use_fork else None,
             "reimport": p.get("reimport", []),
         }
-        budget = 30 + sum(secs[n] * 4 + 2 for n in tl)
+        budget = 30 + sum(max(secs[n], cost[n]) * 4 + 2 for n in tl)
         if use_fork:
             r, wfd = os.pipe()
             pid = os.fork()
