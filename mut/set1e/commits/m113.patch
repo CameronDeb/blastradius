@@ -1,0 +1,11 @@
+diff --git a/sqlglot/generators/bigquery.py b/sqlglot/generators/bigquery.py
+--- a/sqlglot/generators/bigquery.py
++++ b/sqlglot/generators/bigquery.py
+@@ -183,6 +183,7 @@
+     )
+ 
+ 
++# Cheap check first
+ def _widen_decimal(expression: exp.Expr) -> exp.Expr:
+     # NUMERIC holds at most 29 integer and 9 fractional digits, e.g. DECIMAL(38, 0) needs BIGNUMERIC
+     for node in expression.find_all(exp.DataType):

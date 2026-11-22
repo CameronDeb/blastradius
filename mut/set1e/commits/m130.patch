@@ -1,0 +1,12 @@
+diff --git a/tests/fixtures/optimizer/optimizer.sql b/tests/fixtures/optimizer/optimizer.sql
+--- a/tests/fixtures/optimizer/optimizer.sql
++++ b/tests/fixtures/optimizer/optimizer.sql
+@@ -168,7 +168,7 @@
+ # title: Root subquery
+ (SELECT a FROM x) LIMIT 1;
+ (
+-  SELECT
++ x  SELECT
+     "x"."a" AS "a"
+   FROM "x" AS "x"
+ )

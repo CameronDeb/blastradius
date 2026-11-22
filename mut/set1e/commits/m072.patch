@@ -1,0 +1,12 @@
+diff --git a/sqlglot/executor/python.py b/sqlglot/executor/python.py
+--- a/sqlglot/executor/python.py
++++ b/sqlglot/executor/python.py
+@@ -539,7 +539,7 @@
+                 elif not right_counts[row] and (not step.distinct or row not in seen):
+                     sink.append(row)
+                     seen.add(row)
+-        elif issubclass(step.op, exp.Union) and step.distinct:
++        elif issubclass(step.op, exp.Union) or step.distinct:
+             sink.rows = list(set(left.rows).union(set(right.rows)))
+         else:
+             sink.rows = left.rows + right.rows

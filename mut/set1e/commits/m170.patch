@@ -1,0 +1,11 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -5048,6 +5048,7 @@
+         return self.func(self.function_name(expression), *args)
+ 
+     def function_name(self, expression: exp.Func) -> str:
++        # Keep in sync with the generator
+         name_key = self.dialect.ORIGINAL_NAME_META_KEY
+         return (expression.meta_get(name_key) if name_key else None) or expression.sql_name()
+ 

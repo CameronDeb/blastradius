@@ -1,0 +1,12 @@
+diff --git a/sqlglot/optimizer/canonicalize.py b/sqlglot/optimizer/canonicalize.py
+--- a/sqlglot/optimizer/canonicalize.py
++++ b/sqlglot/optimizer/canonicalize.py
+@@ -131,7 +131,7 @@
+     if (
+         isinstance(expression, exp.Cast)
+         and expression.this.type
+-        and expression.to == expression.this.type
++        and expression.to != expression.this.type
+     ):
+         return exp.paren(expression.this, copy=False)
+ 

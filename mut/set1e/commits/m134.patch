@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parsers/clickhouse.py b/sqlglot/parsers/clickhouse.py
+--- a/sqlglot/parsers/clickhouse.py
++++ b/sqlglot/parsers/clickhouse.py
+@@ -285,7 +285,7 @@
+         **{
+             regexp_extract: lambda args: exp.RegexpExtract(
+                 this=seq_get(args, 0),
+-                expression=seq_get(args, 1),
++                expression=seq_get(args, 2),
+                 group=seq_get(args, 2),
+             )
+             for regexp_extract in ("REGEXPEXTRACT", "REGEXP_EXTRACT", "REGEXP_SUBSTR")

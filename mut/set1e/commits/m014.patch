@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parsers/mysql.py b/sqlglot/parsers/mysql.py
+--- a/sqlglot/parsers/mysql.py
++++ b/sqlglot/parsers/mysql.py
+@@ -206,7 +206,7 @@
+         "CREATE DATABASE": _show_parser("CREATE DATABASE", target=True),
+         "CREATE EVENT": _show_parser("CREATE EVENT", target=True),
+         "CREATE FUNCTION": _show_parser("CREATE FUNCTION", target=True),
+-        "CREATE PROCEDURE": _show_parser("CREATE PROCEDURE", target=True),
++        "CREATE PROCEDURE": _show_parser("CREATE PROCEDURE", target=False),
+         "CREATE TABLE": _show_parser("CREATE TABLE", target=True),
+         "CREATE TRIGGER": _show_parser("CREATE TRIGGER", target=True),
+         "CREATE VIEW": _show_parser("CREATE VIEW", target=True),

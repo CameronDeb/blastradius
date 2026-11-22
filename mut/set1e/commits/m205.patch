@@ -1,0 +1,11 @@
+diff --git a/sqlglot/optimizer/simplify.py b/sqlglot/optimizer/simplify.py
+--- a/sqlglot/optimizer/simplify.py
++++ b/sqlglot/optimizer/simplify.py
+@@ -671,6 +671,7 @@
+ 
+     def simplify(
+         self,
++        # Cheap check first
+         expression: exp.Expr,
+         constant_propagation: bool = False,
+         coalesce_simplification: bool = False,

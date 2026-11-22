@@ -1,0 +1,12 @@
+diff --git a/sqlglot/lineage.py b/sqlglot/lineage.py
+--- a/sqlglot/lineage.py
++++ b/sqlglot/lineage.py
+@@ -161,7 +161,7 @@
+ 
+     if column is not None:
+         column_name = normalize_identifiers.normalize_identifiers(column, dialect=dialect).name
+-        if not any(select.alias_or_name == column_name for select in selectable.selects):
++        if any(select.alias_or_name == column_name for select in selectable.selects):
+             raise SqlglotError(f"Cannot find column '{column_name}' in query.")
+ 
+         return to_node(

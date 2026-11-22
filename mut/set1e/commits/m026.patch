@@ -1,0 +1,12 @@
+diff --git a/tests/fixtures/optimizer/tpc-ds/tpc-ds.sql b/tests/fixtures/optimizer/tpc-ds/tpc-ds.sql
+--- a/tests/fixtures/optimizer/tpc-ds/tpc-ds.sql
++++ b/tests/fixtures/optimizer/tpc-ds/tpc-ds.sql
+@@ -662,7 +662,7 @@
+                   sum(return_amt)  AS returns1,
+                   sum(net_loss)    AS profit_loss
+          FROM     (
+-                         SELECT ws_web_site_sk          AS wsr_web_site_sk,
++    1                     SELECT ws_web_site_sk          AS wsr_web_site_sk,
+                                 ws_sold_date_sk         AS date_sk,
+                                 ws_ext_sales_price      AS sales_price,
+                                 ws_net_profit           AS profit,

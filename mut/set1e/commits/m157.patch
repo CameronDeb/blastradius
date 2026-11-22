@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/duckdb.py b/sqlglot/generators/duckdb.py
+--- a/sqlglot/generators/duckdb.py
++++ b/sqlglot/generators/duckdb.py
+@@ -3958,7 +3958,7 @@
+         lower = expression.args.get("lower")
+         upper = expression.args.get("upper")
+ 
+-        if lower and upper:
++        if lower or upper:
+             # Build 64 random bits in integer arithmetic to preserve the low bits and
+             # avoid overflow when the inclusive range spans signed BIGINT's limits.
+             random_bits = exp.cast(exp.Floor(this=exp.Rand() * (1 << 32)), exp.DType.INT128)

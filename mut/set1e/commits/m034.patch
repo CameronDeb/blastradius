@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parsers/duckdb.py b/sqlglot/parsers/duckdb.py
+--- a/sqlglot/parsers/duckdb.py
++++ b/sqlglot/parsers/duckdb.py
+@@ -561,7 +561,7 @@
+ 
+         return self._parse_install(force=True)
+ 
+-    def _parse_install(self, force: bool = False) -> exp.Install:
++    def _parse_install(self, force: bool = True) -> exp.Install:
+         return self.expression(
+             exp.Install(
+                 this=self._parse_id_var(),

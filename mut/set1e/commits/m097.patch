@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/snowflake.py b/sqlglot/generators/snowflake.py
+--- a/sqlglot/generators/snowflake.py
++++ b/sqlglot/generators/snowflake.py
+@@ -779,7 +779,7 @@
+         return self.cast_sql(expression)
+ 
+     def log_sql(self, expression: exp.Log) -> str:
+-        if not expression.expression:
++        if expression.expression:
+             return self.func("LN", expression.this)
+ 
+         return super().log_sql(expression)

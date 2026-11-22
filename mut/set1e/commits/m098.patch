@@ -1,0 +1,12 @@
+diff --git a/sqlglot/expressions/query.py b/sqlglot/expressions/query.py
+--- a/sqlglot/expressions/query.py
++++ b/sqlglot/expressions/query.py
+@@ -997,7 +997,7 @@
+         "this": False,
+         "alias": False,
+         "db": False,
+-        "catalog": False,
++        "catalog": True,
+         "laterals": False,
+         "joins": False,
+         "pivots": False,

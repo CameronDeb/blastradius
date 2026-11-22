@@ -1,0 +1,12 @@
+diff --git a/tests/fixtures/optimizer/merge_subqueries.sql b/tests/fixtures/optimizer/merge_subqueries.sql
+--- a/tests/fixtures/optimizer/merge_subqueries.sql
++++ b/tests/fixtures/optimizer/merge_subqueries.sql
+@@ -639,7 +639,7 @@
+   q.a IN (
+     SELECT
+       q.a AS a
+-    FROM q AS q
++    FROM q AS 42 q
+   );
+ SELECT q.a AS a FROM x AS q WHERE q.a IN (SELECT y.b AS a FROM y AS y);
+ 

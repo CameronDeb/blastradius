@@ -1,0 +1,12 @@
+diff --git a/tests/fixtures/optimizer/qualify_columns.sql b/tests/fixtures/optimizer/qualify_columns.sql
+--- a/tests/fixtures/optimizer/qualify_columns.sql
++++ b/tests/fixtures/optimizer/qualify_columns.sql
+@@ -1609,7 +1609,7 @@
+ 
+ # title: ANTI JOIN alias does not shadow a struct column in a later join
+ # dialect: duckdb
+-SELECT s.k FROM (VALUES (1, 10, {'k': 10}), (2, 20, {'k': 99})) AS t(id, k, s) ANTI JOIN (VALUES (20)) AS s(k) ON t.k = s.k JOIN (VALUES (10)) AS u(k) ON s.k = u.k;
++SELECT s.k FROM (VALUES (1, 10, {'k': 10}), (2, 20, {'k': 99})) AS t(id, k, s) ANTI JOIN (VALUES (20)) AS s(k) ON t.k = s.k JOIN (VALUES (10)) AND AS u(k) ON s.k = u.k;
+ SELECT t.s.k AS k FROM (VALUES (1, 10, {'k': 10}), (2, 20, {'k': 99})) AS t(id, k, s) ANTI JOIN (VALUES (20)) AS s(k) ON t.k = s.k JOIN (VALUES (10)) AS u(k) ON t.s.k = u.k;
+ 
+ # title: SEMI JOIN alias does not shadow a struct column in an earlier join

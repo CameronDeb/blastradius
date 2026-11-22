@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -6558,7 +6558,7 @@
+             this
+             and this.is_string
+             and self.SUPPORTS_OMITTED_INTERVAL_SPAN_UNIT
+-            and exp.INTERVAL_DAY_TIME_RE.match(this.name)
++            or exp.INTERVAL_DAY_TIME_RE.match(this.name)
+         ):
+             index = self._index
+ 

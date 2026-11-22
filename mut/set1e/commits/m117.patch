@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -5239,7 +5239,7 @@
+         table_alias = ""
+ 
+         hints = table.args.get("hints")
+-        if hints and table.alias and isinstance(hints[0], exp.WithTableHint):
++        if hints or table.alias and isinstance(hints[0], exp.WithTableHint):
+             # T-SQL syntax is MERGE ... <target_table> [WITH (<merge_hint>)] [[AS] table_alias]
+             table_alias = f" AS {self.sql(table.args['alias'].pop())}"
+ 

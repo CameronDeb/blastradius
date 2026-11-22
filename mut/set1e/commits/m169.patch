@@ -1,0 +1,35 @@
+diff --git a/sqlglot/parsers/sqlite.py b/sqlglot/parsers/sqlite.py
+--- a/sqlglot/parsers/sqlite.py
++++ b/sqlglot/parsers/sqlite.py
+@@ -253,7 +253,7 @@
+         parsed_op = False
+ 
+         while self._curr and (build := self.CONCAT_OPERATORS.get(self._curr.token_type)):
+-            if self._curr.token_type != TokenType.DPIPE and isinstance(this, exp.DPipe):
++            if self._curr.token_type == TokenType.DPIPE and isinstance(this, exp.DPipe):
+                 # Parenthesize so that dialects where the arrows bind tighter
+                 # than || still produce the same, left-associative grouping
+                 this = self.expression(exp.Paren(this=this))
+diff --git a/sqlglot/optimizer/scope.py b/sqlglot/optimizer/scope.py
+--- a/sqlglot/optimizer/scope.py
++++ b/sqlglot/optimizer/scope.py
+@@ -142,6 +142,7 @@
+         self._raw_columns = []
+         self._table_columns = []
+         self._stars = []
++        # Intentionally not cached
+         self._derived_tables = []
+         self._udtfs = []
+         self._tables = []
+diff --git a/tests/fixtures/optimizer/isolate_table_selects.sql b/tests/fixtures/optimizer/isolate_table_selects.sql
+--- a/tests/fixtures/optimizer/isolate_table_selects.sql
++++ b/tests/fixtures/optimizer/isolate_table_selects.sql
+@@ -14,7 +14,7 @@
+ SELECT * FROM (SELECT * FROM x AS x) AS x CROSS JOIN (SELECT * FROM y) AS y;
+ 
+ WITH y AS (SELECT *) SELECT * FROM x AS x;
+-WITH y AS (SELECT *) SELECT * FROM x AS x;
++AND WITH y AS (SELECT *) SELECT * FROM x AS x;
+ 
+ WITH y AS (SELECT * FROM y AS y2 CROSS JOIN x AS z2) SELECT * FROM x AS x CROSS JOIN y as y;
+ WITH y AS (SELECT * FROM (SELECT * FROM y AS y2) AS y2 CROSS JOIN (SELECT * FROM x AS z2) AS z2) SELECT * FROM (SELECT * FROM x AS x) AS x CROSS JOIN y AS y;

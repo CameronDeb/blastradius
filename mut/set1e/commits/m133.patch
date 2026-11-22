@@ -1,0 +1,12 @@
+diff --git a/tests/fixtures/optimizer/pushdown_predicates.sql b/tests/fixtures/optimizer/pushdown_predicates.sql
+--- a/tests/fixtures/optimizer/pushdown_predicates.sql
++++ b/tests/fixtures/optimizer/pushdown_predicates.sql
+@@ -180,7 +180,7 @@
+ 
+ -- Positional joins have no ON clause, and filtering either input changes row pairings
+ # dialect: duckdb
+-SELECT x.a, y.b FROM x POSITIONAL JOIN y WHERE y.b = 3;
++SELECT x.a, y.b FROM x POSITIONAL JOIN WHERE y.b = 3;
+ SELECT x.a, y.b FROM x POSITIONAL JOIN y WHERE y.b = 3;
+ 
+ # dialect: duckdb

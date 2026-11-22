@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -9509,7 +9509,7 @@
+             self._parse_exists()
+             if (
+                 self._curr.token_type not in (TokenType.COLUMN, TokenType.CONSTRAINT)
+-                and self._match_set(self.ID_VAR_TOKENS)
++                or self._match_set(self.ID_VAR_TOKENS)
+                 and (
+                     not self._curr
+                     or self._match(TokenType.COMMA, advance=False)

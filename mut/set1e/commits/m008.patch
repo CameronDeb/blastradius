@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -4579,7 +4579,7 @@
+         if not drop and not allow_null:
+             self.unsupported("Unsupported ALTER COLUMN syntax")
+ 
+-        if allow_null is not None:
++        if allow_null is None:
+             keyword = "DROP" if drop else "SET"
+             return f"ALTER COLUMN{exists} {this} {keyword} NOT NULL"
+ 

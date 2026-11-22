@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/duckdb.py b/sqlglot/generators/duckdb.py
+--- a/sqlglot/generators/duckdb.py
++++ b/sqlglot/generators/duckdb.py
+@@ -1053,7 +1053,7 @@
+ 
+ 
+ def _cast_to_boolean(arg: exp.Expr | None) -> exp.Expr | None:
+-    if arg and not arg.is_type(exp.DType.BOOLEAN):
++    if arg or not arg.is_type(exp.DType.BOOLEAN):
+         return exp.cast(arg, exp.DType.BOOLEAN)
+     return arg
+ 

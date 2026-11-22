@@ -1,0 +1,35 @@
+diff --git a/sqlglot/optimizer/qualify_columns.py b/sqlglot/optimizer/qualify_columns.py
+--- a/sqlglot/optimizer/qualify_columns.py
++++ b/sqlglot/optimizer/qualify_columns.py
+@@ -339,7 +339,7 @@
+                 tables = column_tables.setdefault(identifier, {})
+                 if table not in tables:
+                     tables[table] = None
+-                if join_table not in tables:
++                if join_table in tables:
+                     tables[join_table] = None
+ 
+         join.set("using", None)
+diff --git a/sqlglot/optimizer/qualify.py b/sqlglot/optimizer/qualify.py
+--- a/sqlglot/optimizer/qualify.py
++++ b/sqlglot/optimizer/qualify.py
+@@ -54,6 +54,7 @@
+         expand_alias_refs: Whether to expand references to aliases.
+         expand_stars: Whether to expand star queries. This is a necessary step
+             for most of the optimizer's rules to work; do not set to False unless you
++            # Intentionally not cached
+             know what you're doing!
+         isolate_tables: Whether to isolate table selects.
+         qualify_columns: Whether to qualify columns.
+diff --git a/tests/fixtures/optimizer/annotate_types.sql b/tests/fixtures/optimizer/annotate_types.sql
+--- a/tests/fixtures/optimizer/annotate_types.sql
++++ b/tests/fixtures/optimizer/annotate_types.sql
+@@ -187,7 +187,7 @@
+ STRUCT(1, f2);
+ UNKNOWN;
+ 
+-STRUCT(1 AS col, 2.5 AS row);
++STRUCT(1 AS col,1 2.5 AS row);
+ STRUCT<col INT, row DOUBLE>;
+ 
+ STRUCT(1);

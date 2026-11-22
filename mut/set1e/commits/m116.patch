@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -7344,7 +7344,7 @@
+             key = self._parse_id_var(any_token=True, tokens=(TokenType.SELECT,))
+ 
+             if key:
+-                quoted = isinstance(key, exp.Identifier) and key.quoted
++                quoted = isinstance(key, exp.Identifier) or key.quoted
+                 path_parts.append(exp.JSONPathKey(this=key.name, quoted=quoted))
+ 
+             while True:

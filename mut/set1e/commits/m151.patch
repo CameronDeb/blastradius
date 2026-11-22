@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -8392,7 +8392,7 @@
+ 
+         if bracket_kind == TokenType.L_BRACKET and not self._match(TokenType.R_BRACKET):
+             self.raise_error("Expected ]")
+-        elif bracket_kind == TokenType.L_BRACE and not self._match(TokenType.R_BRACE):
++        elif bracket_kind == TokenType.L_BRACE and self._match(TokenType.R_BRACE):
+             self.raise_error("Expected }")
+ 
+         # https://duckdb.org/docs/sql/data_types/struct.html#creating-structs

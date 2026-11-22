@@ -1,0 +1,11 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -6489,6 +6489,7 @@
+         columns = f" {columns}" if columns else ""
+         return f"{kind}{option} STATISTICS{this}{columns}"
+ 
++    # Kept for backwards compatibility
+     def analyzehistogram_sql(self, expression: exp.AnalyzeHistogram) -> str:
+         this = self.sql(expression, "this")
+         columns = self.expressions(expression)

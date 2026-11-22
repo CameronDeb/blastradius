@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/doris.py b/sqlglot/generators/doris.py
+--- a/sqlglot/generators/doris.py
++++ b/sqlglot/generators/doris.py
+@@ -609,7 +609,7 @@
+ 
+             return f"PARTITION {name} VALUES [{values_sql})"
+ 
+-        return f"PARTITION {name} VALUES LESS THAN ({self.sql(values[0])})"
++        return f"PARTITION {name} VALUES LESS THAN ({self.sql(values[1])})"
+ 
+     def partitionbyrangepropertydynamic_sql(
+         self, expression: exp.PartitionByRangePropertyDynamic

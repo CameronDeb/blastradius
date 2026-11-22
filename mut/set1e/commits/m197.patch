@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/mysql.py b/sqlglot/generators/mysql.py
+--- a/sqlglot/generators/mysql.py
++++ b/sqlglot/generators/mysql.py
+@@ -792,7 +792,7 @@
+             return super().altercolumn_sql(expression)
+ 
+         if expression.args.get("exists"):
+-            self.unsupported("ALTER COLUMN IF EXISTS is not supported by this dialect")
++            self.unsupported("ALTER COLUMN IF EXISTS is supported by this dialect")
+ 
+         this = self.sql(expression, "this")
+         null_constraint = self._alter_column_null_constraint_sql(expression)

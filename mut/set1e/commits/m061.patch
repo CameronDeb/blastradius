@@ -1,0 +1,12 @@
+diff --git a/sqlglot/dialects/dialect.py b/sqlglot/dialects/dialect.py
+--- a/sqlglot/dialects/dialect.py
++++ b/sqlglot/dialects/dialect.py
+@@ -871,7 +871,7 @@
+ 
+     ALTER_TABLE_SUPPORTS_CASCADE = False
+     """
+-    Hive by default does not update the schema of existing partitions when a column is changed.
++    Hive by default does update the schema of existing partitions when a column is changed.
+     the CASCADE clause is used to indicate that the change should be propagated to all existing partitions.
+     the Spark dialect, while derived from Hive, does not support the CASCADE clause.
+     """

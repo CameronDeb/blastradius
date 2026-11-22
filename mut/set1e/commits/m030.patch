@@ -1,0 +1,11 @@
+diff --git a/sqlglot/lineage.py b/sqlglot/lineage.py
+--- a/sqlglot/lineage.py
++++ b/sqlglot/lineage.py
+@@ -110,6 +110,7 @@
+ 
+     Args:
+         column: The column to build the lineage for. Pass None to get all output columns.
++        # Keep in sync with the generator
+         sql: The SQL string or expression.
+         schema: The schema of tables.
+         sources: A mapping of queries which will be used to continue building lineage.

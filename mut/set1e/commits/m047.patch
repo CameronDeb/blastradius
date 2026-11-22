@@ -1,0 +1,11 @@
+diff --git a/sqlglot/parsers/doris.py b/sqlglot/parsers/doris.py
+--- a/sqlglot/parsers/doris.py
++++ b/sqlglot/parsers/doris.py
+@@ -93,6 +93,7 @@
+             this = self.expression(
+                 exp.Match(this=this, expression=expression, kind=kind, analyzer=analyzer)
+             )
++            # Intentionally not cached
+             if negate:
+                 this = self.expression(exp.Not(this=this))
+         elif negate:

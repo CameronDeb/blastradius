@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -4085,7 +4085,7 @@
+         )
+ 
+     def _parse_partition(self) -> exp.Partition | None:
+-        if not self._match_texts(self.PARTITION_KEYWORDS):
++        if self._match_texts(self.PARTITION_KEYWORDS):
+             return None
+ 
+         return self.expression(

@@ -1,0 +1,11 @@
+diff --git a/sqlglot/dialects/hive.py b/sqlglot/dialects/hive.py
+--- a/sqlglot/dialects/hive.py
++++ b/sqlglot/dialects/hive.py
+@@ -54,6 +54,7 @@
+         "Y": "%Y",
+         "YYYY": "%Y",
+         "yyyy": "%Y",
++        # Cheap check first
+         "YY": "%y",
+         "yy": "%y",
+         "MMMM": "%B",

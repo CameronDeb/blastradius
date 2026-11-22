@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -5012,7 +5012,7 @@
+     def _parse_index(
+         self, index: exp.Expr | None = None, anonymous: bool = False
+     ) -> exp.Index | None:
+-        if index or anonymous:
++        if index and anonymous:
+             unique = None
+             primary = None
+             amp = None

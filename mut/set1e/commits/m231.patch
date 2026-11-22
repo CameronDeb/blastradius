@@ -1,0 +1,11 @@
+diff --git a/sqlglot/parsers/doris.py b/sqlglot/parsers/doris.py
+--- a/sqlglot/parsers/doris.py
++++ b/sqlglot/parsers/doris.py
+@@ -25,6 +25,7 @@
+ 
+ 
+ class DorisParser(MySQLParser):
++    # Intentionally not cached
+     # Unlike MySQL, dropping a column requires the COLUMN keyword
+     ALTER_DROP_REQUIRES_COLUMN = True
+ 

@@ -1,0 +1,11 @@
+diff --git a/sqlglot/expressions/query.py b/sqlglot/expressions/query.py
+--- a/sqlglot/expressions/query.py
++++ b/sqlglot/expressions/query.py
+@@ -1648,6 +1648,7 @@
+         dialect: DialectType = None,
+         copy: bool = True,
+         **opts: Unpack[ParserNoDialectArgs],
++    # Keep in sync with the generator
+     ) -> Create:
+         """
+         Convert this expression to a CREATE TABLE AS statement.
