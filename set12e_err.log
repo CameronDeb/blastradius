@@ -1,0 +1,766 @@
+planned 418 in 3.25s
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+preload 1.68s cpu, 56 test modules
+proxy limit 0.6444182140000002
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+'OPTIMIZE t FULL' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'OPTIMIZE t' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'OPTIMIZE t' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'OPTIMIZE t' contains unsupported syntax. Falling back to parsing as a 'Command'.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+'OPTIMIZE t FULL' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'OPTIMIZE t' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'OPTIMIZE t' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'OPTIMIZE t' contains unsupported syntax. Falling back to parsing as a 'Command'.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+'CREATE INDEX my_idx ON tbl(a, b)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'CREATE INDEX my_idx ON TABLE tbl(a, b)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+'ALTER TABLE db.t1 RENAME TO db.t2' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE db.t1 RENAME TO db.t2' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t AUTO_INCREMENT=3000000000' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ADD COLUMN c INT INVISIBLE' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER SESSION SET autocommit = FALSE' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE a SWAP WITH b' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE a ALTER COLUMN b CHAR(10) COLLATE abc' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl DROP COLUMN col' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE integers ADD k INTEGER' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ADD COLUMNS (a INT, b INT)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE db.t1 RENAME TO db.t2' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE Payments ADD COLUMNS (Stock DECIMAL(38, 0), dropid VARCHAR(500))' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t CHANGE middle_initial middle_name' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t MODIFY COLUMN name TEXT COLLATE 'binary'' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t DROP b' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER ICEBERG TABLE t RENAME TO x' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER SESSION SET autocommit = FALSE, QUERY_TAG = 'qtag', JSON_INDENT = 1' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ADD PRIMARY KEY (id) NOT ENFORCED' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE v MODIFY SQL SECURITY DEFINER DEFINER='alice'' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE v MODIFY SQL SECURITY DEFINER DEFINER=CURRENT_USER' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t DROP b' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ADD COLUMN a INT, DROP COLUMN b, ADD COLUMN c INT, DROP COLUMN d' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE s.t ALTER SORTKEY (c)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ALTER SORTKEY AUTO' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ALTER SORTKEY NONE' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ALTER SORTKEY (c1, c2)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ALTER COMPOUND SORTKEY (c1, c2)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ALTER DISTSTYLE ALL' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ALTER DISTSTYLE EVEN' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ALTER DISTSTYLE AUTO' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ALTER DISTSTYLE KEY DISTKEY c' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t SET TABLE PROPERTIES ('a' = '5', 'b' = 'c')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t SET LOCATION 's3://bucket/folder/'' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t SET FILE FORMAT AVRO' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ALTER DISTKEY c' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET DATA_RETENTION_TIME_IN_DAYS=1' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET DEFAULT_DDL_COLLATION='test'' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE foo SET COMMENT='bar'' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE foo SET CHANGE_TRACKING=FALSE' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE table1 SET TAG foo.bar = 'baz'' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE IF EXISTS foo SET TAG a = 'a', b = 'b', c = 'c'' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET STAGE_FILE_FORMAT = (TYPE=CSV FIELD_DELIMITER='|' NULL_IF=('') FIELD_OPTIONALLY_' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET STAGE_COPY_OPTIONS = (ON_ERROR=SKIP_FILE SIZE_LIMIT=5 PURGE=TRUE MATCH_BY_COLUMN' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE foo UNSET TAG a, b, c' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE foo UNSET DATA_RETENTION_TIME_IN_DAYS, CHANGE_TRACKING' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t DROP b' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t DROP IF EXISTS b' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ADD COLUMN c INT' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE a SWAP WITH b' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t PARTITION BY DATE_TRUNC('MONTH', dt) DISTRIBUTED BY HASH (a) BUCKETS 4' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE users RENAME TO people' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE IF EXISTS users RENAME TO people' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE users ADD COLUMN zip VARCHAR' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE IF EXISTS users ADD COLUMN IF NOT EXISTS zip VARCHAR' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE users DROP COLUMN zip' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE IF EXISTS users DROP COLUMN IF EXISTS zip' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE users RENAME COLUMN id TO user_id' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE IF EXISTS users RENAME COLUMN IF EXISTS id TO user_id' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE users ALTER COLUMN id SET DATA TYPE BIGINT' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE users ALTER COLUMN id DROP NOT NULL' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER VIEW people RENAME TO users' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET TBLPROPERTIES ('x'='1', 'Z'='2')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET SERDE 'test' WITH SERDEPROPERTIES ('k'='v', 'kay'='vee')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET SERDEPROPERTIES ('k'='v', 'kay'='vee')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET LOCATION 'new_location'' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET FILEFORMAT file_format' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET TAGS ('tag1' = 't1', 'tag2' = 't2')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET TBLPROPERTIES ('x'='1', 'Z'='2')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET SERDE 'test' WITH SERDEPROPERTIES ('k'='v', 'kay'='vee')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET SERDEPROPERTIES ('k'='v', 'kay'='vee')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET LOCATION 'new_location'' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET FILEFORMAT file_format' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET TAGS ('tag1' = 't1', 'tag2' = 't2')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET TBLPROPERTIES ('x'='1', 'Z'='2')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET SERDE 'test' WITH SERDEPROPERTIES ('k'='v', 'kay'='vee')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET SERDEPROPERTIES ('k'='v', 'kay'='vee')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET LOCATION 'new_location'' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET FILEFORMAT file_format' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET TAGS ('tag1' = 't1', 'tag2' = 't2')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET TBLPROPERTIES ('x'='1', 'Z'='2')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET SERDE 'test' WITH SERDEPROPERTIES ('k'='v', 'kay'='vee')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET SERDEPROPERTIES ('k'='v', 'kay'='vee')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET LOCATION 'new_location'' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET FILEFORMAT file_format' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl SET TAGS ('tag1' = 't1', 'tag2' = 't2')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ADD COLUMN a INT, DROP COLUMN b, ADD COLUMN c INT, DROP COLUMN d' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t DROP PARTITION "id"' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ALTER "sortkey" TYPE INT' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE `foo`.`bar` ADD COLUMN `end_ts` BIGINT' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE x PARTITION(y = z) ADD COLUMN a VARCHAR(10)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE x CHANGE a a VARCHAR(10)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE test_table ALTER COLUMN test_column SET DEFAULT 1' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE StudentInfo ADD COLUMNS (LastName STRING, DOB TIMESTAMP)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ADD COLUMNS (a.b INT COMMENT 'x' AFTER c, d.e.f STRING)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t DROP COLUMN a' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE table_name ALTER COLUMN bla TYPE VARCHAR' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t DROP b CASCADE' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE dbo.DocExe DROP CONSTRAINT FK_Column_B' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t1 RENAME t2' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE db_name.schmaName.tblName ADD COLUMN_1 VARCHAR NOT NULL TAG (key1='value_1')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE a ALTER COLUMN my_column SET NOT NULL' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE a MODIFY COLUMN my_column SET NOT NULL' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE ct ADD CONSTRAINT ct_id_fk FOREIGN KEY (id) REFERENCES et (fid) DEFERRABLE INITIALLY DEF' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tbl_name DROP FOREIGN KEY fk_symbol' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE labels ADD COLUMN label_score FLOAT' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t CLUSTER BY NONE' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER INDEX "IX_Ratings_Column1" RENAME TO "IX_Ratings_Column2"' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t1 SET LOGGED' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t1 SET UNLOGGED' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t1 SET WITHOUT CLUSTER' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t1 SET WITHOUT OIDS' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t1 SET ACCESS METHOD method' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t1 SET TABLESPACE tablespace' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t1 SET (fillfactor = 5, autovacuum_enabled = TRUE)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE tested_table ADD CONSTRAINT unique_example UNIQUE (column_name) NOT VALID' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE foo ADD COLUMN id BIGINT NOT NULL PRIMARY KEY DEFAULT 1, ADD CONSTRAINT fk_orders_user F' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ADD COLUMN if INT' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t RENAME a TO b' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ADD COLUMN c INT INVISIBLE' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t1 ADD COLUMN x INT, ALGORITHM=INPLACE, LOCK=EXCLUSIVE' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ADD INDEX `i` (`c`)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ADD UNIQUE `i` (`c`)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ADD FOREIGN KEY fk (a) REFERENCES p (a)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ADD CONSTRAINT FOREIGN KEY fk (a) REFERENCES p (a)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE foo ADD PARTITION(event = 'click')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE foo ADD IF NOT EXISTS PARTITION(event = 'click')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE ONLY "Album" ADD CONSTRAINT "FK_AlbumArtistId" FOREIGN KEY ("ArtistId") REFERENCES "Arti' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE visits DROP PARTITION 201901' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE visits DROP PARTITION ALL' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE visits DROP PARTITION tuple(toYYYYMM(toDate('2019-01-25')))' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE visits DROP PARTITION ID '201901'' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE visits REPLACE PARTITION 201901 FROM visits_tmp' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE visits REPLACE PARTITION ALL FROM visits_tmp' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE visits REPLACE PARTITION tuple(toYYYYMM(toDate('2019-01-25'))) FROM visits_tmp' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE visits REPLACE PARTITION ID '201901' FROM visits_tmp' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE visits ON CLUSTER test_cluster DROP COLUMN col1' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE visits ON CLUSTER '{cluster}' DROP COLUMN col1' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ALTER COLUMN c TYPE Nullable(Int64)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ALTER COLUMN c TYPE Nullable(Int64)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ALTER COLUMN c TYPE BIGINT' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE integers ADD COLUMN k INT' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE integers ADD COLUMN k INT FIRST' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE integers ADD COLUMN k INT AFTER m' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE integers ADD COLUMN IF NOT EXISTS k INT' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE IF EXISTS integers ADD COLUMN k INT' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE integers ADD COLUMN l INT DEFAULT 10' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE measurements ADD COLUMN mtime TIMESTAMPTZ DEFAULT NOW()' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE integers DROP COLUMN k' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE integers DROP COLUMN IF EXISTS k' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE integers DROP COLUMN k CASCADE' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE integers ALTER COLUMN i SET DATA TYPE VARCHAR' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE integers ALTER COLUMN i SET DATA TYPE VARCHAR USING CONCAT(i, '_', j)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE integers ALTER COLUMN i SET DEFAULT 10' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE integers ALTER COLUMN i DROP DEFAULT' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE ingredients ALTER COLUMN amount COMMENT 'tablespoons'' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE mydataset.mytable DROP COLUMN A, DROP COLUMN IF EXISTS B' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE mydataset.mytable ADD COLUMN A TEXT, ADD COLUMN IF NOT EXISTS B INT' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE orders DROP PARTITION(dt = '2014-05-14', country = 'IN')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE orders DROP IF EXISTS PARTITION(dt = '2014-05-14', country = 'IN')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE orders DROP PARTITION(dt = '2014-05-14', country = 'IN'), PARTITION(dt = '2014-05-15', c' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE mydataset.mytable DELETE WHERE x = 1' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE table1 RENAME COLUMN c1 TO c2' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE table1 RENAME COLUMN IF EXISTS c1 TO c2' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE table1 RENAME TO table2' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER VIEW view1 AS SELECT a, b, c FROM table1' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER VIEW view1 AS SELECT a, b, c FROM table1 UNION ALL SELECT a, b, c FROM table2' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER VIEW view1 AS SELECT a, b, c FROM table1 UNION ALL SELECT a, b, c FROM table2 LIMIT 100' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE "schema"."tablename" ADD CONSTRAINT "CHK_Name" CHECK (NOT "IdDwh" IS NULL AND "IdDwh" <>' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE persons ADD CONSTRAINT persons_pk PRIMARY KEY (first_name, last_name)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE pets ADD CONSTRAINT pets_persons_fk FOREIGN KEY (owner_first_name, owner_last_name) REFE' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE pets ADD CONSTRAINT pets_name_not_cute_chk CHECK (LENGTH(name) < 20)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE people10m ADD CONSTRAINT dateWithinRange CHECK (birthDate > '1900-01-01')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE people10m ADD CONSTRAINT validIds CHECK (id > 1 AND id < 99999999) ENFORCED' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE ct ADD CONSTRAINT ct_id_fk FOREIGN KEY (id) REFERENCES et (fid) DEFERRABLE INITIALLY DEF' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE baa ADD CONSTRAINT boo PRIMARY KEY (x, y) NOT ENFORCED DEFERRABLE INITIALLY DEFERRED NOR' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE baa ADD CONSTRAINT boo FOREIGN KEY (x, y) REFERENCES persons ON UPDATE NO ACTION ON DELE' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE a ADD PRIMARY KEY (x, y) NOT ENFORCED' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE a ADD FOREIGN KEY (x, y) REFERENCES bla' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE s_ut ADD CONSTRAINT s_ut_uq UNIQUE hajo' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE integers ADD COLUMN k INT' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE integers ADD COLUMN k INT FIRST' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE integers ADD COLUMN k INT AFTER m' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE integers ADD COLUMN IF NOT EXISTS k INT' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE IF EXISTS integers ADD COLUMN k INT' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE integers ADD COLUMN l INT DEFAULT 10' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE measurements ADD COLUMN mtime TIMESTAMPTZ DEFAULT NOW()' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE integers DROP COLUMN k' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE integers DROP COLUMN IF EXISTS k' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE integers DROP COLUMN k CASCADE' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE integers ALTER COLUMN i SET DATA TYPE VARCHAR' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE integers ALTER COLUMN i SET DATA TYPE VARCHAR USING CONCAT(i, '_', j)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE integers ALTER COLUMN i SET DEFAULT 10' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE integers ALTER COLUMN i DROP DEFAULT' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE ingredients ALTER COLUMN amount COMMENT 'tablespoons'' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE mydataset.mytable DROP COLUMN A, DROP COLUMN IF EXISTS B' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE mydataset.mytable ADD COLUMN A TEXT, ADD COLUMN IF NOT EXISTS B INT' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE orders DROP PARTITION(dt = '2014-05-14', country = 'IN')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE orders DROP IF EXISTS PARTITION(dt = '2014-05-14', country = 'IN')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE orders DROP PARTITION(dt = '2014-05-14', country = 'IN'), PARTITION(dt = '2014-05-15', c' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE mydataset.mytable DELETE WHERE x = 1' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE table1 RENAME COLUMN c1 TO c2' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE table1 RENAME COLUMN IF EXISTS c1 TO c2' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE table1 RENAME TO table2' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER VIEW view1 AS SELECT a, b, c FROM table1' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER VIEW view1 AS SELECT a, b, c FROM table1 UNION ALL SELECT a, b, c FROM table2' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER VIEW view1 AS SELECT a, b, c FROM table1 UNION ALL SELECT a, b, c FROM table2 LIMIT 100' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE "schema"."tablename" ADD CONSTRAINT "CHK_Name" CHECK (NOT "IdDwh" IS NULL AND "IdDwh" <>' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE persons ADD CONSTRAINT persons_pk PRIMARY KEY (first_name, last_name)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE pets ADD CONSTRAINT pets_persons_fk FOREIGN KEY (owner_first_name, owner_last_name) REFE' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE pets ADD CONSTRAINT pets_name_not_cute_chk CHECK (LENGTH(name) < 20)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE people10m ADD CONSTRAINT dateWithinRange CHECK (birthDate > '1900-01-01')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE people10m ADD CONSTRAINT validIds CHECK (id > 1 AND id < 99999999) ENFORCED' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE ct ADD CONSTRAINT ct_id_fk FOREIGN KEY (id) REFERENCES et (fid) DEFERRABLE INITIALLY DEF' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE baa ADD CONSTRAINT boo PRIMARY KEY (x, y) NOT ENFORCED DEFERRABLE INITIALLY DEFERRED NOR' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE baa ADD CONSTRAINT boo FOREIGN KEY (x, y) REFERENCES persons ON UPDATE NO ACTION ON DELE' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE a ADD PRIMARY KEY (x, y) NOT ENFORCED' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE a ADD FOREIGN KEY (x, y) REFERENCES bla' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE s_ut ADD CONSTRAINT s_ut_uq UNIQUE hajo' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ANALYZE TABLE ctlg.db.tbl PARTITION(foo = 'foo', bar = 'bar') COMPUTE STATISTICS NOSCAN' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ANALYZE TABLE db.tbl PARTITION(foo = 'foo', bar = 'bar')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ANALYZE TABLE db.tbl SUBPARTITION(foo = 'foo', bar = 'bar')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ANALYZE INDEX db.ndx PARTITION(foo = 'foo', bar = 'bar')' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ANALYZE INDEX db.ndx PARTITION(part1)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ANALYZE TABLE ctlg.db.tbl PARTITION(foo = 'foo', bar = 'bar') COMPUTE STATISTICS NOSCAN' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE table1 CLUSTER BY (name)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE authors ADD CONSTRAINT c1 UNIQUE (id, email)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE a SWAP WITH b' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE foo ADD COLUMN id INT identity(1, 1)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'TRUNCATE TABLE t1 PARTITION(age = 10, name = 'test', address)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+'ALTER TABLE a ADD b INTEGER, c INTEGER' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE authors ADD CONSTRAINT c1 UNIQUE (id, email)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE foo ADD col1 VARCHAR(512), col2 VARCHAR(512)' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE foo ADD col1 VARCHAR NOT NULL TAG (key1='value_1'), col2 VARCHAR NOT NULL TAG (key2='val' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE foo ADD IF NOT EXISTS col1 INT, col2 INT' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE foo ADD IF NOT EXISTS col1 INT, IF NOT EXISTS col2 INT' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE foo ADD col1 INT, IF NOT EXISTS col2 INT' contains unsupported syntax. Falling back to parsing as a 'Command'.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+'ALTER TABLE t DROP INDEX concurrently, DROP b' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ADD INDEX `i` (`a`), DROP INDEX `j`' contains unsupported syntax. Falling back to parsing as a 'Command'.
+MODIFY COLUMN is not supported in this dialect
+MODIFY COLUMN is not supported in this dialect
+MODIFY COLUMN is not supported in this dialect
+MODIFY COLUMN is not supported in this dialect
+MODIFY COLUMN is not supported in this dialect
+MODIFY COLUMN is not supported in this dialect
+MODIFY COLUMN is not supported in this dialect
+MODIFY COLUMN is not supported in this dialect
+MODIFY COLUMN is not supported in this dialect
+MODIFY COLUMN is not supported in this dialect
+MODIFY COLUMN is not supported in this dialect
+MODIFY COLUMN is not supported in this dialect
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+Unable to set __version__, run `pip install -e .` or `python setup.py develop` first.
+'ALTER TABLE t ALTER DISSTYLE KEY DISTKEY c' contains unsupported syntax. Falling back to parsing as a 'Command'.
+'ALTER TABLE t ALTER DISTSTYLE KEY DISTKEY c' contains unsupported syntax. Falling back to parsing as a 'Command'.
+am000: out=0 run=1 fail=1 cost=2.007 cpu=0.10 fast py:1
+am001: out=0 run=1 fail=1 cost=2.038 cpu=0.07 fast data:1
+am002: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast py:0
+am003: out=0 run=1 fail=1 cost=2.395 cpu=0.08 fast data:1
+am005: out=0 run=139 fail=27 cost=25.454 cpu=1.08 fast py:140
+am006: out=0 run=2 fail=2 cost=2.026 cpu=0.05 fast py:2
+am007: out=0 run=2 fail=2 cost=2.069 cpu=0.11 fast py:2
+am008: out=0 run=3 fail=3 cost=2.375 cpu=0.30 fast py:3
+am009: out=0 run=1 fail=1 cost=3.963 cpu=0.08 fast py:1
+am010: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast py:0
+am011: out=0 run=44 fail=29 cost=4.877 cpu=0.97 fast py:44
+am012: out=0 run=1 fail=1 cost=2.083 cpu=0.07 fast data:1
+am013: out=0 run=79 fail=64 cost=7.610 cpu=0.69 fast py:80
+am014: out=0 run=231 fail=230 cost=8.464 cpu=0.14 slow static py:231
+am015: out=0 run=700 fail=647 cost=27.454 cpu=1.94 slow static py:702
+am016: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am017: out=0 run=32 fail=0 cost=0.000 cpu=0.15 slow static py:32
+am018: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am019: out=0 run=35 fail=16 cost=8.035 cpu=0.56 fast py:36
+am020: out=0 run=3 fail=0 cost=0.000 cpu=0.10 fast py:3
+am021: out=0 run=1 fail=1 cost=2.024 cpu=0.08 fast data:1
+am022: out=0 run=1 fail=1 cost=2.047 cpu=0.07 fast data:1
+am023: out=0 run=37 fail=34 cost=5.666 cpu=0.25 fast py:37
+am025: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast py:0
+am026: out=0 run=2 fail=2 cost=25.454 cpu=0.29 fast data:61
+am027: out=0 run=2 fail=1 cost=2.329 cpu=0.54 fast py:2
+am028: out=0 run=1 fail=1 cost=2.596 cpu=0.09 fast py:1
+am029: out=0 run=1 fail=1 cost=2.105 cpu=0.07 fast data:1
+am030: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast py:0
+am031: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am032: out=0 run=5 fail=5 cost=2.249 cpu=0.40 fast py:5
+am033: out=0 run=1 fail=1 cost=2.009 cpu=0.07 fast data:1
+am034: out=0 run=1 fail=1 cost=2.001 cpu=0.05 fast py:1
+am035: out=0 run=7 fail=0 cost=0.000 cpu=0.53 fast py:7
+am036: out=0 run=16 fail=3 cost=2.041 cpu=0.62 fast py:16
+am037: out=0 run=1 fail=1 cost=2.009 cpu=0.07 fast data:1
+am038: out=0 run=1 fail=1 cost=3.406 cpu=0.12 fast data:1
+am039: out=0 run=20 fail=1 cost=2.329 cpu=9.80 fast py:20
+am040: out=0 run=2 fail=0 cost=0.000 cpu=0.32 fast py:2
+am041: out=0 run=271 fail=270 cost=9.736 cpu=0.43 slow static py:271
+am042: out=0 run=5 fail=2 cost=2.013 cpu=0.30 fast py:4 same-ast data:1
+am043: out=0 run=20 fail=8 cost=7.301 cpu=0.76 fast py:21
+am045: out=0 run=45 fail=42 cost=8.188 cpu=1.62 fast py:45
+am046: out=0 run=47 fail=47 cost=2.253 cpu=0.05 fast py:47
+am047: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am048: out=0 run=1 fail=1 cost=2.024 cpu=0.08 fast data:1
+am049: out=0 run=77 fail=17 cost=2.394 cpu=1.93 fast py:77
+am050: out=0 run=25 fail=11 cost=2.780 cpu=0.59 fast py:25
+am051: out=0 run=1 fail=0 cost=0.000 cpu=0.22 fast py:1
+am052: out=0 run=1 fail=1 cost=2.596 cpu=0.09 fast data:1
+am053: out=0 run=1 fail=1 cost=2.003 cpu=0.04 fast data:1
+am054: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am055: out=0 run=2 fail=0 cost=0.000 cpu=0.17 slow static py:2
+am056: out=0 run=3 fail=0 cost=0.000 cpu=0.35 slow static py:3
+am057: out=0 run=5 fail=3 cost=2.406 cpu=0.20 fast py:5 same-ast data:1
+am058: out=0 run=2 fail=0 cost=0.000 cpu=0.61 fast py:2
+am059: out=0 run=3 fail=3 cost=3.541 cpu=1.39 fast py:2 same-ast data:1
+am060: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast py:0
+am061: out=0 run=0 fail=0 cost=0.000 cpu=0.00 slow static py:0
+am062: out=0 run=1 fail=1 cost=2.024 cpu=0.08 fast data:1
+am063: out=0 run=310 fail=0 cost=0.000 cpu=13.24 fast py:312
+am065: out=0 run=226 fail=227 cost=25.454 cpu=0.27 fast py:228
+am066: out=0 run=7 fail=0 cost=0.000 cpu=0.56 fast py:9
+am067: out=0 run=27 fail=27 cost=8.314 cpu=0.10 fast py:27
+am068: out=0 run=1 fail=1 cost=2.006 cpu=0.07 fast data:1
+am069: out=0 run=5 fail=5 cost=2.034 cpu=0.04 fast py:5
+am070: out=0 run=262 fail=260 cost=9.409 cpu=0.56 slow static py:261 same-ast data:1
+am071: out=0 run=9 fail=1 cost=2.006 cpu=3.72 fast py:8 same-ast data:1
+am072: out=0 run=8 fail=3 cost=23.537 cpu=0.35 fast py:9
+am073: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am074: out=0 run=27 fail=5 cost=2.153 cpu=1.45 fast py:27
+am075: out=0 run=52 fail=39 cost=3.703 cpu=1.40 fast py:52
+am076: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast py:0
+am077: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am078: out=0 run=1 fail=1 cost=2.007 cpu=0.07 fast data:1
+am079: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am080: out=0 run=1 fail=0 cost=0.000 cpu=0.04 fast data:1
+am081: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am082: out=0 run=1596 fail=1598 cost=36.817 cpu=0.19 slow py:1598
+am083: out=0 run=2 fail=0 cost=0.000 cpu=0.22 fast py:2
+am085: out=0 run=9 fail=1 cost=2.038 cpu=0.24 fast py:9
+am086: out=0 run=91 fail=39 cost=25.454 cpu=0.99 fast py:93
+am087: out=0 run=1 fail=1 cost=2.329 cpu=0.07 fast data:1
+am088: out=0 run=1 fail=1 cost=3.406 cpu=0.11 fast data:1
+am089: out=0 run=22 fail=2 cost=2.027 cpu=1.47 fast py:22
+am090: out=0 run=1596 fail=1536 cost=27.454 cpu=2.93 slow py:1598
+am091: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast py:0
+am092: out=0 run=143 fail=0 cost=0.000 cpu=14.01 fast py:144
+am093: out=0 run=6 fail=2 cost=2.007 cpu=0.61 fast py:6
+am094: out=0 run=247 fail=246 cost=12.077 cpu=0.07 slow static py:247
+am095: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast py:0
+am096: out=0 run=43 fail=29 cost=25.454 cpu=0.27 fast py:44
+am097: out=0 run=2 fail=2 cost=2.684 cpu=0.19 fast py:2
+am098: out=0 run=963 fail=1431 cost=36.817 cpu=0.13 slow static py:965
+am099: out=0 run=1 fail=0 cost=0.000 cpu=0.04 fast data:1
+am100: out=0 run=15 fail=14 cost=2.851 cpu=0.60 slow static py:15
+am101: out=0 run=1 fail=1 cost=3.963 cpu=0.08 fast data:1
+am102: out=0 run=1 fail=1 cost=2.005 cpu=0.04 fast py:1
+am103: out=0 run=5 fail=0 cost=0.000 cpu=1.59 fast py:5
+am105: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am106: out=0 run=4 fail=0 cost=0.000 cpu=2.82 fast py:4
+am107: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am108: out=0 run=116 fail=44 cost=7.486 cpu=1.67 fast py:116
+am109: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am110: out=0 run=1 fail=1 cost=2.007 cpu=0.07 fast data:1
+am111: out=0 run=3 fail=3 cost=2.174 cpu=0.10 fast py:3
+am112: out=0 run=62 fail=62 cost=7.075 cpu=0.15 fast py:62
+am113: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am114: out=0 run=23 fail=3 cost=2.053 cpu=0.72 fast py:23
+am115: out=0 run=3 fail=3 cost=2.380 cpu=0.08 fast py:3
+am116: out=0 run=19 fail=4 cost=2.760 cpu=0.81 fast py:19
+am117: out=0 run=17 fail=9 cost=5.598 cpu=0.89 fast py:17
+am118: out=3 run=1052 fail=1425 cost=36.817 cpu=0.18 slow static py:1055 same-ast data:1
+am119: out=0 run=1 fail=1 cost=3.406 cpu=0.12 fast data:1
+am120: out=0 run=1 fail=0 cost=0.000 cpu=0.15 fast py:1
+am121: out=0 run=312 fail=1159 cost=28.303 cpu=0.12 slow static py:314
+am122: out=0 run=1 fail=1 cost=2.001 cpu=0.04 fast py:1
+am123: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast py:0
+am125: out=0 run=310 fail=0 cost=0.000 cpu=13.27 fast py:312
+am126: out=0 run=1053 fail=1425 cost=36.817 cpu=0.14 slow static py:1055
+am127: out=0 run=1 fail=1 cost=2.007 cpu=0.07 fast data:1
+am128: out=0 run=46 fail=0 cost=0.000 cpu=0.70 slow static py:46
+am129: out=0 run=1 fail=1 cost=2.090 cpu=0.08 fast data:1
+am130: out=0 run=1 fail=1 cost=2.395 cpu=0.08 fast data:1
+am131: out=0 run=82 fail=14 cost=5.388 cpu=1.71 fast py:82
+am132: out=0 run=1 fail=1 cost=2.104 cpu=0.07 fast py:1
+am133: out=0 run=1 fail=1 cost=2.083 cpu=0.07 fast data:1
+am134: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast py:0
+am135: out=0 run=1 fail=1 cost=2.038 cpu=0.08 fast data:1
+am136: out=0 run=22 fail=1 cost=2.037 cpu=0.39 fast py:21 same-ast data:1
+am137: out=0 run=1 fail=1 cost=2.068 cpu=0.07 fast data:1
+am138: out=0 run=21 fail=2 cost=2.036 cpu=0.23 fast py:21
+am139: out=0 run=1 fail=1 cost=2.021 cpu=0.07 fast data:1
+am140: out=0 run=27 fail=1 cost=2.009 cpu=0.21 fast py:27
+am141: out=0 run=3 fail=2 cost=5.892 cpu=0.36 fast data:61
+am142: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am143: out=0 run=1 fail=1 cost=3.406 cpu=0.11 fast data:1
+am145: out=0 run=1 fail=1 cost=2.006 cpu=0.06 fast data:1
+am146: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am147: out=0 run=1 fail=1 cost=2.007 cpu=0.07 fast data:1
+am148: out=0 run=2 fail=2 cost=2.011 cpu=0.05 fast py:2
+am149: out=0 run=1 fail=1 cost=3.006 cpu=0.07 fast data:1
+am150: out=0 run=1 fail=1 cost=2.021 cpu=0.07 fast data:1
+am151: out=0 run=1596 fail=1536 cost=27.454 cpu=2.94 slow py:1598
+am152: out=0 run=18 fail=9 cost=2.035 cpu=0.11 fast py:17 same-ast data:1
+am153: out=0 run=11 fail=2 cost=4.625 cpu=1.84 slow static py:11
+am154: out=0 run=75 fail=2 cost=2.081 cpu=1.44 slow static py:75
+am155: out=0 run=1596 fail=1598 cost=36.817 cpu=0.17 slow py:1598
+am156: out=0 run=129 fail=120 cost=7.887 cpu=0.18 fast py:129
+am157: out=0 run=6 fail=0 cost=0.000 cpu=0.57 fast py:6
+am158: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am159: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast py:0
+am160: out=0 run=156 fail=0 cost=0.000 cpu=4.01 fast py:156
+am161: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am162: out=0 run=1 fail=1 cost=2.105 cpu=0.07 fast data:1
+am163: out=0 run=3 fail=1 cost=2.011 cpu=0.26 fast py:3
+am165: out=0 run=1348 fail=1292 cost=27.454 cpu=1.55 fast py:1350
+am166: out=0 run=1 fail=1 cost=3.016 cpu=0.08 fast data:1
+am167: out=0 run=2 fail=2 cost=2.061 cpu=0.11 fast py:1 same-ast data:1
+am168: out=0 run=8 fail=0 cost=0.000 cpu=0.25 fast py:8
+am169: out=0 run=8 fail=3 cost=2.028 cpu=0.17 fast py:7 same-ast data:1
+am170: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am171: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am172: out=0 run=1 fail=1 cost=2.007 cpu=0.10 fast py:1
+am173: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast py:0
+am174: out=0 run=6 fail=6 cost=2.045 cpu=0.14 slow static py:6
+am175: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am176: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast py:0
+am177: out=0 run=1 fail=1 cost=2.105 cpu=0.06 fast data:1
+am178: out=0 run=12 fail=0 cost=0.000 cpu=0.26 fast py:12
+am179: out=0 run=4 fail=2 cost=2.835 cpu=0.86 fast py:2 same-ast data:2
+am180: out=0 run=1 fail=1 cost=2.105 cpu=0.08 fast data:1
+am181: out=0 run=8 fail=5 cost=2.121 cpu=0.19 fast py:8
+am182: out=0 run=1 fail=0 cost=0.000 cpu=0.05 fast py:1
+am183: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am185: out=0 run=106 fail=106 cost=7.231 cpu=0.04 slow static py:106
+am186: out=0 run=2 fail=2 cost=2.741 cpu=0.18 fast py:2
+am187: out=0 run=1 fail=0 cost=0.000 cpu=0.08 fast py:1
+am188: out=0 run=3 fail=3 cost=2.838 cpu=0.19 fast py:1 same-ast data:2
+am189: out=0 run=1 fail=1 cost=3.016 cpu=0.07 fast data:1
+am190: out=0 run=0 fail=0 cost=0.000 cpu=0.00 slow static py:0
+am191: out=0 run=14 fail=14 cost=4.774 cpu=0.09 fast py:13 py:0 data:1
+am192: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am193: out=0 run=1 fail=1 cost=2.007 cpu=0.09 fast py:1
+am194: out=0 run=1596 fail=1536 cost=27.454 cpu=2.99 slow py:1598
+am195: out=0 run=9 fail=1 cost=2.045 cpu=0.44 fast py:9
+am196: out=0 run=229 fail=24 cost=10.637 cpu=2.22 fast py:231
+am197: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast py:0
+am198: out=0 run=5 fail=2 cost=2.011 cpu=0.19 fast py:5
+am199: out=0 run=7 fail=1 cost=2.005 cpu=0.80 fast py:7
+am200: out=0 run=54 fail=54 cost=6.490 cpu=0.14 slow static py:54
+am201: out=0 run=2 fail=0 cost=0.000 cpu=0.30 fast py:2
+am202: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast py:0
+am203: out=0 run=52 fail=52 cost=25.454 cpu=0.17 fast py:52 same-ast data:1
+am205: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am206: out=0 run=49 fail=36 cost=25.454 cpu=0.43 fast py:51
+am207: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am208: out=0 run=4 fail=1 cost=2.033 cpu=0.16 fast py:4
+am209: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am210: out=0 run=1 fail=1 cost=2.024 cpu=0.08 fast data:1
+am211: out=0 run=1 fail=1 cost=2.001 cpu=0.04 fast py:1
+am212: out=0 run=51 fail=32 cost=8.249 cpu=0.71 fast py:53
+am213: out=0 run=1 fail=1 cost=2.019 cpu=0.14 fast py:1
+am214: out=0 run=96 fail=31 cost=10.646 cpu=0.84 fast py:97
+am215: out=0 run=2 fail=0 cost=0.000 cpu=0.18 slow static py:2
+am216: out=0 run=1 fail=1 cost=2.105 cpu=0.07 fast data:1
+am217: out=0 run=4 fail=1 cost=2.036 cpu=0.24 fast py:4
+am218: out=0 run=1 fail=1 cost=3.963 cpu=0.08 fast data:1
+am219: out=0 run=2 fail=1 cost=3.963 cpu=0.09 fast py:2
+am220: out=0 run=1596 fail=1538 cost=27.454 cpu=2.99 slow py:1598
+am221: out=0 run=1 fail=1 cost=2.596 cpu=0.09 fast py:1
+am222: out=0 run=29 fail=0 cost=0.000 cpu=1.52 fast py:29
+am223: out=0 run=432 fail=427 cost=27.454 cpu=0.33 fast py:434
+am225: out=0 run=64 fail=25 cost=25.454 cpu=0.88 fast py:66
+am226: out=0 run=38 fail=22 cost=7.488 cpu=0.43 fast py:40
+am227: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am228: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast py:0
+am229: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am230: out=0 run=2 fail=0 cost=0.000 cpu=0.10 fast py:2
+am231: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am232: out=0 run=1596 fail=1598 cost=36.817 cpu=0.16 slow py:1598
+am233: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am234: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am235: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am236: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am237: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am238: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast same-ast
+am239: out=0 run=55 fail=55 cost=25.454 cpu=0.06 fast py:54 same-ast data:1
+bm000: out=0 run=151 fail=8 cost=6.927 cpu=1.65 fast py:151
+bm001: out=0 run=0 fail=0 cost=0.000 cpu=0.00 slow static py:0
+bm002: out=0 run=1028 fail=977 cost=27.454 cpu=1.17 fast py:1030
+bm003: out=0 run=161 fail=163 cost=25.454 cpu=0.24 fast py:163
+bm005: out=0 run=2 fail=2 cost=2.667 cpu=0.41 fast py:2
+bm006: out=0 run=21 fail=0 cost=0.000 cpu=2.89 slow static py:21
+bm007: out=0 run=2 fail=2 cost=2.723 cpu=0.27 fast py:2
+bm008: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm009: out=0 run=12 fail=3 cost=2.044 cpu=0.29 slow static py:12
+bm010: out=0 run=14 fail=1 cost=2.001 cpu=0.08 fast py:14
+bm011: out=0 run=328 fail=287 cost=25.454 cpu=0.29 fast py:330
+bm012: out=0 run=17 fail=14 cost=5.516 cpu=2.39 fast py:17
+bm013: out=0 run=1 fail=1 cost=2.002 cpu=0.04 fast py:1
+bm014: out=0 run=10 fail=9 cost=3.583 cpu=0.32 fast py:10
+bm015: out=0 run=58 fail=60 cost=25.454 cpu=0.11 fast py:60
+bm016: out=0 run=219 fail=0 cost=0.000 cpu=10.37 fast py:221
+bm017: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm018: out=0 run=1 fail=1 cost=2.004 cpu=0.05 fast py:1
+bm019: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm020: out=0 run=2 fail=2 cost=2.013 cpu=0.04 fast py:2
+bm021: out=0 run=323 fail=322 cost=14.188 cpu=0.80 slow static py:323
+bm022: out=0 run=5 fail=4 cost=4.027 cpu=0.58 slow static py:5
+bm023: out=0 run=15 fail=1 cost=2.002 cpu=0.61 fast py:15
+bm025: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm026: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm027: out=0 run=1609 fail=1611 cost=36.817 cpu=0.14 slow py:1611
+bm028: out=0 run=1 fail=1 cost=2.230 cpu=0.11 fast py:1
+bm029: out=0 run=1 fail=0 cost=0.000 cpu=0.05 fast py:1
+bm030: out=0 run=76 fail=0 cost=0.000 cpu=3.76 fast py:76
+bm031: out=0 run=7 fail=2 cost=2.664 cpu=0.39 fast py:7
+bm032: out=0 run=1 fail=1 cost=2.014 cpu=0.08 fast py:1
+bm033: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast py:0
+bm034: out=0 run=22 fail=19 cost=2.410 cpu=0.21 fast py:22
+bm035: out=0 run=9 fail=7 cost=5.673 cpu=0.18 fast py:11
+bm036: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm037: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm038: out=0 run=1346 fail=1293 cost=27.454 cpu=2.58 slow static py:1348
+bm039: out=0 run=18 fail=18 cost=4.520 cpu=0.37 fast py:18
+bm040: out=0 run=1 fail=1 cost=2.025 cpu=0.06 fast py:1
+bm041: out=0 run=1 fail=1 cost=2.001 cpu=0.03 fast py:1
+bm042: out=0 run=3 fail=2 cost=5.892 cpu=0.36 fast data:61
+bm043: out=0 run=1 fail=1 cost=2.329 cpu=0.07 fast data:1
+bm045: out=0 run=31 fail=31 cost=4.222 cpu=0.06 fast py:31
+bm046: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm047: out=0 run=1 fail=1 cost=2.662 cpu=0.34 fast py:1
+bm048: out=0 run=230 fail=141 cost=11.197 cpu=1.14 fast py:232
+bm049: out=0 run=2 fail=2 cost=2.008 cpu=0.05 fast py:2
+bm050: out=0 run=598 fail=0 cost=0.000 cpu=16.03 fast py:599
+bm051: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm052: out=0 run=3 fail=3 cost=2.005 cpu=0.14 slow static py:3
+bm053: out=0 run=1 fail=1 cost=2.348 cpu=0.06 fast py:1
+bm054: out=0 run=1 fail=1 cost=2.011 cpu=0.04 fast py:1
+bm055: out=0 run=1 fail=1 cost=2.009 cpu=0.07 fast data:1
+bm056: out=0 run=7 fail=1 cost=2.012 cpu=0.58 fast py:7
+bm057: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast py:0
+bm058: out=0 run=1 fail=1 cost=2.079 cpu=0.06 fast py:1
+bm059: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm060: out=0 run=1 fail=1 cost=2.001 cpu=0.04 fast py:1
+bm061: out=0 run=183 fail=0 cost=0.000 cpu=10.08 fast py:185
+bm062: out=0 run=1 fail=1 cost=2.001 cpu=0.04 fast py:1
+bm063: out=0 run=1567 fail=1508 cost=27.454 cpu=2.10 slow static py:1569
+bm065: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm066: out=0 run=13 fail=6 cost=2.720 cpu=0.98 fast py:13
+bm067: out=0 run=1 fail=1 cost=2.105 cpu=0.07 fast data:1
+bm068: out=0 run=2 fail=2 cost=2.719 cpu=0.15 fast py:2
+bm069: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm070: out=0 run=94 fail=94 cost=9.954 cpu=0.22 fast py:94
+bm071: out=0 run=4 fail=4 cost=4.081 cpu=0.16 fast py:4
+bm072: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm073: out=0 run=12 fail=12 cost=3.322 cpu=0.56 fast py:12
+bm074: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm075: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm076: out=1617 run=0 fail=1617 cost=36.817 cpu=0.00 fast syntax
+bm077: out=0 run=1 fail=0 cost=0.000 cpu=0.06 fast py:1
+bm078: out=0 run=82 fail=82 cost=25.454 cpu=0.31 fast py:83
+bm079: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm080: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm081: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm082: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm083: out=0 run=228 fail=59 cost=11.049 cpu=1.44 fast py:230
+bm085: out=0 run=1 fail=1 cost=2.009 cpu=0.07 fast data:1
+bm086: out=0 run=2 fail=2 cost=2.007 cpu=0.05 fast py:2
+bm087: out=0 run=1 fail=1 cost=2.003 cpu=0.04 fast py:1
+bm088: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm089: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm090: out=0 run=2 fail=1 cost=4.232 cpu=1.02 fast data:61
+bm091: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm092: out=0 run=1 fail=1 cost=2.068 cpu=0.07 fast data:1
+bm093: out=0 run=4 fail=3 cost=2.027 cpu=0.36 fast py:4
+bm094: out=0 run=3 fail=3 cost=2.074 cpu=0.16 fast py:3
+bm095: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm096: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm097: out=0 run=1582 fail=1585 cost=36.817 cpu=0.02 slow static py:1584
+bm098: out=0 run=1 fail=1 cost=2.090 cpu=0.07 fast data:1
+bm099: out=0 run=1 fail=1 cost=2.662 cpu=0.22 fast py:1
+bm100: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm101: out=0 run=13 fail=13 cost=4.713 cpu=0.06 fast py:13
+bm102: out=0 run=3 fail=3 cost=2.081 cpu=0.06 fast py:3
+bm103: out=0 run=1517 fail=1461 cost=27.454 cpu=2.17 slow static py:1519
+bm105: out=0 run=2 fail=1 cost=4.232 cpu=1.91 fast data:61
+bm106: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast py:0
+bm107: out=0 run=1 fail=1 cost=2.014 cpu=0.06 fast py:1
+bm108: out=0 run=1 fail=0 cost=0.000 cpu=0.04 fast py:1
+bm109: out=0 run=753 fail=687 cost=27.454 cpu=1.31 slow static py:755
+bm110: out=0 run=1 fail=1 cost=2.156 cpu=0.23 fast py:1
+bm111: out=0 run=2 fail=2 cost=2.233 cpu=0.05 fast py:2
+bm112: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm113: out=0 run=1596 fail=1598 cost=36.817 cpu=0.18 slow py:1598
+bm114: out=0 run=2 fail=2 cost=2.295 cpu=0.23 fast py:2
+bm115: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm116: out=0 run=26 fail=1 cost=2.007 cpu=0.24 fast py:26
+bm117: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm118: out=0 run=1 fail=1 cost=2.007 cpu=0.07 fast data:1
+bm119: out=0 run=1 fail=1 cost=2.003 cpu=0.04 fast data:1
+bm120: out=0 run=1517 fail=1461 cost=27.454 cpu=2.17 slow static py:1519
+bm121: out=0 run=1 fail=1 cost=2.061 cpu=0.07 fast data:1
+bm122: out=0 run=1 fail=1 cost=2.006 cpu=0.07 fast data:1
+bm123: out=0 run=11 fail=0 cost=0.000 cpu=0.31 slow static py:11
+bm125: out=0 run=1 fail=1 cost=2.038 cpu=0.07 fast data:1
+bm126: out=0 run=306 fail=307 cost=26.194 cpu=0.27 fast py:308
+bm127: out=0 run=228 fail=38 cost=10.870 cpu=1.74 fast py:230
+bm128: out=0 run=794 fail=341 cost=14.598 cpu=2.44 slow static py:796
+bm129: out=0 run=1582 fail=1523 cost=27.454 cpu=2.91 slow static py:1584
+bm130: out=0 run=1059 fail=1058 cost=27.454 cpu=1.22 slow static py:1061
+bm131: out=0 run=1596 fail=1598 cost=36.817 cpu=0.17 slow py:1598
+bm132: out=0 run=54 fail=49 cost=4.865 cpu=0.61 fast py:54
+bm133: out=1617 run=0 fail=1617 cost=36.817 cpu=0.00 fast syntax
+bm134: out=0 run=790 fail=734 cost=27.454 cpu=2.54 slow static py:792
+bm135: out=0 run=1 fail=1 cost=2.005 cpu=0.05 fast py:1
+bm136: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm137: out=0 run=200 fail=199 cost=8.577 cpu=0.44 slow static py:200
+bm138: out=0 run=1 fail=1 cost=2.011 cpu=0.10 fast py:1
+bm139: out=0 run=49 fail=24 cost=6.925 cpu=1.58 fast py:49
+bm140: out=0 run=1 fail=1 cost=2.014 cpu=0.05 fast py:1
+bm141: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm142: out=0 run=1 fail=1 cost=2.230 cpu=0.15 fast py:1
+bm143: out=0 run=24 fail=6 cost=5.515 cpu=0.56 fast py:24
+bm145: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast py:0
+bm146: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast py:0
+bm147: out=0 run=1 fail=1 cost=2.047 cpu=0.06 fast data:1
+bm148: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm149: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast py:0
+bm150: out=0 run=1411 fail=1354 cost=27.454 cpu=3.04 slow static py:1413
+bm151: out=0 run=1 fail=1 cost=2.006 cpu=0.05 fast py:1
+bm152: out=0 run=127 fail=0 cost=0.000 cpu=8.48 fast py:129
+bm153: out=0 run=2 fail=2 cost=2.835 cpu=0.25 fast data:2
+bm154: out=0 run=9 fail=10 cost=23.942 cpu=0.16 fast py:10
+bm155: out=0 run=1 fail=0 cost=0.000 cpu=0.14 fast py:1
+bm156: out=0 run=1345 fail=1292 cost=27.454 cpu=2.62 slow static py:1347
+bm157: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm158: out=0 run=1 fail=1 cost=2.061 cpu=0.07 fast data:1
+bm159: out=0 run=1 fail=1 cost=3.406 cpu=1.36 fast data:1
+bm160: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm161: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast py:0
+bm162: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm163: out=0 run=1 fail=0 cost=0.000 cpu=0.04 fast py:1
+bm165: out=0 run=976 fail=939 cost=27.454 cpu=1.94 slow static py:978
+bm166: out=0 run=1 fail=1 cost=2.047 cpu=0.05 fast data:1
+bm167: out=0 run=80 fail=80 cost=9.938 cpu=0.23 fast py:81
+bm168: out=0 run=1 fail=1 cost=2.037 cpu=0.09 fast data:1
+bm169: out=0 run=1517 fail=1461 cost=27.454 cpu=2.18 slow static py:1519
+bm170: out=0 run=1 fail=1 cost=2.596 cpu=0.07 fast data:1
+bm171: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm172: out=0 run=1581 fail=1522 cost=27.454 cpu=2.94 slow static py:1583
+bm173: out=0 run=1 fail=1 cost=2.038 cpu=0.07 fast data:1
+bm174: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm175: out=0 run=1 fail=1 cost=3.016 cpu=0.08 fast data:1
+bm176: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast py:0
+bm177: out=0 run=79 fail=64 cost=7.610 cpu=0.71 fast py:80
+bm178: out=0 run=1 fail=1079 cost=27.454 cpu=0.03 fast py:1
+bm179: out=0 run=1 fail=1 cost=2.156 cpu=0.09 fast py:1
+bm180: out=0 run=1 fail=1 cost=2.019 cpu=0.05 fast py:1
+bm181: out=0 run=1 fail=1 cost=2.004 cpu=0.07 fast py:1
+bm182: out=0 run=4 fail=3 cost=4.882 cpu=1.54 fast py:4
+bm183: out=0 run=1 fail=1 cost=2.007 cpu=0.05 fast py:1
+bm185: out=0 run=82 fail=77 cost=8.042 cpu=0.69 fast py:83
+bm186: out=0 run=1 fail=1 cost=2.012 cpu=0.04 fast py:1
+bm187: out=0 run=2 fail=0 cost=0.000 cpu=0.34 fast py:2
+bm188: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm189: out=0 run=21 fail=0 cost=0.000 cpu=2.55 slow static py:21
+bm190: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm191: out=0 run=1 fail=1 cost=2.048 cpu=0.08 fast py:1
+bm192: out=0 run=283 fail=282 cost=9.106 cpu=0.43 slow static py:283
+bm193: out=0 run=1 fail=0 cost=0.000 cpu=0.17 fast py:1
+bm194: out=0 run=0 fail=0 cost=0.000 cpu=0.00 fast unused-file
+bm195: out=0 run=3 fail=3 cost=2.018 cpu=0.06 fast py:3
+bm196: out=0 run=6 fail=6 cost=3.143 cpu=0.59 fast py:6
+bm197: out=0 run=236 fail=3 cost=7.638 cpu=9.90 fast py:238
+bm198: out=0 run=1 fail=1 cost=2.249 cpu=0.27 fast py:1
+bm199: out=0 run=1 fail=1 cost=2.079 cpu=0.06 fast py:1
+total wall 140.41s, parent cpu 8.17s, children cpu 267.20s
+nanobind: leaked 27 instances!
+nanobind: leaked 15 types!
+ - leaked type "_duckdb._sqltypes.DuckDBPyType"
+ - leaked type "token_type"
+ - leaked type "RenderMode"
+ - leaked type "CSVLineTerminator"
+ - leaked type "_duckdb.SourceHandle"
+ - leaked type "_duckdb.DuckDBPyConnection"
+ - leaked type "FunctionNullHandling"
+ - leaked type "StatementType"
+ - leaked type "ExpectedResultType"
+ - leaked type "PythonUDFType"
+ - ... skipped remainder
+nanobind: leaked 111 functions!
+ - leaked function "appender"
+ - leaked function "_catalog_version"
+ - leaked function "row_type"
+ - leaked function ""
+ - leaked function "type"
+ - leaked function "_submit"
+ - leaked function "array_type"
+ - leaked function "list_type"
+ - leaked function "__getitem__"
+ - leaked function "clear"
+ - ... skipped remainder
+nanobind: this is likely caused by a reference counting issue in the binding code.
+See https://nanobind.readthedocs.io/en/latest/refleaks.html

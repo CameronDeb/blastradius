@@ -1,0 +1,6 @@
+brbase run1 sim=94.351 cpu=20.9479
+br run1 sim=103.435 cpu=12.3092
+brbase run2 sim=94.351 cpu=21.1941
+br run2 sim=103.435 cpu=12.4481
+brbase run3 sim=94.351 cpu=21.4553
+br run3 sim=103.435 cpu=12.1248
