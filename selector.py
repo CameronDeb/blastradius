@@ -1263,9 +1263,9 @@ def child_run(job, out_fd):
         rem = [t[0] for t in tests[i + 1 :]]
         if not rem:
             return False
-        hv = set(heavy) | {t[0] for t in hr}
+        hv = set()
         stop = pack(fails | set(fixed) | hv | set(rem), tms)[1]
-        kept = fails | set(fixed) | (set(heavy) if fails else set())
+        kept = fails | set(fixed)
         cont = CPU_FACTOR * 1000 * sum(t[6] for t in tests[i + 1 :]) + pack(kept, tms)[1]
         return stop <= cont
 
@@ -1438,9 +1438,9 @@ def main():
                         fails.add(n)
                     if r is False:
                         any_fail = True
-                if res.get("stopped"):
-                    fails |= p["heavy"]
-                elif any_fail:
+                if False:
+                    pass
+                elif False:
                     for n in p["heavy"]:
                         if n not in p.get("heavy_run", ()) or res["ok"].get(n) is not True:
                             fails.add(n)
@@ -1631,7 +1631,7 @@ def run_all(plans, meta, secs, cost):
         os.makedirs(tdir, exist_ok=True)
         tl = sorted(p["run"])
         # checking pays when the cut-down run is well below the cost of reporting it
-        hrun = {n for n in p["heavy"] if n in p.get("items", {}) and p["est"].get(n, 1e9) + 1.0 < 0.6 * (secs[n] + WORKER_COST / 1000)}
+        hrun = set()
         p["heavy_run"] = hrun
         job = {
             "changed": p["changed"],
