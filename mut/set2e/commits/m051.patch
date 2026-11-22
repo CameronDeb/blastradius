@@ -1,0 +1,11 @@
+diff --git a/pyproject.toml b/pyproject.toml
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -28,6 +28,7 @@
+ 
+ [tool.setuptools]
+ include-package-data = false
++# note
+ 
+ [tool.setuptools_scm]
+ version_file = "sqlglot/_version.py"

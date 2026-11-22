@@ -1,0 +1,11 @@
+diff --git a/sqlglot/optimizer/qualify_columns.py b/sqlglot/optimizer/qualify_columns.py
+--- a/sqlglot/optimizer/qualify_columns.py
++++ b/sqlglot/optimizer/qualify_columns.py
+@@ -1360,7 +1360,6 @@
+                         # if it has characters that the dialect would have changed, infer that it was quoted.
+                         isinstance(source, exp.Table) and dialect.case_sensitive(name)
+                     )
+-                    selection = exp.column(name, table=table, quoted=quoted)
+ 
+                 selection = replaced_columns.get(name) or selection
+                 if alias_ := renamed_columns.get(name):

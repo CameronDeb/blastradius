@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -5893,7 +5893,7 @@
+ 
+         credentials = self.sql(expression, "credentials")
+         credentials = self.seg(credentials) if credentials else ""
+-        files = self.expressions(expression, key="files", flat=True)
++        files = self.expressions(expression, key="files", flat=False)
+         kind = self.seg("FROM" if expression.args.get("kind") else "TO") if files else ""
+ 
+         sep = ", " if self.dialect.COPY_PARAMS_ARE_CSV else " "

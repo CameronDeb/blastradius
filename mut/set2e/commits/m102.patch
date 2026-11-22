@@ -1,0 +1,11 @@
+diff --git a/sqlglot/generators/mysql.py b/sqlglot/generators/mysql.py
+--- a/sqlglot/generators/mysql.py
++++ b/sqlglot/generators/mysql.py
+@@ -869,7 +869,6 @@
+ 
+     def partitionlist_sql(self, expression: exp.PartitionList) -> str:
+         name = self.sql(expression, "this")
+-        values = self.expressions(expression, flat=True)
+         return f"PARTITION {name} VALUES IN ({values})"
+ 
+     def partitionrange_sql(self, expression: exp.PartitionRange) -> str:

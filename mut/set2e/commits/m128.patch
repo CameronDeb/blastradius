@@ -1,0 +1,11 @@
+diff --git a/sqlglot/expressions/query.py b/sqlglot/expressions/query.py
+--- a/sqlglot/expressions/query.py
++++ b/sqlglot/expressions/query.py
+@@ -2203,7 +2203,6 @@
+ 
+ 
+ class TableColumn(Expression):
+-    @property
+     def output_name(self) -> str:
+         return self.name
+ 

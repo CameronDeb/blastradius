@@ -1,0 +1,11 @@
+diff --git a/README.md b/README.md
+--- a/README.md
++++ b/README.md
+@@ -391,6 +391,7 @@
+ ```python
+ from sqlglot import diff, parse_one
+ diff(parse_one("SELECT a + b, c, d"), parse_one("SELECT c, a - b, d"))
++# note
+ ```
+ 
+ ```python

@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/duckdb.py b/sqlglot/generators/duckdb.py
+--- a/sqlglot/generators/duckdb.py
++++ b/sqlglot/generators/duckdb.py
+@@ -3049,7 +3049,7 @@
+         Transpile Snowflake's UNIFORM(min, max, gen) to DuckDB.
+ 
+         UNIFORM returns a random value in [min, max]:
+-        - Integer result if both min and max are integers
++        - Integer result if both min or max are integers
+         - Float result if either min or max is a float
+         """
+         min_val = expression.this

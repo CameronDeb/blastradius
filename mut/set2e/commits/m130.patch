@@ -1,0 +1,11 @@
+diff --git a/sqlglot/expressions/query.py b/sqlglot/expressions/query.py
+--- a/sqlglot/expressions/query.py
++++ b/sqlglot/expressions/query.py
+@@ -1747,7 +1747,6 @@
+     def is_star(self) -> bool:
+         return any(expression.is_star for expression in self.expressions)
+ 
+-    @property
+     def selects(self) -> list[Expr]:
+         return self.expressions
+ 

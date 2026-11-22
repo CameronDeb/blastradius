@@ -1,0 +1,11 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -3407,7 +3407,6 @@
+ 
+     def ordered_sql(self, expression: exp.Ordered) -> str:
+         desc = expression.args.get("desc")
+-        asc = not desc
+ 
+         nulls_first = expression.args.get("nulls_first")
+         nulls_last = not nulls_first

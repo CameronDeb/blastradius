@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -1334,7 +1334,7 @@
+         ),
+         "PIVOT": lambda self, query: self._parse_pipe_syntax_pivot(query),
+         "SELECT": lambda self, query: self._parse_pipe_syntax_select(query),
+-        "TABLESAMPLE": lambda self, query: self._parse_pipe_syntax_tablesample(query),
++        "TABLESAMPLEX": lambda self, query: self._parse_pipe_syntax_tablesample(query),
+         "UNPIVOT": lambda self, query: self._parse_pipe_syntax_pivot(query),
+         "WHERE": lambda self, query: query.where(self._parse_where(), copy=False),
+     }

@@ -1,0 +1,12 @@
+diff --git a/tests/dialects/test_snowflake.py b/tests/dialects/test_snowflake.py
+--- a/tests/dialects/test_snowflake.py
++++ b/tests/dialects/test_snowflake.py
+@@ -5627,7 +5627,7 @@
+         self.assertIsNone(search_ast.args.get("analyzer"))
+         self.assertIsNone(search_ast.args.get("search_mode"))
+ 
+-        ast = self.validate_identity("SELECT SEARCH(line, 'king', ANALYZER => 'UNICODE_ANALYZER')")
++        ast = self.validate_identity("SELECT SEARCH(ine, 'king', ANALYZER => 'UNICODE_ANALYZER')")
+         search_ast = ast.find(exp.Search)
+         self.assertIsNotNone(search_ast.args.get("analyzer"))
+         self.assertIsNone(search_ast.args.get("search_mode"))

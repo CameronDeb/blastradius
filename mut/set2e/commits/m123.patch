@@ -1,0 +1,11 @@
+diff --git a/sqlglot/dialects/dialect.py b/sqlglot/dialects/dialect.py
+--- a/sqlglot/dialects/dialect.py
++++ b/sqlglot/dialects/dialect.py
+@@ -289,7 +289,6 @@
+         except ImportError:
+             pass
+ 
+-    @classmethod
+     def __getitem__(cls, key: str) -> Type[Dialect]:
+         if key not in cls._classes:
+             cls._try_load(key)

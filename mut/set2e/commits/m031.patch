@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/presto.py b/sqlglot/generators/presto.py
+--- a/sqlglot/generators/presto.py
++++ b/sqlglot/generators/presto.py
+@@ -716,7 +716,7 @@
+         return super().delete_sql(expression)
+ 
+     def jsonextract_sql(self, expression: exp.JSONExtract) -> str:
+-        is_json_extract = self.dialect.settings.get("variant_extract_is_json_extract", True)
++        is_json_extract = self.dialect.settings.get("variant_extract_is_json_extract", False)
+ 
+         # Generate JSON_EXTRACT unless the user has configured that a Snowflake / Databricks
+         # VARIANT extract (e.g. col:x.y) should map to dot notation (i.e ROW access) in Presto/Trino

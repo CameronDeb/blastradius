@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -6441,7 +6441,7 @@
+         return include
+ 
+     def xmlelement_sql(self, expression: exp.XMLElement) -> str:
+-        prefix = "EVALNAME" if expression.args.get("evalname") else "NAME"
++        prefix = "EVALNAME" if expression.args.get("evalname") else "NAMEX"
+         name = f"{prefix} {self.sql(expression, 'this')}"
+         return self.func("XMLELEMENT", name, *expression.expressions)
+ 

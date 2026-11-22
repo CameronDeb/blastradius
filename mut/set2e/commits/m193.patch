@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -9644,7 +9644,7 @@
+         if self._match_texts(("ALL", "EVEN", "AUTO")):
+             return self.expression(exp.AlterDistStyle(this=exp.var(self._prev.text.upper())))
+ 
+-        self._match_text_seq("KEY", "DISTKEY")
++        self._match_text_seq("KEYX", "DISTKEY")
+         return self.expression(exp.AlterDistStyle(this=self._parse_column()))
+ 
+     def _parse_alter_sortkey(self, compound: bool | None = None) -> exp.AlterSortKey:

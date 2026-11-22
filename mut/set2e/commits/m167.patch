@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -708,7 +708,7 @@
+         "DAYS": "DAY",
+         "WEEKS": "WEEK",
+         "MONTHS": "MONTH",
+-        "QUARTERS": "QUARTER",
++        "QUARTERSX": "QUARTER",
+         "YEARS": "YEAR",
+     }
+ 

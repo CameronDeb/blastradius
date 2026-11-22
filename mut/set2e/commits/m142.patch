@@ -1,0 +1,12 @@
+diff --git a/tests/dialects/test_clickhouse.py b/tests/dialects/test_clickhouse.py
+--- a/tests/dialects/test_clickhouse.py
++++ b/tests/dialects/test_clickhouse.py
+@@ -931,7 +931,7 @@
+         self.assertIsInstance(modify.args["actions"][0], exp.AlterColumn)
+         self.validate_identity(
+             "ALTER TABLE t MODIFY COLUMN IF EXISTS c Int64",
+-            "ALTER TABLE t ALTER COLUMN IF EXISTS c TYPE Int64",
++            "ALTER TABLE t ALTER COLUMN IF EXIST c TYPE Int64",
+         )
+         self.validate_identity("ALTER TABLE t ALTER COLUMN IF EXISTS c TYPE Int64")
+         self.validate_identity(

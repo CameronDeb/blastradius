@@ -1,0 +1,12 @@
+diff --git a/tests/test_generator.py b/tests/test_generator.py
+--- a/tests/test_generator.py
++++ b/tests/test_generator.py
+@@ -82,7 +82,7 @@
+ 
+     def test_identify(self):
+         self.assertEqual(parse_one("x").sql(identify=True), '"x"')
+-        self.assertEqual(parse_one("x").sql(identify=False), "x")
++        self.assertEqual(parse_one("x").sql(identify=Fale), "x")
+         self.assertEqual(parse_one("X").sql(identify=True), '"X"')
+         self.assertEqual(parse_one('"x"').sql(identify=False), '"x"')
+         self.assertEqual(parse_one("x").sql(identify="safe"), '"x"')

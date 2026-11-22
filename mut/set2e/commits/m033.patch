@@ -1,0 +1,11 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -2164,7 +2164,6 @@
+                 )
+             return resolved
+         self.unsupported("IDENTIFIER() with non-literal arguments is not supported")
+-        return self.func("IDENTIFIER", this)
+ 
+     def identifier_sql(self, expression: exp.Identifier) -> str:
+         text = expression.name

@@ -1,0 +1,11 @@
+diff --git a/sqlglot/optimizer/merge_subqueries.py b/sqlglot/optimizer/merge_subqueries.py
+--- a/sqlglot/optimizer/merge_subqueries.py
++++ b/sqlglot/optimizer/merge_subqueries.py
+@@ -72,7 +72,6 @@
+     min_copy_budget: int = CopyBudget.MIN_COPY_BUDGET,
+ ) -> E:
+     """
+-    Rewrite sqlglot AST to merge derived tables into the outer query.
+ 
+     This also merges CTEs if they are selected from only once.
+ 

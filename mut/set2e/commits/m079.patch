@@ -1,0 +1,11 @@
+diff --git a/pyproject.toml b/pyproject.toml
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -31,6 +31,7 @@
+ 
+ [tool.setuptools_scm]
+ version_file = "sqlglot/_version.py"
++# note
+ write_to_source = true
+ fallback_version = "0.0.0"
+ local_scheme = "no-local-version"

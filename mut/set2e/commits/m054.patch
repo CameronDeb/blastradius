@@ -1,0 +1,12 @@
+diff --git a/tests/test_typing.py b/tests/test_typing.py
+--- a/tests/test_typing.py
++++ b/tests/test_typing.py
+@@ -57,7 +57,7 @@
+         redundant = []
+ 
+         for info in pkgutil.iter_modules([str(package_path)]):
+-            parent_name = _parent_module((package_path / f"{info.name}.py").read_text("utf-8"))
++            parent_name = _parent_module((package_path / f"{info.name}.py").read_text("uf-8"))
+             if not parent_name:
+                 continue
+ 

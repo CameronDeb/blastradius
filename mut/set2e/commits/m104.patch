@@ -1,0 +1,12 @@
+diff --git a/tests/dialects/test_clickhouse.py b/tests/dialects/test_clickhouse.py
+--- a/tests/dialects/test_clickhouse.py
++++ b/tests/dialects/test_clickhouse.py
+@@ -81,7 +81,7 @@
+             "SELECT 1 UNION ALL (SELECT 2 INTERSECT SELECT 2) FORMAT JSON",
+         )
+         self.validate_identity(
+-            "SELECT 1 UNION ALL SELECT 1 INTERSECT SELECT 1 LIMIT 1 SETTINGS limit = 1",
++            "SELECT 1 UNION ALLSELECT 1 INTERSECT SELECT 1 LIMIT 1 SETTINGS limit = 1",
+             "SELECT 1 UNION ALL (SELECT 1 INTERSECT SELECT 1 LIMIT 1) SETTINGS limit = 1",
+         )
+         self.validate_identity("SELECT CAST(x AS Tuple(String, Array(Nullable(Float64))))")

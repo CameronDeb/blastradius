@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/sqlite.py b/sqlglot/generators/sqlite.py
+--- a/sqlglot/generators/sqlite.py
++++ b/sqlglot/generators/sqlite.py
+@@ -272,7 +272,7 @@
+         # An INTERVAL amount carries its own unit, e.g. DATE_ADD(d, INTERVAL 1 DAY);
+         # unwrap it so the unit is not left inside the quoted modifier string.
+         if isinstance(modifier, exp.Interval):
+-            unit = unit or modifier.unit
++            unit = unit and modifier.unit
+             modifier = modifier.this
+ 
+         if unit and unit.name.upper() == "WEEK":

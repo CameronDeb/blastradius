@@ -1,0 +1,12 @@
+diff --git a/tests/fixtures/optimizer/tpc-ds/tpc-ds.sql b/tests/fixtures/optimizer/tpc-ds/tpc-ds.sql
+--- a/tests/fixtures/optimizer/tpc-ds/tpc-ds.sql
++++ b/tests/fixtures/optimizer/tpc-ds/tpc-ds.sql
+@@ -6095,7 +6095,7 @@
+   OR (
+     "customer_address"."ca_address_sk" = "store_sales"."ss_addr_sk"
+     AND "customer_address"."ca_country" = 'United States'
+-    AND "customer_address"."ca_state" IN ('TX', 'NE', 'MO')
++    AND "customer_address"."ca_state"1 IN ('TX', 'NE', 'MO')
+     AND "store_sales"."ss_net_profit" <= 2000
+     AND "store_sales"."ss_net_profit" >= 0
+   )

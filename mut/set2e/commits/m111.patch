@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parsers/clickhouse.py b/sqlglot/parsers/clickhouse.py
+--- a/sqlglot/parsers/clickhouse.py
++++ b/sqlglot/parsers/clickhouse.py
+@@ -607,7 +607,7 @@
+                 exp.If(
+                     this=this,
+                     true=self._parse_assignment(),
+-                    false=self._match(TokenType.COLON) and self._parse_assignment(),
++                    false=self._match(TokenType.COLON) or self._parse_assignment(),
+                 )
+             )
+ 

@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/clickhouse.py b/sqlglot/generators/clickhouse.py
+--- a/sqlglot/generators/clickhouse.py
++++ b/sqlglot/generators/clickhouse.py
+@@ -511,7 +511,7 @@
+         if not isinstance(expression.parent, exp.Cast):
+             # StrToDate returns DATEs in other dialects (eg. postgres), so
+             # this branch aims to improve the transpilation to clickhouse
+-            return self.cast_sql(exp.cast(expression, "DATE"))
++            return self.cast_sql(exp.cast(expression, "DATEX"))
+ 
+         return strtodate_sql
+ 

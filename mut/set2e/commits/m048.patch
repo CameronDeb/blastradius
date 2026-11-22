@@ -1,0 +1,11 @@
+diff --git a/sqlglot/optimizer/scope.py b/sqlglot/optimizer/scope.py
+--- a/sqlglot/optimizer/scope.py
++++ b/sqlglot/optimizer/scope.py
+@@ -597,7 +597,6 @@
+     @property
+     def is_root(self) -> bool:
+         """Determine if this is the root scope"""
+-        return self.scope_type == ScopeType.ROOT
+ 
+     @property
+     def is_udtf(self) -> bool:

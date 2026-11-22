@@ -1,0 +1,11 @@
+diff --git a/README.md b/README.md
+--- a/README.md
++++ b/README.md
+@@ -268,6 +268,7 @@
+ ```sql
+ Argument 'accuracy' is not supported for expression 'ApproxDistinct' when targeting Hive.
+ 'SELECT APPROX_COUNT_DISTINCT(a) FROM foo'
++# note
+ ```
+ 
+ This behavior can be changed by setting the [`unsupported_level`](https://github.com/tobymao/sqlglot/blob/b0e8dc96ba179edb1776647b5bde4e704238b44d/sqlglot/errors.py#L9) attribute. For example, we can set it to either `RAISE` or `IMMEDIATE` to ensure an exception is raised instead:

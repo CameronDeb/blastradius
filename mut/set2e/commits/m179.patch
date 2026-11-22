@@ -1,0 +1,11 @@
+diff --git a/sqlglot/generators/mysql.py b/sqlglot/generators/mysql.py
+--- a/sqlglot/generators/mysql.py
++++ b/sqlglot/generators/mysql.py
+@@ -635,7 +635,6 @@
+             return self.function_fallback_sql(expression)
+ 
+         parent = expression.parent
+-        sep = " - " if isinstance(parent, exp.Sub) and parent.expression is expression else " + "
+ 
+         return sep.join(self.sql(interval) for interval in intervals)
+ 

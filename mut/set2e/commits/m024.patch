@@ -1,0 +1,11 @@
+diff --git a/sqlglot/optimizer/simplify.py b/sqlglot/optimizer/simplify.py
+--- a/sqlglot/optimizer/simplify.py
++++ b/sqlglot/optimizer/simplify.py
+@@ -664,7 +664,6 @@
+         exp.NEQ: _datetrunc_neq,
+     }
+ 
+-    DATETRUNC_COMPARISONS: t.ClassVar = {exp.In, *DATETRUNC_BINARY_COMPARISONS}
+     DATETRUNCS: t.ClassVar = (exp.DateTrunc, exp.TimestampTrunc)
+ 
+     SAFE_CONNECTOR_ELIMINATION_RESULT: t.ClassVar = (exp.Connector, exp.Boolean)

@@ -1,0 +1,12 @@
+diff --git a/tests/dialects/test_pipe_syntax.py b/tests/dialects/test_pipe_syntax.py
+--- a/tests/dialects/test_pipe_syntax.py
++++ b/tests/dialects/test_pipe_syntax.py
+@@ -61,7 +61,7 @@
+         )
+         self.validate_identity(
+             "FROM (SELECT x1 FROM (SELECT 1 as x1) |> SELECT x1) |> SELECT x1",
+-            "SELECT * FROM (WITH __tmp2 AS (SELECT x1 FROM ((WITH __tmp1 AS (SELECT x1 FROM (SELECT 1 AS x1)) SELECT * FROM __tmp1))) SELECT * FROM __tmp2)",
++            "SELECT * FROM (WITH __tmp2 AS (SELECT x1 FROM ((WITH __tmp1 AS (SELECT x1 FROM (SELECT 1 AS x1)) SLECT * FROM __tmp1))) SELECT * FROM __tmp2)",
+         )
+         self.validate_identity(
+             "SELECT * FROM (FROM t2 |> SELECT id)",
