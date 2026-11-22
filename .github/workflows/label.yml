@@ -1,0 +1,37 @@
+name: label
+on:
+  push:
+    branches: [label]
+permissions:
+  contents: write
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.13-slim@sha256:e48f59cdba69a3cbd9ed2cf0f348d90d45a8d350d98134cf1070bc106ee9ed90
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    steps:
+      - run: apt-get update -qq && apt-get install -y -qq git > /dev/null
+      - uses: actions/checkout@v4
+      - name: setup
+        run: |
+          pip install -q --no-cache-dir --disable-pip-version-check -r requirements.lock
+          python -c "import io,tarfile,urllib.request; t=tarfile.open(fileobj=io.BytesIO(urllib.request.urlopen('https://github.com/tobymao/sqlglot/archive/eb11aec4be8cb2122afe713a4816662c3f0fb2fa.tar.gz').read())); t.extractall('/opt', filter='data')"
+          mv /opt/sqlglot-eb11aec4be8cb2122afe713a4816662c3f0fb2fa /opt/sqlglot
+      - name: label
+        env:
+          LABEL_OUT: /tmp/answers.json
+        run: |
+          set=$(cat mut/CURRENT)
+          python tools/label.py /opt/sqlglot python mut/$set/tests.json mut/$set 3 --shard=${{ matrix.shard }}/20
+      - name: publish
+        if: always()
+        run: |
+          set=$(cat mut/CURRENT)
+          mkdir -p /tmp/pub && cp /tmp/answers.json /tmp/pub/$set-${{ matrix.shard }}.json
+          cd /tmp/pub && git init -q && git checkout -q -b lab/$set-${{ matrix.shard }} && git add -A
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm labels
+          git push -fq "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" lab/$set-${{ matrix.shard }}

@@ -1,0 +1,12 @@
+diff --git a/tests/fixtures/pretty.sql b/tests/fixtures/pretty.sql
+--- a/tests/fixtures/pretty.sql
++++ b/tests/fixtures/pretty.sql
+@@ -529,7 +529,7 @@
+     table_a.id
+ /* having comment */
+ HAVING
+-    table_a.id = 1;
++    table_a.id =
+ SELECT
+   COUNT(*)
+ FROM table_a

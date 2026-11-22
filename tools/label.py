@@ -18,6 +18,8 @@ from selector import apply_hunks, parse_patch  # noqa: E402
 
 src, py, tests_json, mdir, nworkers = sys.argv[1:6]
 skip_giants = "--skip-giants" in sys.argv
+shard = next((a.split("=")[1] for a in sys.argv if a.startswith("--shard=")), "0/1")
+shard_i, shard_n = map(int, shard.split("/"))
 nworkers = int(nworkers)
 tests = json.load(open(tests_json))["tests"]
 num = {t["id"]: t["number"] for t in tests}
@@ -29,13 +31,16 @@ GIANTS = [
     "tests/test_parser.py::TestParser::test_max_nodes",
     "tests/test_generator.py::TestGenerator::test_generator_memory",
 ]
-shutil.copy(tests_json, os.path.join(mdir, "tests.json"))
-ans_path = os.path.join(mdir, "answers.json")
+if os.path.abspath(tests_json) != os.path.abspath(os.path.join(mdir, "tests.json")):
+    shutil.copy(tests_json, os.path.join(mdir, "tests.json"))
+ans_path = os.environ.get("LABEL_OUT") or os.path.join(mdir, "answers.json")
 answers = json.load(open(ans_path))["commits"] if os.path.exists(ans_path) else {}
 kinds = json.load(open(os.path.join(mdir, "kinds.json")))
 todo = Queue()
-for f in sorted(os.listdir(os.path.join(mdir, "commits"))):
+for k, f in enumerate(sorted(os.listdir(os.path.join(mdir, "commits")))):
     cid = f[:-6]
+    if k % shard_n != shard_i:
+        continue
     if cid not in answers:
         todo.put(cid)
 lock = threading.Lock()

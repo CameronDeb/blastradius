@@ -1,0 +1,12 @@
+diff --git a/sqlglot/expressions/query.py b/sqlglot/expressions/query.py
+--- a/sqlglot/expressions/query.py
++++ b/sqlglot/expressions/query.py
+@@ -2257,7 +2257,7 @@
+     arg_types = {
+         "this": True,
+         "characteristics": False,
+-        "properties": False,
++        "properties": True,
+         "expression": True,
+     }
+ 

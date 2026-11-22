@@ -1,0 +1,12 @@
+diff --git a/sqlglot/expressions/core.py b/sqlglot/expressions/core.py
+--- a/sqlglot/expressions/core.py
++++ b/sqlglot/expressions/core.py
+@@ -1542,7 +1542,7 @@
+         return self._binop(IntDiv, other)
+ 
+     def __rfloordiv__(self, other: t.Any) -> IntDiv:
+-        return self._binop(IntDiv, other, reverse=True)
++        return self._binop(IntDiv, other, reverse=False)
+ 
+     def __mod__(self, other: t.Any) -> Mod:
+         return self._binop(Mod, other)

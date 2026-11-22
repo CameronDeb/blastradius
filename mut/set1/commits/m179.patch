@@ -1,0 +1,35 @@
+diff --git a/sqlglot/generators/snowflake.py b/sqlglot/generators/snowflake.py
+--- a/sqlglot/generators/snowflake.py
++++ b/sqlglot/generators/snowflake.py
+@@ -421,7 +421,7 @@
+             "ARRAY_CONTAINS",
+             e.expression
+             if e.args.get("ensure_variant") is False
+-            else exp.cast(e.expression, exp.DType.VARIANT, copy=False),
++            else exp.cast(e.expression, exp.DType.VARIANT, copy=True),
+             e.this,
+         ),
+         exp.ArrayPosition: lambda self, e: self.func(
+diff --git a/sqlglot/generators/duckdb.py b/sqlglot/generators/duckdb.py
+--- a/sqlglot/generators/duckdb.py
++++ b/sqlglot/generators/duckdb.py
+@@ -3527,6 +3527,7 @@
+             this = exp.Substring(this=this, start=position)
+ 
+         # Handle empty pattern: Snowflake returns 0, DuckDB would match between every character.
++        # Intentionally not cached
+         # Checked before the flags are embedded, which would make the pattern non-empty
+         is_empty = exp.EQ(this=pattern.copy(), expression=exp.Literal.string(""))
+ 
+diff --git a/tests/fixtures/identity.sql b/tests/fixtures/identity.sql
+--- a/tests/fixtures/identity.sql
++++ b/tests/fixtures/identity.sql
+@@ -834,7 +834,7 @@
+ JSON_OBJECT('x': NULL, 'y': 1 NULL ON NULL)
+ JSON_OBJECT('x': NULL, 'y': 1 WITH UNIQUE KEYS)
+ JSON_OBJECT('x': NULL, 'y': 1 ABSENT ON NULL WITH UNIQUE KEYS)
+-JSON_OBJECT('x': 1 RETURNING VARCHAR(100))
++JSON_OBJECT('x': 1 VARCHAR(100))
+ JSON_OBJECT('x': 1 RETURNING VARBINARY FORMAT JSON ENCODING UTF8)
+ PRIOR AS x
+ SELECT if.x

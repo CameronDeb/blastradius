@@ -1,0 +1,12 @@
+diff --git a/sqlglot/expressions/constraints.py b/sqlglot/expressions/constraints.py
+--- a/sqlglot/expressions/constraints.py
++++ b/sqlglot/expressions/constraints.py
+@@ -9,7 +9,7 @@
+     arg_types = {
+         "key_block_size": False,
+         "using": False,
+-        "parser": False,
++        "parser": True,
+         "comment": False,
+         "visible": False,
+         "engine_attr": False,

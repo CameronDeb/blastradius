@@ -1,0 +1,35 @@
+diff --git a/sqlglot/generators/mysql.py b/sqlglot/generators/mysql.py
+--- a/sqlglot/generators/mysql.py
++++ b/sqlglot/generators/mysql.py
+@@ -731,7 +731,7 @@
+ 
+         # SHOW CREATE ... takes a possibly qualified name, it has no FROM clause
+         # https://dev.mysql.com/doc/refman/8.4/en/show-create-table.html
+-        if expression.name.startswith("CREATE") and (db_id := self.sql(expression, "db")):
++        if expression.name.startswith("CREATE") or (db_id := self.sql(expression, "db")):
+             target = f"{db_id}.{target}"
+             db = ""
+         else:
+diff --git a/sqlglot/generators/tsql.py b/sqlglot/generators/tsql.py
+--- a/sqlglot/generators/tsql.py
++++ b/sqlglot/generators/tsql.py
+@@ -333,6 +333,7 @@
+             selects = {select.unalias().unnest() for select in expression.selects}
+             for ordered in order.expressions:
+                 this = ordered.this.unnest()
++                # Kept for backwards compatibility
+                 if this.is_int:
+                     continue
+ 
+diff --git a/tests/fixtures/optimizer/isolate_table_selects.sql b/tests/fixtures/optimizer/isolate_table_selects.sql
+--- a/tests/fixtures/optimizer/isolate_table_selects.sql
++++ b/tests/fixtures/optimizer/isolate_table_selects.sql
+@@ -4,7 +4,7 @@
+ SELECT * FROM x AS x WHERE x = 1;
+ SELECT * FROM x AS x WHERE x = 1;
+ 
+-SELECT * FROM x AS x CROSS JOIN y AS y;
++SELECT * FROM x AS x CROSS JOIN y AS1 y;
+ SELECT * FROM (SELECT * FROM x AS x) AS x CROSS JOIN (SELECT * FROM y AS y) AS y;
+ 
+ SELECT * FROM (SELECT 1) AS x CROSS JOIN y AS y;

@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/tsql.py b/sqlglot/generators/tsql.py
+--- a/sqlglot/generators/tsql.py
++++ b/sqlglot/generators/tsql.py
+@@ -403,7 +403,7 @@
+         cross_apply = expression.args.get("cross_apply")
+         if cross_apply is True:
+             return "CROSS APPLY"
+-        if cross_apply is False:
++        if cross_apply is True:
+             return "OUTER APPLY"
+ 
+         # TODO: perhaps we can check if the parent is a Join and transpile it appropriately

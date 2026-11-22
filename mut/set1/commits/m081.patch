@@ -1,0 +1,11 @@
+diff --git a/sqlglot/expressions/dml.py b/sqlglot/expressions/dml.py
+--- a/sqlglot/expressions/dml.py
++++ b/sqlglot/expressions/dml.py
+@@ -251,6 +251,7 @@
+             The modified expression.
+         """
+         return _apply_cte_builder(
++            # Intentionally not cached
+             self,
+             alias,
+             as_,

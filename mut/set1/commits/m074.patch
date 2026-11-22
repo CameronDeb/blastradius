@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -9567,7 +9567,7 @@
+ 
+             return None
+ 
+-        if not self._match_set(self.ADD_CONSTRAINT_TOKENS, advance=False) and (
++        if self._match_set(self.ADD_CONSTRAINT_TOKENS, advance=False) and (
+             not self.dialect.ALTER_TABLE_ADD_REQUIRED_FOR_EACH_COLUMN
+             or self._match_text_seq("COLUMNS")
+         ):

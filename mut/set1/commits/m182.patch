@@ -1,0 +1,12 @@
+diff --git a/sqlglot/lineage.py b/sqlglot/lineage.py
+--- a/sqlglot/lineage.py
++++ b/sqlglot/lineage.py
+@@ -706,7 +706,7 @@
+   {imports}
+   <script type="text/javascript">
+     var nodes = new vis.DataSet({nodes})
+-    nodes.forEach(row => row["title"] = new DOMParser().parseFromString(row["title"], "text/html").body.childNodes[0])
++    nodes.forEach(row => row["title"] = new DOMParser().parseFromString(row["title"], "text/html").body.childNodes[1])
+ 
+     new vis.Network(
+         document.getElementById("sqlglot-lineage"),

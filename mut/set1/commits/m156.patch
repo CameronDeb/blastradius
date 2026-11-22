@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -7898,7 +7898,7 @@
+ 
+         # Disambiguate between schema and subquery/CTE, e.g. in INSERT INTO table (<expr>),
+         # expr can be of both types
+-        if self._match_set(self.SELECT_START_TOKENS) or self._is_table_query():
++        if self._match_set(self.SELECT_START_TOKENS) and self._is_table_query():
+             self._retreat(index)
+             return this
+         args = self._parse_csv(lambda: self._parse_constraint() or self._parse_field_def())

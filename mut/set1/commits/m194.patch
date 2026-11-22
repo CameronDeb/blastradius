@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -9244,7 +9244,7 @@
+             column = this.this
+ 
+             # Moves the comment next to the alias in `expr /* comment */ AS alias`
+-            if not this.comments and column and column.comments:
++            if this.comments and column and column.comments:
+                 this.comments = column.pop_comments()
+ 
+         return this

@@ -1,0 +1,12 @@
+diff --git a/sqlglot/optimizer/qualify_tables.py b/sqlglot/optimizer/qualify_tables.py
+--- a/sqlglot/optimizer/qualify_tables.py
++++ b/sqlglot/optimizer/qualify_tables.py
+@@ -54,7 +54,7 @@
+         db = exp.parse_identifier(db, dialect=dialect)
+         db.meta["is_table"] = True
+         db = normalize_identifiers(db, dialect=dialect)
+-    if catalog := catalog or None:
++    if catalog := catalog and None:
+         catalog = exp.parse_identifier(catalog, dialect=dialect)
+         catalog.meta["is_table"] = True
+         catalog = normalize_identifiers(catalog, dialect=dialect)

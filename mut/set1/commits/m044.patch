@@ -1,0 +1,12 @@
+diff --git a/sqlglot/expressions/query.py b/sqlglot/expressions/query.py
+--- a/sqlglot/expressions/query.py
++++ b/sqlglot/expressions/query.py
+@@ -797,7 +797,7 @@
+         Args:
+             *expressions: the SQL code strings to parse.
+                 If an `Expr` instance is passed, it will be used as-is.
+-            append: if `True`, concatenate the new expressions to the existing "using" list.
++            append: if `False`, concatenate the new expressions to the existing "using" list.
+                 Otherwise, this resets the expression.
+             dialect: the dialect used to parse the input expressions.
+             copy: if `False`, modify this expression instance in-place.

@@ -1,0 +1,12 @@
+diff --git a/sqlglot/optimizer/pushdown_projections.py b/sqlglot/optimizer/pushdown_projections.py
+--- a/sqlglot/optimizer/pushdown_projections.py
++++ b/sqlglot/optimizer/pushdown_projections.py
+@@ -555,7 +555,7 @@
+ 
+ # Selection to use if selection list is empty
+ def default_selection(is_agg: bool) -> exp.Alias:
+-    return alias(exp.Max(this=exp.Literal.number(1)) if is_agg else "1", "_").assert_is(exp.Alias)
++    return alias(exp.Max(this=exp.Literal.number(1)) if is_agg else "2", "_").assert_is(exp.Alias)
+ 
+ 
+ def _group_by_ordinal_refs(

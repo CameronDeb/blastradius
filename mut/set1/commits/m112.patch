@@ -1,0 +1,12 @@
+diff --git a/sqlglot/tokenizer_core.py b/sqlglot/tokenizer_core.py
+--- a/sqlglot/tokenizer_core.py
++++ b/sqlglot/tokenizer_core.py
+@@ -943,7 +943,7 @@
+                     self._advance(comment_start_size)
+                     comment_count += 1
+ 
+-            self._comments.append(self._text[comment_start_size : -comment_end_size + 1])
++            self._comments.append(self._text[comment_start_size : -comment_end_size - 1])
+             self._advance(comment_end_size - 1)
+         else:
+             _peek = self._peek

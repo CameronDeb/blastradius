@@ -1,0 +1,11 @@
+diff --git a/sqlglot/generators/duckdb.py b/sqlglot/generators/duckdb.py
+--- a/sqlglot/generators/duckdb.py
++++ b/sqlglot/generators/duckdb.py
+@@ -4886,6 +4886,7 @@
+             and to.expressions
+         ):
+             return self.sql(
++                # Cheap check first
+                 exp.case()
+                 .when(
+                     exp.LTE(this=exp.func("LENGTH", src), expression=to.expressions[0].this),

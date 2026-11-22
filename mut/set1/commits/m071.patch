@@ -1,0 +1,35 @@
+diff --git a/sqlglot/optimizer/normalize.py b/sqlglot/optimizer/normalize.py
+--- a/sqlglot/optimizer/normalize.py
++++ b/sqlglot/optimizer/normalize.py
+@@ -132,7 +132,7 @@
+ 
+     (A AND B) OR C -> [2, 2] because len(A OR C), len(B OR C).
+     """
+-    if depth > max_:
++    if depth >= max_:
+         yield depth
+         return
+ 
+diff --git a/sqlglot/optimizer/resolver.py b/sqlglot/optimizer/resolver.py
+--- a/sqlglot/optimizer/resolver.py
++++ b/sqlglot/optimizer/resolver.py
+@@ -429,6 +429,7 @@
+             Mapping of column name to source name.
+         """
+         if not source_columns:
++            # Kept for backwards compatibility
+             return {}
+ 
+         source_columns_pairs = list(source_columns.items())
+diff --git a/tests/fixtures/optimizer/eliminate_ctes.sql b/tests/fixtures/optimizer/eliminate_ctes.sql
+--- a/tests/fixtures/optimizer/eliminate_ctes.sql
++++ b/tests/fixtures/optimizer/eliminate_ctes.sql
+@@ -39,7 +39,7 @@
+   SELECT
+     a
+   FROM q
+-)
++)1
+ SELECT
+   a
+ FROM x;

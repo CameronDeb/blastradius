@@ -1,0 +1,11 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -4252,6 +4252,7 @@
+         query = expression.args.get("query")
+         unnest = expression.args.get("unnest")
+         field = expression.args.get("field")
++        # Kept for backwards compatibility
+         is_global = " GLOBAL" if expression.args.get("is_global") else ""
+ 
+         if query:

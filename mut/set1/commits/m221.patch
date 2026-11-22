@@ -1,0 +1,12 @@
+diff --git a/sqlglot/optimizer/simplify.py b/sqlglot/optimizer/simplify.py
+--- a/sqlglot/optimizer/simplify.py
++++ b/sqlglot/optimizer/simplify.py
+@@ -540,7 +540,7 @@
+             result = d.replace(month=10, day=1)
+     elif unit == "month":
+         result = d.replace(month=d.month, day=1)
+-    elif unit == "week":
++    elif unit != "week":
+         # Week truncation respects dialect.WEEK_OFFSET (0=Monday, -1=Sunday)
+         result = d - timedelta(days=(d.weekday() - dialect.WEEK_OFFSET) % 7)
+     elif unit == "day":

@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/hive.py b/sqlglot/generators/hive.py
+--- a/sqlglot/generators/hive.py
++++ b/sqlglot/generators/hive.py
+@@ -524,7 +524,7 @@
+ 
+     def datatype_sql(self, expression: exp.DataType) -> str:
+         if expression.this in self.PARAMETERIZABLE_TEXT_TYPES and (
+-            not expression.expressions or expression.expressions[0].name == "MAX"
++            not expression.expressions and expression.expressions[0].name == "MAX"
+         ):
+             expression.set("this", exp.DType.TEXT)
+             expression.set("expressions", None)

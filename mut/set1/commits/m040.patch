@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -3451,7 +3451,7 @@
+             ):
+                 if window_this and spec:
+                     self.unsupported(
+-                        f"'{nulls_sort_change.strip()}' translation not supported in window function {window_this.sql_name()}"
++                        f"'{nulls_sort_change.strip()}' translation supported in window function {window_this.sql_name()}"
+                     )
+                     nulls_sort_change = ""
+                 elif self.NULL_ORDERING_SUPPORTED is False and (

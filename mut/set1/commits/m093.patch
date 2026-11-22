@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/duckdb.py b/sqlglot/generators/duckdb.py
+--- a/sqlglot/generators/duckdb.py
++++ b/sqlglot/generators/duckdb.py
+@@ -2694,7 +2694,7 @@
+         is_safe = expression.args.get("safe")
+         is_binary = _is_binary(expression)
+ 
+-        if not format_arg and not is_binary:
++        if not format_arg or not is_binary:
+             func_name = "TRY_TO_BINARY" if is_safe else "TO_BINARY"
+             return self.func(func_name, value)
+ 

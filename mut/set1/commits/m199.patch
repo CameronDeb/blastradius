@@ -1,0 +1,12 @@
+diff --git a/sqlglot/transforms.py b/sqlglot/transforms.py
+--- a/sqlglot/transforms.py
++++ b/sqlglot/transforms.py
+@@ -448,7 +448,7 @@
+                         unnest_map
+                         and type(explode) is exp.Explode
+                         and explode.this.is_type(exp.DType.MAP)
+-                        and (select is explode or isinstance(select, exp.Aliases))
++                        and (select is explode and isinstance(select, exp.Aliases))
+                     ):
+                         map_key_alias: t.Any
+                         map_value_alias: t.Any

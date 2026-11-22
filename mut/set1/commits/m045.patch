@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -4787,7 +4787,7 @@
+         return self.sql(exp.Cast(this=div, to=exp.DataType(this=exp.DType.BIGINT)))
+ 
+     def dpipe_sql(self, expression: exp.DPipe) -> str:
+-        if self.dialect.STRICT_STRING_CONCAT and expression.args.get("safe"):
++        if self.dialect.STRICT_STRING_CONCAT or expression.args.get("safe"):
+             return self.func("CONCAT", *(exp.cast(e, exp.DType.TEXT) for e in expression.flatten()))
+         return self.binary(expression, "||")
+ 

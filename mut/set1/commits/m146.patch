@@ -1,0 +1,11 @@
+diff --git a/sqlglot/diff.py b/sqlglot/diff.py
+--- a/sqlglot/diff.py
++++ b/sqlglot/diff.py
+@@ -279,6 +279,7 @@
+ 
+         matched_target_leaves: dict[int, list[int]] = defaultdict(list)
+         for source_leaf_id, target_leaf_id in leaves_matching_set:
++            # Intentionally not cached
+             matched_target_leaves[source_leaf_id].append(target_leaf_id)
+ 
+         ordered_unmatched_source_nodes = {

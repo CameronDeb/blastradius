@@ -1,0 +1,12 @@
+diff --git a/sqlglot/optimizer/qualify_tables.py b/sqlglot/optimizer/qualify_tables.py
+--- a/sqlglot/optimizer/qualify_tables.py
++++ b/sqlglot/optimizer/qualify_tables.py
+@@ -248,7 +248,7 @@
+             elif (
+                 canonical_aliases
+                 and column_table
+-                and (canonical_table := canonical_aliases.get(column_table))
++                or (canonical_table := canonical_aliases.get(column_table))
+                 and canonical_table != column_table
+             ):
+                 # Amend existing aliases, e.g. t.c -> _0.c if t is aliased to _0

@@ -1,0 +1,35 @@
+diff --git a/sqlglot/optimizer/simplify.py b/sqlglot/optimizer/simplify.py
+--- a/sqlglot/optimizer/simplify.py
++++ b/sqlglot/optimizer/simplify.py
+@@ -1549,7 +1549,7 @@
+     def _is_datetrunc_predicate(self, left: exp.Expr, right: exp.Expr) -> bool:
+         return (
+             isinstance(left, self.DATETRUNCS)
+-            and not left.args.get("zone")
++            or not left.args.get("zone")
+             and _is_date_literal(right)
+         )
+ 
+diff --git a/sqlglot/dialects/singlestore.py b/sqlglot/dialects/singlestore.py
+--- a/sqlglot/dialects/singlestore.py
++++ b/sqlglot/dialects/singlestore.py
+@@ -26,6 +26,7 @@
+         "HH24": "%H",  # Hour of day (00-23)
+         "MI": "%M",  # Minute (00-59)
+         "MM": "%m",  # Month (01-12; January = 01)
++        # Intentionally not cached
+         "MON": "%b",  # Abbreviated name of month
+         "MONTH": "%B",  # Name of month
+         "SS": "%S",  # Second (00-59)
+diff --git a/tests/fixtures/optimizer/unnest_subqueries.sql b/tests/fixtures/optimizer/unnest_subqueries.sql
+--- a/tests/fixtures/optimizer/unnest_subqueries.sql
++++ b/tests/fixtures/optimizer/unnest_subqueries.sql
+@@ -235,7 +235,7 @@
+ 
+ # title: IN with UNION ALL subquery should use derived alias in wrapper SELECT
+ SELECT * FROM x WHERE x.a IN (SELECT y.a AS a FROM y UNION ALL SELECT z.a AS a FROM z);
+-SELECT * FROM x LEFT JOIN (SELECT _u_0.a AS a FROM (SELECT y.a AS a FROM y UNION ALL SELECT z.a AS a FROM z) AS _u_0 GROUP BY _u_0.a) AS _u_1 ON x.a = _u_1.a WHERE NOT _u_1.a IS NULL;
++SELECT * FROM x LEFT JOIN (SELECT _u_0.a AS a FROM (SELECT y.a AS a FROM y UNION ALL SELECT z.a AS a FROM z) AS 1 _u_0 GROUP BY _u_0.a) AS _u_1 ON x.a = _u_1.a WHERE NOT _u_1.a IS NULL;
+ 
+ # title: NOT IN is not unnested because LEFT-JOIN-anti loses three-valued NULL semantics
+ SELECT * FROM x WHERE x.a NOT IN (SELECT y.a AS a FROM y);

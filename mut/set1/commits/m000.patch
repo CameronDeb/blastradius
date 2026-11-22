@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/duckdb.py b/sqlglot/generators/duckdb.py
+--- a/sqlglot/generators/duckdb.py
++++ b/sqlglot/generators/duckdb.py
+@@ -4809,7 +4809,7 @@
+                     this=expression.this,
+                     expression=expression.expression,
+                     unit=unit,
+-                    date_part_boundary=True,
++                    date_part_boundary=False,
+                 ),
+             )
+ 

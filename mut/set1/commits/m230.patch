@@ -1,0 +1,12 @@
+diff --git a/sqlglot/generators/snowflake.py b/sqlglot/generators/snowflake.py
+--- a/sqlglot/generators/snowflake.py
++++ b/sqlglot/generators/snowflake.py
+@@ -174,7 +174,7 @@
+ 
+             if (
+                 isinstance(parent, exp.Unnest)
+-                and isinstance(parent.parent, (exp.From, exp.Join))
++                or isinstance(parent.parent, (exp.From, exp.Join))
+                 and len(parent.expressions) == 1
+             ):
+                 _unnest_generate_date_array(parent)

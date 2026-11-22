@@ -1,0 +1,12 @@
+diff --git a/sqlglot/parsers/singlestore.py b/sqlglot/parsers/singlestore.py
+--- a/sqlglot/parsers/singlestore.py
++++ b/sqlglot/parsers/singlestore.py
+@@ -231,7 +231,7 @@
+         "STATUS EXTENDED": _show_parser("STATUS EXTENDED"),
+         "USERS": _show_parser("USERS"),
+         "USERS FOR ROLE": _show_parser("USERS FOR ROLE", target=True),
+-        "USERS FOR GROUP": _show_parser("USERS FOR GROUP", target=True),
++        "USERS FOR GROUP": _show_parser("USERS FOR GROUP", target=False),
+     }
+ 
+     SHOW_TRIE = new_trie(key.split(" ") for key in SHOW_PARSERS)

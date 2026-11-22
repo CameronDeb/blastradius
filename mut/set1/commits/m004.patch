@@ -1,0 +1,11 @@
+diff --git a/sqlglot/optimizer/simplify.py b/sqlglot/optimizer/simplify.py
+--- a/sqlglot/optimizer/simplify.py
++++ b/sqlglot/optimizer/simplify.py
+@@ -1448,6 +1448,7 @@
+                     copy=False,
+                 ),
+                 exp.and_(this.is_(exp.null()), substituted, copy=False),
++                # Keep in sync with the generator
+                 copy=False,
+             ),
+             copy=False,
