@@ -1445,11 +1445,18 @@ def main():
                         fails.add(n)
                     if r is False:
                         any_fail = True
-                if res.get("stopped"):
-                    fails |= p["heavy"]
-                elif any_fail:
+                if res.get("stopped") or any_fail:
+                    # The heavy executor tests (TPC-H/TPC-DS) have only failed when
+                    # some other executor test failed; unverified ones count.
+                    ex_bad = any(
+                        meta[n][0] == "tests.test_executor" and res["ok"].get(n, False) is not True
+                        for n in p["run"]
+                        if n not in p["heavy"]
+                    )
                     for n in p["heavy"]:
-                        if n not in p.get("heavy_run", ()) or res["ok"].get(n) is not True:
+                        if meta[n][0] == "tests.test_executor" and not ex_bad:
+                            continue
+                        if res.get("stopped") or n not in p.get("heavy_run", ()) or res["ok"].get(n) is not True:
                             fails.add(n)
         workers, cost = pack(fails, ms)
         out.write(json.dumps({"commit": cid, "workers": workers}) + "\n")
@@ -1639,7 +1646,7 @@ def run_all(plans, meta, secs, cost):
         os.makedirs(tdir, exist_ok=True)
         tl = sorted(p["run"])
         # checking pays when the cut-down run is well below the cost of reporting it
-        hrun = {n for n in p["heavy"] if n in p.get("items", {}) and p["est"].get(n, 1e9) + 1.0 < 0.6 * (secs[n] + WORKER_COST / 1000)}
+        hrun = {n for n in p["heavy"] if n in p.get("items", {}) and meta[n][0] != "tests.test_executor" and p["est"].get(n, 1e9) + 1.0 < 0.6 * (secs[n] + WORKER_COST / 1000)}
         p["heavy_run"] = hrun
         job = {
             "changed": p["changed"],
