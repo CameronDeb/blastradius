@@ -1607,7 +1607,8 @@ def run_all(plans, meta, secs, cost):
         for _, p in jobs:
             need |= {meta[n][0] for n in p["run"]}
         c0 = time.process_time()
-        preload(need)
+        ex_jobs = sum(1 for _, p in jobs if any(meta[n][0] == "tests.test_executor" for n in p["run"]))
+        preload(need, exec_setup=ex_jobs >= 2)
         log(f"preload {time.process_time() - c0:.2f}s cpu, {len(need)} test modules")
         if any(p.get("proxy") for _, p in jobs):
             c0 = time.process_time()
@@ -1732,7 +1733,7 @@ def run_all(plans, meta, secs, cost):
     return results
 
 
-def preload(test_mods):
+def preload(test_mods, exec_setup=True):
     """Import sqlglot and the test modules once; children fork from here."""
     import gc
     import importlib
@@ -1765,7 +1766,7 @@ def preload(test_mods):
         except Exception as e:
             log("preload import failed", modn, repr(e))
     ex = sys.modules.get("tests.test_executor")
-    if ex is not None and hasattr(ex, "TestExecutor"):
+    if exec_setup and ex is not None and hasattr(ex, "TestExecutor"):
         try:
             ex.TestExecutor.setUpClass()
             ex.TestExecutor._br_ready = True
